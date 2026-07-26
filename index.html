@@ -134,20 +134,106 @@ body{
 }
 
 /* ============================================================
-   模块1: 每日计划
+   模块1: 每日计划（日历视图）
    ============================================================ */
-.progress-wrap{ margin-bottom:14px; }
+
+/* 日历导航栏 */
+.calendar-nav{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px; gap:6px;
+}
+.calendar-nav .nav-btn{
+  width:32px; height:32px; border:none; background:var(--olive-light);
+  border-radius:8px; font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--olive); font-weight:700;
+}
+.calendar-nav .nav-btn:active{ background:var(--olive); color:#FFF; }
+.calendar-nav .month-label{
+  font-size:15px; font-weight:700; color:var(--text); flex:1; text-align:center;
+}
+.calendar-nav .today-btn{
+  padding:6px 14px; border:1px solid var(--olive); background:transparent;
+  border-radius:14px; font-size:12px; color:var(--olive); cursor:pointer;
+  font-weight:600;
+}
+.calendar-nav .today-btn:active{ background:var(--olive); color:#FFF; }
+
+/* 星期头 */
+.calendar-weekdays{
+  display:grid; grid-template-columns:repeat(7,1fr);
+  text-align:center; margin-bottom:4px;
+}
+.calendar-weekdays span{
+  font-size:11px; color:var(--text3); font-weight:600; padding:4px 0;
+}
+.calendar-weekdays span.weekend{ color:var(--orange); }
+
+/* 日期网格 */
+.calendar-grid{
+  display:grid; grid-template-columns:repeat(7,1fr);
+  gap:3px; margin-bottom:14px;
+}
+.calendar-day{
+  aspect-ratio:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  border-radius:var(--radius-xs); font-size:13px;
+  cursor:pointer; position:relative; color:var(--text2);
+  transition:background .15s; user-select:none;
+}
+.calendar-day:hover{ background:var(--olive-light); }
+.calendar-day.other-month{ color:var(--text3); opacity:.4; }
+.calendar-day.today{
+  font-weight:700; color:var(--olive);
+}
+.calendar-day.today::before{
+  content:''; position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:32px; height:32px; border-radius:50%;
+  border:2px solid var(--olive); z-index:0;
+}
+.calendar-day.selected{
+  background:var(--olive); color:#FFF; font-weight:700;
+}
+.calendar-day.selected.today::before{ border-color:#FFF; }
+.calendar-day .dot{
+  position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
+  width:4px; height:4px; border-radius:50%; background:var(--olive);
+}
+.calendar-day.selected .dot{ background:#FFF; }
+
+/* 选中日期信息 & 进度 */
+.calendar-date-info{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px; padding:8px 0;
+  border-top:1px solid var(--border);
+}
+.calendar-date-info .date-label{
+  font-size:14px; font-weight:700; color:var(--text);
+}
+.calendar-date-info .date-label .today-badge{
+  display:inline-block; font-size:10px; background:var(--olive);
+  color:#FFF; padding:1px 7px; border-radius:10px; margin-left:6px;
+  font-weight:500; vertical-align:middle;
+}
+.calendar-reminder{
+  padding:8px 12px; background:#FFF9E6; border-radius:var(--radius-sm);
+  font-size:12px; color:#B45309; margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
+}
+
+.progress-wrap{ margin-bottom:10px; }
 .progress-bar{
-  width:100%; height:8px; background:var(--olive-light);
-  border-radius:4px; overflow:hidden;
+  width:100%; height:6px; background:var(--olive-light);
+  border-radius:3px; overflow:hidden;
 }
 .progress-fill{
-  height:100%; background:var(--olive); border-radius:4px;
+  height:100%; background:var(--olive); border-radius:3px;
   transition:width .3s ease; width:0%;
 }
 .progress-text{
-  display:flex; justify-content:space-between; margin-top:6px;
-  font-size:12px; color:var(--text3);
+  display:flex; justify-content:space-between; margin-top:4px;
+  font-size:11px; color:var(--text3);
 }
 .progress-text b{ color:var(--olive); }
 
@@ -155,7 +241,7 @@ body{
 .task-list{ display:flex; flex-direction:column; gap:2px; }
 .task-row{
   display:flex; align-items:center; gap:10px;
-  padding:12px 4px; border-bottom:1px solid #f5f5f5;
+  padding:10px 4px; border-bottom:1px solid #f5f5f5;
   transition:background .15s;
 }
 .task-row:last-child{ border-bottom:none; }
@@ -191,7 +277,7 @@ body{
 
 /* 添加任务 */
 .task-add{
-  display:flex; gap:8px; margin-top:12px; padding-top:12px;
+  display:flex; gap:8px; margin-top:10px; padding-top:10px;
   border-top:1px dashed var(--border);
 }
 .task-add input{
@@ -491,12 +577,27 @@ function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 let modules = load(LS_MODULES, null) || JSON.parse(JSON.stringify(DEFAULT_MODULES));
 let activeModuleId = modules.length ? modules[0].id : '';
 
-// ---------- 每日计划任务 ----------
+// ---------- 日期工具 ----------
+function dateStr(d) { const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function todayStr() { return dateStr(new Date()); }
+
+// ---------- 每日计划任务（含日期） ----------
 let tasks = load(LS_TASKS, null) || [
-  { id:1, text:'健身 0.5 小时', done:false },
-  { id:2, text:'平板支撑 3 分钟', done:false },
-  { id:3, text:'排浊操 5 分钟', done:false },
+  { id:1, text:'健身 0.5 小时', done:false, date: todayStr() },
+  { id:2, text:'平板支撑 3 分钟', done:false, date: todayStr() },
+  { id:3, text:'排浊操 5 分钟', done:false, date: todayStr() },
 ];
+// 迁移旧数据：无date字段的任务补充为今天
+tasks.forEach(t => { if(!t.date) t.date = todayStr(); });
+
+// ---------- 日历状态 ----------
+let calYear, calMonth, calSelectedDate;
+(function initCal() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth(); // 0-based
+  calSelectedDate = todayStr();
+})();
 
 // ---------- 备忘录 ----------
 let memos = load(LS_MEMOS, null) || [
@@ -553,27 +654,149 @@ function openDrawer() {
   $('#drawerOverlay').classList.add('open');
 }
 
-// ---------- 模块1: 每日计划 ----------
+// ---------- 日历辅助函数 ----------
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function firstDayOfMonth(y,m){ return new Date(y,m,1).getDay(); } // 0=Sun
+
+function tasksOnDate(date){ return tasks.filter(t=>t.date===date); }
+function datesWithTasks(){
+  const s = new Set();
+  tasks.forEach(t=>{ if(t.date) s.add(t.date); });
+  return s;
+}
+
+// ---------- 模块1: 每日计划（日历视图） ----------
 function renderDailyPlan() {
-  const doneCount = tasks.filter(t=>t.done).length;
-  const total = tasks.length;
+  const today = todayStr();
+  const activeDates = datesWithTasks();
+  const days = daysInMonth(calYear, calMonth);
+  const firstDay = firstDayOfMonth(calYear, calMonth);
+  const prevMonthDays = daysInMonth(calYear, calMonth-1<0?11:calMonth-1);
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+  // 构建日历格子
+  let cells = '';
+  // 上月填充
+  for(let i=firstDay-1; i>=0; i--) {
+    const d = prevMonthDays - i;
+    const ds = `${calMonth===0?calYear-1:calYear}-${String(calMonth===0?12:calMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells += `<div class="calendar-day other-month" data-date="${ds}">${d}</div>`;
+  }
+  // 当月日期
+  for(let d=1; d<=days; d++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls = 'calendar-day';
+    if(ds === today) cls += ' today';
+    if(ds === calSelectedDate) cls += ' selected';
+    const dot = activeDates.has(ds) ? '<span class="dot"></span>' : '';
+    cells += `<div class="${cls}" data-date="${ds}">${d}${dot}</div>`;
+  }
+  // 下月填充（填满6行）
+  const totalCells = firstDay + days;
+  const remaining = totalCells <= 35 ? 35 - totalCells : 42 - totalCells;
+  for(let d=1; d<=remaining; d++) {
+    const ds = `${calMonth===11?calYear+1:calYear}-${String(calMonth===11?0:calMonth+1+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells += `<div class="calendar-day other-month" data-date="${ds}">${d}</div>`;
+  }
+
+  // 选中日期的任务
+  const selTasks = tasksOnDate(calSelectedDate);
+  const doneCount = selTasks.filter(t=>t.done).length;
+  const total = selTasks.length;
   const pct = total ? Math.round(doneCount/total*100) : 0;
+
+  // 选中日期格式化展示
+  const [sy,sm,sd] = calSelectedDate.split('-');
+  const dateDisplay = `${parseInt(sm)}月${parseInt(sd)}日`;
+
+  // 今日提醒
+  let reminder = '';
+  if(calSelectedDate === today && total > 0) {
+    const undone = selTasks.filter(t=>!t.done).length;
+    if(undone > 0) {
+      reminder = `<div class="calendar-reminder">🔔 今日还有 <b>${undone}</b> 项任务待完成</div>`;
+    } else {
+      reminder = `<div class="calendar-reminder" style="background:#E8F5E9;color:#2E7D32;">🎉 今日任务全部完成！</div>`;
+    }
+  } else if(calSelectedDate > today && total > 0) {
+    reminder = `<div class="calendar-reminder">📅 未来日程 · 已安排 <b>${total}</b> 项任务</div>`;
+  } else if(calSelectedDate < today) {
+    const undonePast = selTasks.filter(t=>!t.done).length;
+    if(undonePast > 0) {
+      reminder = `<div class="calendar-reminder" style="background:#FDEDED;color:#C53030;">⚠️ 过往日期还有 <b>${undonePast}</b> 项未完成</div>`;
+    }
+  }
+
   return `
+    <div class="calendar-nav">
+      <button class="nav-btn" id="calPrev">◀</button>
+      <span class="month-label">${calYear}年 ${monthNames[calMonth]}</span>
+      <button class="nav-btn" id="calNext">▶</button>
+      <button class="today-btn" id="calToday">今天</button>
+    </div>
+    <div class="calendar-weekdays">
+      <span class="weekend">日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span class="weekend">六</span>
+    </div>
+    <div class="calendar-grid">${cells}</div>
+    <div class="calendar-date-info">
+      <span class="date-label">${dateDisplay} 任务${calSelectedDate===today ? '<span class="today-badge">今天</span>' : ''}</span>
+    </div>
+    ${reminder}
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <div class="progress-text"><span>今日进度</span><span><b>${doneCount}/${total}</b> (${pct}%)</span></div>
+      <div class="progress-text"><span>该日进度</span><span><b>${doneCount}/${total}</b> (${pct}%)</span></div>
     </div>
-    <div class="task-list">${tasks.map(t=>`
+    <div class="task-list">${selTasks.map(t=>`
       <div class="task-row${t.done?' done':''}" data-tid="${t.id}">
         <input type="checkbox" class="task-check"${t.done?' checked':''}/>
         <span class="task-text">${escHtml(t.text)}</span>
         <button class="task-del" title="删除">×</button>
       </div>
-    `).join('')}</div>
+    `).join('')}
+    ${selTasks.length===0 ? '<div class="empty-state" style="padding:16px;font-size:12px;">暂无任务，点击下方添加</div>' : ''}
+    </div>
+    <div class="task-add">
+      <input type="text" id="newTaskInput" placeholder="添加任务…"/>
+      <button class="btn" id="addTaskBtn">+ 添加</button>
+    </div>
   `;
 }
 
 function bindDailyPlan(el) {
+  // 上月
+  const prevBtn = el.querySelector('#calPrev');
+  if(prevBtn) prevBtn.addEventListener('click',()=>{
+    calMonth--; if(calMonth<0){ calMonth=11; calYear--; }
+    calSelectedDate = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
+    renderModule('daily-plan');
+  });
+  // 下月
+  const nextBtn = el.querySelector('#calNext');
+  if(nextBtn) nextBtn.addEventListener('click',()=>{
+    calMonth++; if(calMonth>11){ calMonth=0; calYear++; }
+    calSelectedDate = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
+    renderModule('daily-plan');
+  });
+  // 今天
+  const todayBtn = el.querySelector('#calToday');
+  if(todayBtn) todayBtn.addEventListener('click',()=>{
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    calSelectedDate = todayStr();
+    renderModule('daily-plan');
+  });
+  // 日期点击
+  el.querySelectorAll('.calendar-day').forEach(day => {
+    day.addEventListener('click', function(){
+      calSelectedDate = this.dataset.date;
+      // 如果点击的是其他月份的日期，切换月份
+      const [y,m] = calSelectedDate.split('-');
+      calYear = parseInt(y);
+      calMonth = parseInt(m)-1;
+      renderModule('daily-plan');
+    });
+  });
   // 勾选
   el.querySelectorAll('.task-check').forEach(cb => {
     cb.addEventListener('change', function() {
@@ -591,6 +814,22 @@ function bindDailyPlan(el) {
       renderModule('daily-plan');
     });
   });
+  // 添加任务
+  const addBtn = el.querySelector('#addTaskBtn');
+  const addInp = el.querySelector('#newTaskInput');
+  if(addBtn && addInp) {
+    const doAdd = () => {
+      const text = addInp.value.trim();
+      if(!text) return;
+      const id = tasks.length ? Math.max(...tasks.map(x=>x.id))+1 : 1;
+      tasks.push({ id, text, done:false, date: calSelectedDate });
+      save(LS_TASKS,tasks);
+      addInp.value = '';
+      renderModule('daily-plan');
+    };
+    addBtn.addEventListener('click', doAdd);
+    addInp.addEventListener('keydown', e => { if(e.key==='Enter') doAdd(); });
+  }
 }
 
 // ---------- 模块2: 选题每日灵感 ----------
