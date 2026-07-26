@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<title>创作工作台</title>
+<style>
+/* ============================================================
+   全局变量 & 基础
+   ============================================================ */
+:root {
+  --olive:#4A7C3F; --olive-dark:#3A6330; --olive-light:#E8F0E4;
+  --olive-bg:#F5F7F0; --white:#FFF; --card:#FFF;
+  --text:#2C2C2C; --text2:#666; --text3:#999;
+  --border:#E8E8E8; --danger:#D94A4A; --danger-light:#FDEDED;
+  --orange:#F0833A; --blue:#3B82F6; --purple:#8B5CF6;
+  --radius:16px; --radius-sm:10px; --radius-xs:6px;
+  --shadow:0 2px 12px rgba(0,0,0,.06);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:var(--font); background:#ECEDE8; color:var(--text);
+  display:flex; justify-content:center; min-height:100vh;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* ============================================================
+   App 容器 — 手机形态
+   ============================================================ */
+.app{
+  width:100%; max-width:430px; min-height:100vh;
+  background:var(--olive-bg); position:relative; overflow-x:hidden;
+  box-shadow:0 0 40px rgba(0,0,0,.08);
+}
+
+/* ============================================================
+   顶部栏
+   ============================================================ */
+.header{
+  position:sticky; top:0; z-index:100;
+  background:var(--white); padding:12px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.header .menu-btn{
+  width:36px; height:36px; border:none; background:var(--olive-light);
+  border-radius:10px; font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; color:var(--olive);
+}
+.header .title{ font-size:17px; font-weight:700; color:var(--olive); letter-spacing:.5px; }
+.header .sync-btn{
+  width:36px; height:36px; border:none; background:var(--olive-light);
+  border-radius:10px; font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; color:var(--olive);
+}
+.header .sync-btn.loading{ animation:spin .8s linear infinite; }
+@keyframes spin{ to{transform:rotate(360deg)} }
+
+/* ============================================================
+   抽屉遮罩 & 抽屉面板
+   ============================================================ */
+.drawer-overlay{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,.35); z-index:200; opacity:0; pointer-events:none;
+  transition:opacity .25s;
+}
+.drawer-overlay.open{ opacity:1; pointer-events:auto; }
+
+.drawer{
+  position:fixed; top:0; left:0; width:280px; height:100%;
+  background:var(--white); z-index:210;
+  transform:translateX(-100%); transition:transform .25s ease;
+  display:flex; flex-direction:column; overflow-y:auto;
+}
+.drawer.open{ transform:translateX(0); }
+
+.drawer-header{
+  padding:20px 18px 14px;
+  border-bottom:1px solid var(--border);
+}
+.drawer-header .brand{ font-size:20px; font-weight:700; color:var(--olive); }
+.drawer-header .brand-sub{ font-size:12px; color:var(--text3); margin-top:2px; }
+
+.drawer-nav{ padding:10px 10px; flex:1; }
+.drawer-label{
+  font-size:11px; color:var(--text3); text-transform:uppercase;
+  letter-spacing:1px; padding:12px 10px 6px;
+}
+.drawer-item{
+  display:flex; align-items:center; gap:10px;
+  padding:11px 12px; border-radius:var(--radius-sm);
+  font-size:14px; color:var(--text2); cursor:pointer;
+  transition:background .15s, color .15s; margin-bottom:2px;
+}
+.drawer-item:hover{ background:var(--olive-light); }
+.drawer-item.active{ background:var(--olive); color:#FFF; font-weight:600; }
+.drawer-item .icon{ font-size:18px; line-height:1; }
+
+.drawer-footer{
+  padding:14px 18px; border-top:1px solid var(--border);
+}
+.drawer-footer .manage-btn{
+  width:100%; padding:10px; border:1px dashed var(--border);
+  border-radius:var(--radius-sm); background:transparent;
+  font-size:13px; color:var(--text3); cursor:pointer;
+}
+.drawer-footer .manage-btn:active{ background:var(--olive-light); }
+
+/* ============================================================
+   主内容区
+   ============================================================ */
+.main{ padding:14px 14px 40px; }
+
+/* ============================================================
+   模块区域
+   ============================================================ */
+.module{ margin-bottom:18px; display:none; }
+.module.active{ display:block; }
+
+/* 模块标题 */
+.module-title{
+  font-size:16px; font-weight:700; margin-bottom:10px; color:var(--text);
+  display:flex; align-items:center; gap:6px;
+}
+
+/* 卡片 */
+.card{
+  background:var(--card); border-radius:var(--radius);
+  padding:16px; box-shadow:var(--shadow);
+  border:1px solid transparent;
+}
+
+/* ============================================================
+   模块1: 每日计划
+   ============================================================ */
+.progress-wrap{ margin-bottom:14px; }
+.progress-bar{
+  width:100%; height:8px; background:var(--olive-light);
+  border-radius:4px; overflow:hidden;
+}
+.progress-fill{
+  height:100%; background:var(--olive); border-radius:4px;
+  transition:width .3s ease; width:0%;
+}
+.progress-text{
+  display:flex; justify-content:space-between; margin-top:6px;
+  font-size:12px; color:var(--text3);
+}
+.progress-text b{ color:var(--olive); }
+
+/* 任务列表 */
+.task-list{ display:flex; flex-direction:column; gap:2px; }
+.task-row{
+  display:flex; align-items:center; gap:10px;
+  padding:12px 4px; border-bottom:1px solid #f5f5f5;
+  transition:background .15s;
+}
+.task-row:last-child{ border-bottom:none; }
+
+.task-check{
+  appearance:none; -webkit-appearance:none;
+  width:22px; height:22px; min-width:22px;
+  border:2px solid var(--border); border-radius:50%;
+  cursor:pointer; position:relative;
+  transition:all .15s;
+}
+.task-check:checked{
+  background:var(--olive); border-color:var(--olive);
+}
+.task-check:checked::after{
+  content:"✓"; color:#FFF; font-size:11px; font-weight:700;
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+}
+.task-text{
+  flex:1; font-size:14px; transition:all .2s;
+}
+.task-row.done .task-text{
+  text-decoration:line-through; color:var(--text3);
+}
+.task-del{
+  border:none; background:transparent; color:var(--text3);
+  font-size:18px; cursor:pointer; padding:4px 4px;
+  border-radius:50%; width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .15s;
+}
+.task-del:active{ background:var(--danger-light); color:var(--danger); }
+
+/* 添加任务 */
+.task-add{
+  display:flex; gap:8px; margin-top:12px; padding-top:12px;
+  border-top:1px dashed var(--border);
+}
+.task-add input{
+  flex:1; padding:10px 14px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); font-size:14px; outline:none;
+  font-family:var(--font);
+}
+.task-add input:focus{ border-color:var(--olive); }
+.task-add .btn{
+  padding:10px 16px; background:var(--olive); color:#FFF;
+  border:none; border-radius:var(--radius-sm); font-size:13px;
+  font-weight:600; cursor:pointer; white-space:nowrap;
+}
+.task-add .btn:active{ background:var(--olive-dark); }
+
+/* ============================================================
+   模块2: 选题每日灵感
+   ============================================================ */
+.inspire-grid{ display:flex; flex-direction:column; gap:10px; }
+.inspire-item{
+  padding:14px; background:#FFF; border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+}
+.inspire-item .inspire-tags{
+  display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;
+}
+.inspire-item .tag{
+  font-size:11px; padding:2px 8px; border-radius:10px;
+  font-weight:500;
+}
+.tag-trend{ background:#FEF3C7; color:#B45309; }
+.tag-douyin{ background:#FDE8E8; color:#C53030; }
+.tag-xhs{ background:#FCE7F3; color:#9D174D; }
+.tag-wechat{ background:#DBEAFE; color:#1E40AF; }
+
+.inspire-item .inspire-title{
+  font-size:14px; font-weight:600; line-height:1.4; margin-bottom:4px;
+}
+.inspire-item .inspire-desc{
+  font-size:12px; color:var(--text2); line-height:1.5; margin-bottom:8px;
+}
+.inspire-item .inspire-actions{ display:flex; gap:6px; }
+.inspire-item .jump-btn{
+  font-size:11px; padding:5px 10px; border-radius:14px;
+  border:1px solid var(--border); background:#FFF;
+  cursor:pointer; font-weight:500;
+  display:flex; align-items:center; gap:3px;
+}
+.jump-btn.dy{ color:#FF004F; border-color:#FF004F33; }
+.jump-btn.dy:active{ background:#FF004F0F; }
+.jump-btn.xhs{ color:#FF2442; border-color:#FF244233; }
+.jump-btn.xhs:active{ background:#FF24420F; }
+
+.gist-status{
+  font-size:11px; color:var(--text3); text-align:center;
+  padding:8px 0 2px;
+}
+.gist-status.success{ color:var(--olive); }
+.gist-status.error{ color:var(--danger); }
+
+/* ============================================================
+   模块3: 爆款热点视频二创
+   ============================================================ */
+.remix-grid{ display:flex; flex-direction:column; gap:10px; }
+.remix-item{
+  padding:14px; background:#FFF; border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+}
+.remix-item .remix-header{
+  display:flex; align-items:center; gap:8px; margin-bottom:6px;
+}
+.remix-item .hot-badge{
+  font-size:10px; background:var(--danger); color:#FFF;
+  padding:2px 8px; border-radius:8px; font-weight:600;
+}
+.remix-item .remix-title{
+  font-size:14px; font-weight:600; line-height:1.4; margin-bottom:4px;
+}
+.remix-item .remix-angle{
+  font-size:12px; color:var(--olive); font-weight:500;
+  background:var(--olive-light); padding:6px 10px; border-radius:8px;
+  margin-top:6px; line-height:1.4;
+}
+
+/* ============================================================
+   模块4: 内容复盘
+   ============================================================ */
+.review-stats{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px;
+}
+.stat-box{
+  background:#FFF; border-radius:var(--radius-sm);
+  padding:12px 8px; text-align:center; border:1px solid var(--border);
+}
+.stat-box .stat-num{ font-size:20px; font-weight:700; color:var(--olive); }
+.stat-box .stat-label{ font-size:11px; color:var(--text3); margin-top:2px; }
+
+.review-section{ margin-bottom:12px; }
+.review-section label{
+  font-size:13px; font-weight:600; color:var(--text); display:block; margin-bottom:4px;
+}
+.review-section textarea{
+  width:100%; padding:10px 12px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); font-size:13px; font-family:var(--font);
+  resize:vertical; min-height:60px; outline:none; line-height:1.5;
+}
+.review-section textarea:focus{ border-color:var(--olive); }
+
+/* ============================================================
+   模块5: 备忘录
+   ============================================================ */
+.memo-list{ display:flex; flex-direction:column; gap:2px; }
+.memo-row{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 4px; border-bottom:1px solid #f5f5f5;
+}
+.memo-row:last-child{ border-bottom:none; }
+.memo-check{
+  appearance:none; -webkit-appearance:none;
+  width:20px; height:20px; min-width:20px;
+  border:2px solid var(--border); border-radius:var(--radius-xs);
+  cursor:pointer; position:relative;
+}
+.memo-check:checked{ background:var(--olive); border-color:var(--olive); }
+.memo-check:checked::after{
+  content:"✓"; color:#FFF; font-size:10px; font-weight:700;
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+}
+.memo-row.done .memo-text{ text-decoration:line-through; color:var(--text3); }
+.memo-text{
+  flex:1; font-size:14px; border:none; outline:none; background:transparent;
+  font-family:var(--font);
+}
+.memo-text:focus{ border-bottom:1px dashed var(--olive); }
+.memo-del{
+  border:none; background:transparent; color:var(--text3);
+  font-size:18px; cursor:pointer; padding:2px 4px;
+}
+.memo-del:active{ color:var(--danger); }
+
+.memo-add-btn{
+  display:block; width:100%; padding:10px; margin-top:6px;
+  border:1px dashed var(--border); border-radius:var(--radius-sm);
+  background:transparent; font-size:13px; color:var(--text3); cursor:pointer;
+}
+.memo-add-btn:active{ background:var(--olive-light); }
+
+/* ============================================================
+   模块管理弹窗
+   ============================================================ */
+.modal-overlay{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,.4); z-index:300;
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.modal-overlay.open{ opacity:1; pointer-events:auto; }
+
+.modal{
+  width:100%; max-width:430px; background:#FFF;
+  border-radius:20px 20px 0 0; padding:20px 18px 30px;
+  transform:translateY(100%); transition:transform .25s ease;
+}
+.modal-overlay.open .modal{ transform:translateY(0); }
+
+.modal h3{ font-size:17px; margin-bottom:14px; }
+.modal .mod-list{ display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+.mod-list .mod-row{
+  display:flex; align-items:center; gap:10px; padding:10px;
+  background:var(--olive-bg); border-radius:var(--radius-sm);
+  font-size:14px;
+}
+.mod-list .mod-row .mod-icon{ font-size:18px; }
+.mod-list .mod-row .mod-name{ flex:1; }
+.mod-list .mod-row .mod-remove{
+  border:none; background:transparent; font-size:18px; color:var(--danger);
+  cursor:pointer; padding:2px 6px;
+}
+
+.modal .mod-add{
+  display:flex; gap:8px;
+}
+.modal .mod-add input{
+  flex:1; padding:10px 14px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); font-size:14px; font-family:var(--font); outline:none;
+}
+.modal .mod-add input:focus{ border-color:var(--olive); }
+.modal .mod-add .btn{
+  padding:10px 16px; background:var(--olive); color:#FFF;
+  border:none; border-radius:var(--radius-sm); font-size:13px;
+  font-weight:600; cursor:pointer; white-space:nowrap;
+}
+.modal .btn-close{
+  width:100%; padding:12px; background:#F3F4F6; border:none;
+  border-radius:var(--radius-sm); font-size:14px; cursor:pointer; margin-top:10px;
+}
+
+/* ============================================================
+   通用
+   ============================================================ */
+.empty-state{
+  text-align:center; padding:30px 20px; color:var(--text3); font-size:13px;
+}
+
+/* 页面底部安全区 */
+.safe-bottom{ height:env(safe-area-inset-bottom,20px); }
+
+/* Toast */
+.toast{
+  position:fixed; top:60px; left:50%; transform:translateX(-50%);
+  background:var(--text); color:#FFF; padding:10px 20px; border-radius:20px;
+  font-size:13px; z-index:999; pointer-events:none;
+  opacity:0; transition:opacity .3s;
+}
+.toast.show{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- 顶部栏 -->
+  <header class="header">
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <span class="title">创作工作台</span>
+    <button class="sync-btn" id="syncBtn" title="刷新数据">🔄</button>
+  </header>
+
+  <!-- 抽屉遮罩 -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+
+  <!-- 抽屉 -->
+  <aside class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div class="brand">✏️ 创作工作台</div>
+      <div class="brand-sub">内容创作者每日助手</div>
+    </div>
+    <div class="drawer-nav" id="drawerNav"></div>
+    <div class="drawer-footer">
+      <div style="margin-bottom:8px;">
+        <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px;">🔗 GitHub Gist ID</label>
+        <input type="text" id="gistIdInput" placeholder="填入Gist ID后可拉取数据"
+          style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;outline:none;"/>
+      </div>
+      <button class="manage-btn" id="manageModulesBtn">⚙️ 管理模块</button>
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="main" id="mainContent"></main>
+
+  <!-- 模块管理弹窗 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3>⚙️ 模块管理</h3>
+      <div class="mod-list" id="modList"></div>
+      <div class="mod-add">
+        <input type="text" id="newModInput" placeholder="输入新模块名称…"/>
+        <button class="btn" id="addModBtn">+ 添加</button>
+      </div>
+      <button class="btn-close" id="closeModal">关闭</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+/* ============================================================
+   数据层 — 所有模块定义与持久化
+   ============================================================ */
+const DEFAULT_MODULES = [
+  { id:'daily-plan',   icon:'📋', name:'每日计划',   builtin:true },
+  { id:'inspiration',  icon:'💡', name:'选题每日灵感', builtin:true },
+  { id:'hot-remix',    icon:'🔥', name:'爆款热点视频二创', builtin:true },
+  { id:'review',       icon:'📊', name:'内容复盘',   builtin:true },
+  { id:'memo',         icon:'📝', name:'备忘录',     builtin:true },
+];
+
+// ---------- localStorage keys ----------
+const LS_MODULES = 'cw_modules_v2';
+const LS_TASKS  = 'cw_tasks_v2';
+const LS_MEMOS  = 'cw_memos_v2';
+const LS_REVIEW = 'cw_review_v2';
+const LS_INSPIRE= 'cw_inspire_v2';
+const LS_REMIX  = 'cw_remix_v2';
+
+function load(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(_) { return fallback; }
+}
+function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+// ---------- 模块 ----------
+let modules = load(LS_MODULES, null) || JSON.parse(JSON.stringify(DEFAULT_MODULES));
+let activeModuleId = modules.length ? modules[0].id : '';
+
+// ---------- 每日计划任务 ----------
+let tasks = load(LS_TASKS, null) || [
+  { id:1, text:'健身 0.5 小时', done:false },
+  { id:2, text:'平板支撑 3 分钟', done:false },
+  { id:3, text:'排浊操 5 分钟', done:false },
+];
+
+// ---------- 备忘录 ----------
+let memos = load(LS_MEMOS, null) || [
+  { id:1, text:'', done:false },
+  { id:2, text:'', done:false },
+  { id:3, text:'', done:false },
+  { id:4, text:'', done:false },
+  { id:5, text:'', done:false },
+];
+
+// ---------- 内容复盘 ----------
+let review = load(LS_REVIEW, null) || {
+  plays:0, likes:0, comments:0, shares:0,
+  highlight:'', problem:'', improve:''
+};
+
+// ---------- 选题灵感 (Gist 数据) ----------
+let inspireData = load(LS_INSPIRE, null) || [];
+let remixData   = load(LS_REMIX, null)   || [];
+
+// ---------- Gist 配置 (用户填写后生效) ----------
+let GIST_ID = localStorage.getItem('cw_gist_id') || 'e9b80c535dc2e91a5078e398a066554b';
+
+/* ============================================================
+   渲染引擎
+   ============================================================ */
+const $ = (s) => document.querySelector(s);
+const $$= (s) => document.querySelectorAll(s);
+
+// 抽屉
+function renderDrawer() {
+  const nav = $('#drawerNav');
+  nav.innerHTML = modules.map(m => `
+    <div class="drawer-item${m.id===activeModuleId?' active':''}" data-mid="${m.id}">
+      <span class="icon">${m.icon}</span><span>${m.name}</span>
+    </div>
+  `).join('');
+  // 点击切换
+  nav.querySelectorAll('.drawer-item').forEach(el => {
+    el.addEventListener('click', () => {
+      activeModuleId = el.dataset.mid;
+      renderAll();
+      closeDrawer();
+    });
+  });
+}
+
+function closeDrawer() {
+  $('#drawer').classList.remove('open');
+  $('#drawerOverlay').classList.remove('open');
+}
+function openDrawer() {
+  $('#drawer').classList.add('open');
+  $('#drawerOverlay').classList.add('open');
+}
+
+// ---------- 模块1: 每日计划 ----------
+function renderDailyPlan() {
+  const doneCount = tasks.filter(t=>t.done).length;
+  const total = tasks.length;
+  const pct = total ? Math.round(doneCount/total*100) : 0;
+  return `
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-text"><span>今日进度</span><span><b>${doneCount}/${total}</b> (${pct}%)</span></div>
+    </div>
+    <div class="task-list">${tasks.map(t=>`
+      <div class="task-row${t.done?' done':''}" data-tid="${t.id}">
+        <input type="checkbox" class="task-check"${t.done?' checked':''}/>
+        <span class="task-text">${escHtml(t.text)}</span>
+        <button class="task-del" title="删除">×</button>
+      </div>
+    `).join('')}</div>
+  `;
+}
+
+function bindDailyPlan(el) {
+  // 勾选
+  el.querySelectorAll('.task-check').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const tid = +this.closest('.task-row').dataset.tid;
+      const t = tasks.find(x=>x.id===tid);
+      if(t){ t.done = this.checked; save(LS_TASKS,tasks); renderModule('daily-plan'); }
+    });
+  });
+  // 删除
+  el.querySelectorAll('.task-del').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const tid = +this.closest('.task-row').dataset.tid;
+      tasks = tasks.filter(x=>x.id!==tid);
+      save(LS_TASKS,tasks);
+      renderModule('daily-plan');
+    });
+  });
+}
+
+// ---------- 模块2: 选题每日灵感 ----------
+function renderInspiration() {
+  if(!inspireData.length) {
+    return `<div class="empty-state">
+      <p>📡 暂无选题数据</p>
+      <p style="margin-top:4px;font-size:11px;">点击右上角 🔄 从云端拉取</p>
+    </div>`;
+  }
+  return `<div class="inspire-grid">${inspireData.map((item,i)=>`
+    <div class="inspire-item">
+      <div class="inspire-tags">
+        ${(item.tags||[]).map(t=>`<span class="tag tag-${t}">${tagLabel(t)}</span>`).join('')}
+      </div>
+      <div class="inspire-title">${i+1}. ${escHtml(item.title)}</div>
+      <div class="inspire-desc">${escHtml(item.desc)}</div>
+      <div class="inspire-actions">
+        <button class="jump-btn dy" data-keyword="${escAttr(item.title)}">📱 打开抖音</button>
+        <button class="jump-btn xhs" data-keyword="${escAttr(item.title)}">📕 打开小红书</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function bindInspiration(el) {
+  el.querySelectorAll('.jump-btn.dy').forEach(btn => {
+    btn.addEventListener('click',()=> openDouyin(btn.dataset.keyword));
+  });
+  el.querySelectorAll('.jump-btn.xhs').forEach(btn => {
+    btn.addEventListener('click',()=> openXiaohongshu(btn.dataset.keyword));
+  });
+}
+
+// ---------- 模块3: 爆款热点视频二创 ----------
+function renderHotRemix() {
+  if(!remixData.length) {
+    return `<div class="empty-state">
+      <p>🔥 暂无二创数据</p>
+      <p style="margin-top:4px;font-size:11px;">点击右上角 🔄 从云端拉取</p>
+    </div>`;
+  }
+  return `<div class="remix-grid">${remixData.map((item,i)=>`
+    <div class="remix-item">
+      <div class="remix-header">
+        <span class="hot-badge">🔥 热点</span>
+        <span style="font-size:11px;color:var(--text3)">${escHtml(item.source||'全网热榜')}</span>
+      </div>
+      <div class="remix-title">${i+1}. ${escHtml(item.title)}</div>
+      <div class="remix-angle">✂️ 改编角度：${escHtml(item.angle)}</div>
+    </div>
+  `).join('')}</div>`;
+}
+
+// ---------- 模块4: 内容复盘 ----------
+function renderReview() {
+  return `
+    <div class="review-stats">
+      <div class="stat-box"><div class="stat-num">${review.plays||0}</div><div class="stat-label">播放</div></div>
+      <div class="stat-box"><div class="stat-num">${review.likes||0}</div><div class="stat-label">点赞</div></div>
+      <div class="stat-box"><div class="stat-num">${review.comments||0}</div><div class="stat-label">评论</div></div>
+      <div class="stat-box"><div class="stat-num">${review.shares||0}</div><div class="stat-label">转发</div></div>
+    </div>
+    <div class="review-section">
+      <label>✅ 亮点</label>
+      <textarea class="review-highlight" placeholder="今天内容做得好的地方…">${escHtml(review.highlight)}</textarea>
+    </div>
+    <div class="review-section">
+      <label>⚠️ 问题</label>
+      <textarea class="review-problem" placeholder="遇到的问题和不足…">${escHtml(review.problem)}</textarea>
+    </div>
+    <div class="review-section">
+      <label>💡 优化方向</label>
+      <textarea class="review-improve" placeholder="明天怎么改进…">${escHtml(review.improve)}</textarea>
+    </div>
+    <button class="task-add btn" style="width:100%;text-align:center;justify-content:center;display:flex;margin-top:8px;" id="reviewSaveBtn">💾 保存复盘</button>
+  `;
+}
+
+function bindReview(el) {
+  const saveBtn = el.querySelector('#reviewSaveBtn');
+  if(!saveBtn) return;
+  saveBtn.addEventListener('click', () => {
+    review.highlight = el.querySelector('.review-highlight')?.value || '';
+    review.problem   = el.querySelector('.review-problem')?.value || '';
+    review.improve   = el.querySelector('.review-improve')?.value || '';
+    // 数字改为手动输入
+    ['plays','likes','comments','shares'].forEach(key => {
+      const v = prompt(`请输入 ${key==='plays'?'播放':key==='likes'?'点赞':key==='comments'?'评论':'转发'} 数：`, review[key]||0);
+      if(v !== null && !isNaN(+v)) review[key] = +v;
+    });
+    save(LS_REVIEW, review);
+    renderModule('review');
+    showToast('✅ 复盘已保存');
+  });
+}
+
+// ---------- 模块5: 备忘录 ----------
+function renderMemo() {
+  return `
+    <div class="memo-list">${memos.map(m=>`
+      <div class="memo-row${m.done?' done':''}" data-mid="${m.id}">
+        <input type="checkbox" class="memo-check"${m.done?' checked':''}/>
+        <input type="text" class="memo-text" value="${escAttr(m.text)}" placeholder="输入备忘…"/>
+        <button class="memo-del" title="删除">×</button>
+      </div>
+    `).join('')}</div>
+    <button class="memo-add-btn" id="addMemoBtn">+ 添加一行</button>
+  `;
+}
+
+function bindMemo(el) {
+  el.querySelectorAll('.memo-check').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const mid = +this.closest('.memo-row').dataset.mid;
+      const m = memos.find(x=>x.id===mid);
+      if(m){ m.done = this.checked; save(LS_MEMOS,memos); }
+    });
+  });
+  el.querySelectorAll('.memo-text').forEach(inp => {
+    inp.addEventListener('input', function() {
+      const mid = +this.closest('.memo-row').dataset.mid;
+      const m = memos.find(x=>x.id===mid);
+      if(m){ m.text = this.value; save(LS_MEMOS,memos); }
+    });
+  });
+  el.querySelectorAll('.memo-del').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const mid = +this.closest('.memo-row').dataset.mid;
+      memos = memos.filter(x=>x.id!==mid);
+      save(LS_MEMOS,memos);
+      renderModule('memo');
+    });
+  });
+  const addBtn = el.querySelector('#addMemoBtn');
+  if(addBtn) {
+    addBtn.addEventListener('click', () => {
+      const id = memos.length ? Math.max(...memos.map(x=>x.id))+1 : 1;
+      memos.push({id, text:'', done:false});
+      save(LS_MEMOS,memos);
+      renderModule('memo');
+    });
+  }
+}
+
+// ---------- 自定义模块（纯笔记型） ----------
+function renderCustomModule(mod) {
+  const key = 'cw_custom_'+mod.id;
+  const content = localStorage.getItem(key) || '';
+  return `
+    <textarea style="width:100%;min-height:160px;padding:12px;border:1px solid var(--border);
+      border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);resize:vertical;
+      outline:none;line-height:1.6;background:#FFF;"
+      class="custom-textarea" data-mid="${mod.id}"
+      placeholder="在这里记录…">${escHtml(content)}</textarea>
+  `;
+}
+
+function bindCustomModule(el, mod) {
+  const ta = el.querySelector('.custom-textarea');
+  if(ta) {
+    ta.addEventListener('input', function() {
+      localStorage.setItem('cw_custom_'+mod.id, this.value);
+    });
+  }
+}
+
+// ---------- 渲染单个模块 ----------
+function renderModule(mid) {
+  const container = document.querySelector(`[data-section="${mid}"]`);
+  if(!container) return;
+  const mod = modules.find(m=>m.id===mid);
+  if(!mod) return;
+
+  let html = '';
+  switch(mid) {
+    case 'daily-plan':  html = renderDailyPlan(); break;
+    case 'inspiration': html = renderInspiration(); break;
+    case 'hot-remix':   html = renderHotRemix(); break;
+    case 'review':      html = renderReview(); break;
+    case 'memo':        html = renderMemo(); break;
+    default:            html = renderCustomModule(mod); break;
+  }
+
+  const card = container.querySelector('.card');
+  if(card) card.innerHTML = html;
+
+  // 绑定事件
+  switch(mid) {
+    case 'daily-plan':  bindDailyPlan(card); break;
+    case 'inspiration': bindInspiration(card); break;
+    case 'review':      bindReview(card); break;
+    case 'memo':        bindMemo(card); break;
+    default:            bindCustomModule(card, mod); break;
+  }
+}
+
+// ---------- 全部渲染 ----------
+function renderAll() {
+  renderDrawer();
+  const main = $('#mainContent');
+
+  main.innerHTML = modules.map(mod => `
+    <div class="module${mod.id===activeModuleId?' active':''}" data-section="${mod.id}">
+      <div class="module-title">${mod.icon} ${mod.name}</div>
+      <div class="card"></div>
+    </div>
+  `).join('');
+
+  // 渲染第一个激活模块
+  if(activeModuleId && modules.find(m=>m.id===activeModuleId)) {
+    renderModule(activeModuleId);
+  } else if(modules.length) {
+    activeModuleId = modules[0].id;
+    renderModule(activeModuleId);
+  }
+}
+
+/* ============================================================
+   模块管理弹窗
+   ============================================================ */
+function renderModuleManager() {
+  const list = $('#modList');
+  list.innerHTML = modules.map(m => `
+    <div class="mod-row">
+      <span class="mod-icon">${m.icon}</span>
+      <span class="mod-name">${m.name}</span>
+      ${m.builtin ? '<span style="font-size:11px;color:var(--text3)">内置</span>' :
+        `<button class="mod-remove" data-mid="${m.id}" title="删除模块">×</button>`}
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.mod-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mid = btn.dataset.mid;
+      modules = modules.filter(m=>m.id!==mid);
+      // 清理该模块的localStorage
+      localStorage.removeItem('cw_custom_'+mid);
+      save(LS_MODULES, modules);
+      if(activeModuleId === mid) activeModuleId = modules.length ? modules[0].id : '';
+      renderAll();
+      renderModuleManager();
+      showToast('模块已删除');
+    });
+  });
+}
+
+// Gist ID 输入
+const gistIdInput = $('#gistIdInput');
+if(gistIdInput) {
+  gistIdInput.value = GIST_ID;
+  gistIdInput.addEventListener('input', function() {
+    GIST_ID = this.value.trim();
+    localStorage.setItem('cw_gist_id', GIST_ID);
+  });
+}
+
+$('#manageModulesBtn').addEventListener('click', () => {
+  renderModuleManager();
+  $('#modalOverlay').classList.add('open');
+});
+$('#closeModal').addEventListener('click', () => $('#modalOverlay').classList.remove('open'));
+$('#modalOverlay').addEventListener('click', function(e) {
+  if(e.target === this) this.classList.remove('open');
+});
+
+$('#addModBtn').addEventListener('click', () => {
+  const inp = $('#newModInput');
+  const name = inp.value.trim();
+  if(!name) return;
+  const id = 'custom-' + Date.now();
+  modules.push({ id, icon:'📌', name, builtin:false });
+  save(LS_MODULES, modules);
+  inp.value = '';
+  renderAll();
+  renderModuleManager();
+  showToast('✅ 模块已添加');
+});
+$('#newModInput').addEventListener('keydown', e => {
+  if(e.key==='Enter') $('#addModBtn').click();
+});
+
+/* ============================================================
+   抽屉开关
+   ============================================================ */
+$('#menuBtn').addEventListener('click', openDrawer);
+$('#drawerOverlay').addEventListener('click', closeDrawer);
+
+/* ============================================================
+   Gist 数据拉取
+   ============================================================ */
+async function fetchGist() {
+  if(!GIST_ID) {
+    showToast('⚠️ 请先配置 Gist ID');
+    return;
+  }
+  const btn = $('#syncBtn');
+  btn.classList.add('loading');
+  try {
+    const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+    if(!resp.ok) throw new Error('Gist 获取失败');
+    const gist = await resp.json();
+    const files = gist.files || {};
+    // 尝试读取 inspire.json 和 remix.json
+    const inspireFile = files['inspire.json'] || files['选题灵感.json'];
+    const remixFile   = files['remix.json']   || files['二创角度.json'];
+
+    if(inspireFile?.content) {
+      inspireData = JSON.parse(inspireFile.content);
+      save(LS_INSPIRE, inspireData);
+    }
+    if(remixFile?.content) {
+      remixData = JSON.parse(remixFile.content);
+      save(LS_REMIX, remixData);
+    }
+    renderModule('inspiration');
+    renderModule('hot-remix');
+    showToast('✅ 数据已刷新');
+  } catch(e) {
+    showToast('❌ 拉取失败：'+e.message);
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+$('#syncBtn').addEventListener('click', fetchGist);
+
+/* ============================================================
+   App 唤起
+   ============================================================ */
+function openDouyin(keyword) {
+  const encoded = encodeURIComponent(keyword||'');
+  // 优先尝试 URL Scheme，失败则跳网页
+  const scheme = `snssdk1128://search?keyword=${encoded}`;
+  const fallback = `https://www.douyin.com/search/${encoded}`;
+  tryOpen(scheme, fallback);
+}
+function openXiaohongshu(keyword) {
+  const encoded = encodeURIComponent(keyword||'');
+  const scheme = `xhsdiscover://search?keyword=${encoded}`;
+  const fallback = `https://www.xiaohongshu.com/search_result?keyword=${encoded}`;
+  tryOpen(scheme, fallback);
+}
+function tryOpen(scheme, fallback) {
+  const start = Date.now();
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = scheme;
+  document.body.appendChild(iframe);
+  setTimeout(() => {
+    document.body.removeChild(iframe);
+    if(Date.now()-start < 2500) {
+      window.open(fallback, '_blank');
+    }
+  }, 2000);
+}
+
+/* ============================================================
+   工具函数
+   ============================================================ */
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function tagLabel(t) {
+  const map = { trend:'趋势', douyin:'抖音', xhs:'小红书', wechat:'微信' };
+  return map[t] || t;
+}
+function showToast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ============================================================
+   页面加载
+   ============================================================ */
+renderAll();
+</script>
+</body>
+</html>

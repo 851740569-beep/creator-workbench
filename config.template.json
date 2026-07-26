@@ -1,0 +1,9 @@
+{
+  "_说明": "请将此文件重命名为 config.json 并填入你的信息",
+  "github_token": "ghp_xxxxxxxxxxxxxxxxxxxx",
+  "gist_id": "",
+  "niche_keywords": ["你的赛道关键词1", "你的赛道关键词2", "你的赛道关键词3"],
+  "wechat_sources": [
+    {"name": "公众号名称1", "account_id": "gh_xxxxxxxxxxxxx"}
+  ]
+}
