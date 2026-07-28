@@ -330,6 +330,14 @@ body{
 .jump-btn.dy:active{ background:#FF004F0F; }
 .jump-btn.xhs{ color:#FF2442; border-color:#FF244233; }
 .jump-btn.xhs:active{ background:#FF24420F; }
+.jump-btn.source{
+  color:var(--olive); border-color:var(--olive-light);
+  font-size:11px; padding:5px 10px; border-radius:14px;
+  border:1px solid var(--olive-light); background:var(--olive-light);
+  cursor:pointer; font-weight:500; margin-top:6px; width:100%;
+  display:flex; align-items:center; justify-content:center; gap:4px;
+}
+.jump-btn.source:active{ background:#D4E0CF; }
 
 .gist-status{
   font-size:11px; color:var(--text3); text-align:center;
@@ -888,6 +896,7 @@ function renderInspiration() {
         <button class="jump-btn dy" data-keyword="${escAttr(item.title)}">📱 打开抖音</button>
         <button class="jump-btn xhs" data-keyword="${escAttr(item.title)}">📕 打开小红书</button>
       </div>
+      <button class="jump-btn source" data-url="${escAttr(item.url||'')}" data-platform="${escAttr(item.sourceLabel||'链接')}">🔗 查看来源：${escHtml(item.sourceLabel||'点击跳转')}</button>
     </div>
   `).join('')}</div>`;
 }
@@ -898,6 +907,15 @@ function bindInspiration(el) {
   });
   el.querySelectorAll('.jump-btn.xhs').forEach(btn => {
     btn.addEventListener('click',()=> openXiaohongshu(btn.dataset.keyword));
+  });
+  el.querySelectorAll('.jump-btn.source').forEach(btn => {
+    btn.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      const url = this.dataset.url;
+      const plat = this.dataset.platform||'';
+      if(url) openSourceUrl(url, plat);
+    });
   });
   const refBtn = el.querySelector('#inspireRefresh');
   if(refBtn) refBtn.addEventListener('click', ()=> fetchHotData());
@@ -927,8 +945,23 @@ function renderHotRemix() {
       </div>
       <div class="remix-title">${i+1}. ${escHtml(item.title)}</div>
       <div class="remix-angle">✂️ 改编角度：${escHtml(item.angle)}</div>
+      <button class="jump-btn source" data-url="${escAttr(item.url||'')}" data-platform="${escAttr(item.sourceLabel||'链接')}" style="margin-top:8px;">🔗 查看来源：${escHtml(item.sourceLabel||'点击跳转')}</button>
     </div>
   `).join('')}</div>`;
+}
+
+function bindHotRemix(el) {
+  el.querySelectorAll('.jump-btn.source').forEach(btn => {
+    btn.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      const url = this.dataset.url;
+      const plat = this.dataset.platform||'';
+      if(url) openSourceUrl(url, plat);
+    });
+  });
+  const refBtn = el.querySelector('#remixRefresh');
+  if(refBtn) refBtn.addEventListener('click', ()=> fetchHotData());
 }
 
 // ---------- 模块4: 内容复盘 ----------
@@ -1068,6 +1101,7 @@ function renderModule(mid) {
   switch(mid) {
     case 'daily-plan':  bindDailyPlan(card); break;
     case 'inspiration': bindInspiration(card); break;
+    case 'hot-remix':   bindHotRemix(card); break;
     case 'review':      bindReview(card); break;
     case 'memo':        bindMemo(card); break;
     default:            bindCustomModule(card, mod); break;
@@ -1288,6 +1322,36 @@ function tryOpen(scheme, fallback) {
       window.open(fallback, '_blank');
     }
   }, 2000);
+}
+
+// 通用来源链接打开：自动检测平台，优先唤起App，兜底打开网页
+function openSourceUrl(url, platform) {
+  if(!url) return;
+  const lowerUrl = url.toLowerCase();
+  const lowerPlat = (platform||'').toLowerCase();
+
+  // 抖音：snssdk1128:// webview
+  if(lowerUrl.includes('douyin.com') || lowerPlat.includes('抖音')) {
+    const encoded = encodeURIComponent(url);
+    tryOpen(`snssdk1128://webview?url=${encoded}`, url);
+    return;
+  }
+
+  // 小红书：xhsdiscover:// webview
+  if(lowerUrl.includes('xiaohongshu.com') || lowerPlat.includes('小红书')) {
+    tryOpen(`xhsdiscover://webview?url=${encodeURIComponent(url)}`, url);
+    return;
+  }
+
+  // 微博：sinaweibo:// 或直接浏览器打开
+  if(lowerUrl.includes('weibo.com') || lowerPlat.includes('微博')) {
+    tryOpen(`sinaweibo://browser?url=${encodeURIComponent(url)}`, url);
+    return;
+  }
+
+  // 微信/公众号：浏览器打开（微信url scheme限制多，直接用浏览器更稳妥）
+  // 其他链接：直接浏览器打开
+  window.open(url, '_blank');
 }
 
 /* ============================================================
