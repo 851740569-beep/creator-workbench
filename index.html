@@ -362,6 +362,31 @@ body{
   margin-top:6px; line-height:1.4;
 }
 
+/* 数据状态条（选题灵感 & 二创共用） */
+.data-meta{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px; padding:8px 12px;
+  background:var(--olive-light); border-radius:var(--radius-sm);
+  font-size:11px; color:var(--text2);
+}
+.data-meta .meta-time{ display:flex; align-items:center; gap:4px; }
+.data-meta .meta-time b{ color:var(--olive); font-weight:600; }
+.data-meta .refresh-inline{
+  border:1px solid var(--olive); background:#FFF;
+  color:var(--olive); font-size:11px; font-weight:600;
+  padding:4px 12px; border-radius:14px; cursor:pointer;
+  display:flex; align-items:center; gap:3px;
+}
+.data-meta .refresh-inline:active{ background:var(--olive); color:#FFF; }
+.data-meta .refresh-inline.loading{ opacity:.5; pointer-events:none; }
+.data-loading{
+  text-align:center; padding:30px 20px; color:var(--text3); font-size:13px;
+}
+.data-loading .spin-icon{
+  display:inline-block; font-size:20px; margin-bottom:6px;
+  animation:spin .8s linear infinite;
+}
+
 /* ============================================================
    模块4: 内容复盘
    ============================================================ */
@@ -621,6 +646,10 @@ let remixData   = load(LS_REMIX, null)   || [];
 // ---------- Gist 配置 (用户填写后生效) ----------
 let GIST_ID = localStorage.getItem('cw_gist_id') || 'e9b80c535dc2e91a5078e398a066554b';
 
+// ---------- 数据更新时间戳 ----------
+let dataUpdatedAt = localStorage.getItem('cw_data_updated_at') || '';
+let dataFetching = false;
+
 /* ============================================================
    渲染引擎
    ============================================================ */
@@ -834,13 +863,21 @@ function bindDailyPlan(el) {
 
 // ---------- 模块2: 选题每日灵感 ----------
 function renderInspiration() {
+  // 数据状态条
+  const meta = `<div class="data-meta">
+    <span class="meta-time">📅 更新：${dataUpdatedAt ? `<b>${dataUpdatedAt}</b>` : '从未'}</span>
+    <button class="refresh-inline${dataFetching?' loading':''}" id="inspireRefresh">🔄 刷新热点</button>
+  </div>`;
+  if(dataFetching) {
+    return meta + `<div class="data-loading"><span class="spin-icon">🔄</span><p>正在联网抓取最新热点…</p></div>`;
+  }
   if(!inspireData.length) {
-    return `<div class="empty-state">
+    return meta + `<div class="empty-state">
       <p>📡 暂无选题数据</p>
-      <p style="margin-top:4px;font-size:11px;">点击右上角 🔄 从云端拉取</p>
+      <p style="margin-top:4px;font-size:11px;">点击「刷新热点」从云端拉取</p>
     </div>`;
   }
-  return `<div class="inspire-grid">${inspireData.map((item,i)=>`
+  return meta + `<div class="inspire-grid">${inspireData.map((item,i)=>`
     <div class="inspire-item">
       <div class="inspire-tags">
         ${(item.tags||[]).map(t=>`<span class="tag tag-${t}">${tagLabel(t)}</span>`).join('')}
@@ -862,17 +899,27 @@ function bindInspiration(el) {
   el.querySelectorAll('.jump-btn.xhs').forEach(btn => {
     btn.addEventListener('click',()=> openXiaohongshu(btn.dataset.keyword));
   });
+  const refBtn = el.querySelector('#inspireRefresh');
+  if(refBtn) refBtn.addEventListener('click', ()=> fetchHotData());
 }
 
 // ---------- 模块3: 爆款热点视频二创 ----------
 function renderHotRemix() {
+  // 数据状态条
+  const meta = `<div class="data-meta">
+    <span class="meta-time">📅 更新：${dataUpdatedAt ? `<b>${dataUpdatedAt}</b>` : '从未'}</span>
+    <button class="refresh-inline${dataFetching?' loading':''}" id="remixRefresh">🔄 刷新热点</button>
+  </div>`;
+  if(dataFetching) {
+    return meta + `<div class="data-loading"><span class="spin-icon">🔄</span><p>正在联网抓取最新热点…</p></div>`;
+  }
   if(!remixData.length) {
-    return `<div class="empty-state">
+    return meta + `<div class="empty-state">
       <p>🔥 暂无二创数据</p>
-      <p style="margin-top:4px;font-size:11px;">点击右上角 🔄 从云端拉取</p>
+      <p style="margin-top:4px;font-size:11px;">点击「刷新热点」从云端拉取</p>
     </div>`;
   }
-  return `<div class="remix-grid">${remixData.map((item,i)=>`
+  return meta + `<div class="remix-grid">${remixData.map((item,i)=>`
     <div class="remix-item">
       <div class="remix-header">
         <span class="hot-badge">🔥 热点</span>
@@ -1119,43 +1166,99 @@ $('#menuBtn').addEventListener('click', openDrawer);
 $('#drawerOverlay').addEventListener('click', closeDrawer);
 
 /* ============================================================
-   Gist 数据拉取
+   热点数据拉取 — 同源静态文件优先，Gist降级，自动拉取
    ============================================================ */
-async function fetchGist() {
-  if(!GIST_ID) {
-    showToast('⚠️ 请先配置 Gist ID');
-    return;
-  }
+async function fetchHotData() {
+  if(dataFetching) return;
+  dataFetching = true;
   const btn = $('#syncBtn');
-  btn.classList.add('loading');
-  try {
-    const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`);
-    if(!resp.ok) throw new Error('Gist 获取失败');
-    const gist = await resp.json();
-    const files = gist.files || {};
-    // 尝试读取 inspire.json 和 remix.json
-    const inspireFile = files['inspire.json'] || files['选题灵感.json'];
-    const remixFile   = files['remix.json']   || files['二创角度.json'];
+  if(btn) btn.classList.add('loading');
+  // 刷新时立即更新视图显示loading
+  renderModule('inspiration');
+  renderModule('hot-remix');
 
-    if(inspireFile?.content) {
-      inspireData = JSON.parse(inspireFile.content);
-      save(LS_INSPIRE, inspireData);
+  let success = false;
+
+  // 策略1：从同源静态文件拉取（GitHub Pages 上的 inspire.json / remix.json，无限流）
+  try {
+    const [respI, respR] = await Promise.all([
+      fetch('./inspire.json', {cache:'no-store'}),
+      fetch('./remix.json', {cache:'no-store'})
+    ]);
+    if(respI.ok && respR.ok) {
+      const iData = await respI.json();
+      const rData = await respR.json();
+      if(Array.isArray(iData) && iData.length) {
+        inspireData = iData; save(LS_INSPIRE, inspireData);
+      }
+      if(Array.isArray(rData) && rData.length) {
+        remixData = rData; save(LS_REMIX, remixData);
+      }
+      const lastMod = respI.headers.get('last-modified');
+      dataUpdatedAt = lastMod ? new Date(lastMod).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+      localStorage.setItem('cw_data_updated_at', dataUpdatedAt);
+      success = true;
+      console.log('[热点] 同源文件拉取成功');
     }
-    if(remixFile?.content) {
-      remixData = JSON.parse(remixFile.content);
-      save(LS_REMIX, remixData);
-    }
-    renderModule('inspiration');
-    renderModule('hot-remix');
-    showToast('✅ 数据已刷新');
   } catch(e) {
-    showToast('❌ 拉取失败：'+e.message);
-  } finally {
-    btn.classList.remove('loading');
+    console.log('[热点] 同源拉取失败，尝试Gist降级:', e.message);
+  }
+
+  // 策略2：Gist API 降级（如果同源失败且配了Gist ID）
+  if(!success && GIST_ID) {
+    try {
+      const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+      if(resp.ok) {
+        const gist = await resp.json();
+        const files = gist.files || {};
+        const inspireFile = files['inspire.json'] || files['选题灵感.json'];
+        const remixFile   = files['remix.json']   || files['二创角度.json'];
+        if(inspireFile?.content) {
+          const d = JSON.parse(inspireFile.content);
+          if(Array.isArray(d) && d.length) { inspireData = d; save(LS_INSPIRE, inspireData); }
+        }
+        if(remixFile?.content) {
+          const d = JSON.parse(remixFile.content);
+          if(Array.isArray(d) && d.length) { remixData = d; save(LS_REMIX, remixData); }
+        }
+        const gistDate = gist.updated_at || gist.created_at;
+        dataUpdatedAt = gistDate ? new Date(gistDate).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+        localStorage.setItem('cw_data_updated_at', dataUpdatedAt);
+        success = true;
+        console.log('[热点] Gist降级拉取成功');
+      }
+    } catch(e) {
+      console.log('[热点] Gist降级也失败:', e.message);
+    }
+  }
+
+  dataFetching = false;
+  if(btn) btn.classList.remove('loading');
+  renderModule('inspiration');
+  renderModule('hot-remix');
+  showToast(success ? '✅ 热点已刷新' : '⚠️ 拉取失败，请稍后重试');
+}
+
+// 自动拉取：数据为空 或 超过12小时未更新时触发
+function autoFetchIfNeeded() {
+  if(dataFetching) return;
+  const empty = !inspireData.length && !remixData.length;
+  let stale = false;
+  if(dataUpdatedAt) {
+    // 简单判断：如果时间戳不含今天日期则视为过期
+    const today = new Date();
+    const todayStr = `${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    if(!dataUpdatedAt.includes(todayStr)) stale = true;
+  } else {
+    stale = true;
+  }
+  if(empty || stale) {
+    console.log('[热点] 数据为空或过期，自动拉取');
+    fetchHotData();
   }
 }
 
-$('#syncBtn').addEventListener('click', fetchGist);
+$('#syncBtn').addEventListener('click', fetchHotData);
 
 /* ============================================================
    App 唤起
@@ -1208,6 +1311,8 @@ function showToast(msg) {
    页面加载
    ============================================================ */
 renderAll();
+// 页面加载后自动检查并拉取最新热点数据
+setTimeout(autoFetchIfNeeded, 800);
 </script>
 </body>
 </html>
