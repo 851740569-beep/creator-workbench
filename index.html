@@ -459,6 +459,228 @@ body{
 .memo-add-btn:active{ background:var(--olive-light); }
 
 /* ============================================================
+   模块6: 日常记账
+   ============================================================ */
+.finance-form{
+  display:flex; flex-direction:column; gap:8px; margin-bottom:14px;
+  padding-bottom:14px; border-bottom:1px solid var(--border);
+}
+.finance-type-toggle{
+  display:flex; gap:6px;
+}
+.finance-type-toggle .type-btn{
+  flex:1; padding:10px; border-radius:var(--radius-sm);
+  border:1px solid var(--border); background:#FFF; font-size:14px;
+  cursor:pointer; font-weight:600; text-align:center;
+  transition:all .15s;
+}
+.finance-type-toggle .type-btn.income.active{
+  background:#E8F5E9; border-color:var(--olive); color:var(--olive);
+}
+.finance-type-toggle .type-btn.expense.active{
+  background:#FDEDED; border-color:var(--danger); color:var(--danger);
+}
+.finance-row{
+  display:flex; gap:6px;
+}
+.finance-row input,.finance-row select{
+  padding:10px 12px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); font-size:14px; font-family:var(--font);
+  outline:none; background:#FFF;
+}
+.finance-row input:focus,.finance-row select:focus{ border-color:var(--olive); }
+.finance-row .fin-amount{ width:100px; flex-shrink:0; }
+.finance-row .fin-cat{ flex:1; min-width:0; }
+.finance-row .fin-cat-input{ flex:1; min-width:0; }
+.finance-row .fin-note{ flex:2; min-width:0; }
+.finance-form .btn-primary{
+  padding:10px 20px; background:var(--olive); color:#FFF;
+  border:none; border-radius:var(--radius-sm); font-size:14px;
+  font-weight:600; cursor:pointer;
+}
+.finance-form .btn-primary:active{ background:var(--olive-dark); }
+
+/* 记账汇总 */
+.finance-summary{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+  margin-bottom:14px; padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.finance-summary .sum-item{
+  background:#FFF; border-radius:var(--radius-sm); padding:12px 8px;
+  text-align:center; border:1px solid var(--border);
+}
+.finance-summary .sum-num{
+  font-size:18px; font-weight:700; display:block;
+}
+.finance-summary .sum-num.income{ color:var(--olive); }
+.finance-summary .sum-num.expense{ color:var(--danger); }
+.finance-summary .sum-num.balance{ color:var(--blue); }
+.finance-summary .sum-label{
+  font-size:11px; color:var(--text3); display:block; margin-top:2px;
+}
+
+/* 支出分类占比 */
+.finance-categories{ margin-bottom:14px; }
+.finance-categories .cat-title{
+  font-size:13px; font-weight:600; color:var(--text); margin-bottom:8px;
+}
+.finance-categories .cat-row{
+  display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  font-size:12px;
+}
+.finance-categories .cat-name{
+  width:52px; text-align:right; color:var(--text2); flex-shrink:0;
+}
+.finance-categories .cat-bar{
+  flex:1; height:14px; background:var(--olive-light); border-radius:7px;
+  overflow:hidden;
+}
+.finance-categories .cat-bar-fill{
+  height:100%; background:var(--olive); border-radius:7px;
+  transition:width .3s; min-width:2px;
+}
+.finance-categories .cat-amount{
+  width:60px; text-align:right; color:var(--text2); flex-shrink:0;
+  font-weight:600;
+}
+.finance-categories .cat-pct{
+  width:36px; text-align:right; color:var(--text3); flex-shrink:0;
+}
+/* 月度/年度切换 */
+.finance-period{
+  display:flex; gap:4px; margin-bottom:10px;
+}
+.finance-period .period-btn{
+  padding:5px 14px; border:1px solid var(--border); border-radius:14px;
+  font-size:12px; cursor:pointer; background:#FFF; color:var(--text2);
+  font-weight:500;
+}
+.finance-period .period-btn.active{
+  background:var(--olive); color:#FFF; border-color:var(--olive);
+}
+
+/* 记账列表 */
+.finance-records{ max-height:300px; overflow-y:auto; }
+.finance-records .rec-date-group{ margin-bottom:8px; }
+.finance-records .rec-date-label{
+  font-size:12px; color:var(--text3); font-weight:600;
+  padding:6px 4px 4px; border-bottom:1px solid #f5f5f5; margin-bottom:4px;
+}
+.finance-records .rec-item{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 4px; font-size:13px; border-bottom:1px solid #fafafa;
+}
+.finance-records .rec-item .rec-tag{
+  font-size:10px; padding:1px 6px; border-radius:8px; font-weight:600;
+  min-width:36px; text-align:center;
+}
+.rec-tag.income-tag{ background:#E8F5E9; color:var(--olive); }
+.rec-tag.expense-tag{ background:#FDEDED; color:var(--danger); }
+.finance-records .rec-item .rec-cat{
+  font-size:11px; color:var(--text3); min-width:42px;
+}
+.finance-records .rec-item .rec-desc{
+  flex:1; color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.finance-records .rec-item .rec-amount{
+  font-weight:700; min-width:60px; text-align:right;
+}
+.finance-records .rec-item .rec-amount.income{ color:var(--olive); }
+.finance-records .rec-item .rec-amount.expense{ color:var(--danger); }
+.finance-records .rec-item .rec-del{
+  border:none; background:transparent; color:var(--text3);
+  font-size:16px; cursor:pointer; padding:2px 4px;
+}
+.finance-records .rec-item .rec-del:active{ color:var(--danger); }
+
+.finance-tabs{
+  display:flex; gap:6px; margin-bottom:12px;
+}
+.finance-tabs .ftab{
+  flex:1; padding:8px; border:none; border-radius:var(--radius-sm);
+  background:var(--olive-bg); font-size:13px; cursor:pointer;
+  color:var(--text2); font-weight:500; transition:all .15s;
+}
+.finance-tabs .ftab.active{
+  background:var(--olive); color:#FFF; font-weight:600;
+}
+
+/* ============================================================
+   模块7: 每日运动记录
+   ============================================================ */
+.exercise-form{
+  display:flex; flex-direction:column; gap:8px;
+  padding-bottom:14px; margin-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.exercise-form .ex-row{
+  display:flex; gap:6px;
+}
+.exercise-form select, .exercise-form input{
+  padding:10px 12px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); font-size:14px; font-family:var(--font);
+  outline:none; background:#FFF;
+}
+.exercise-form select:focus,.exercise-form input:focus{ border-color:var(--olive); }
+.exercise-form .ex-type{ flex:2; }
+.exercise-form .ex-duration{ width:90px; flex-shrink:0; text-align:center; }
+.exercise-form .ex-duration::placeholder{ color:var(--text3); }
+.exercise-form textarea{
+  padding:10px 12px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); font-size:13px; font-family:var(--font);
+  resize:vertical; min-height:50px; outline:none;
+}
+.exercise-form textarea:focus{ border-color:var(--olive); }
+.exercise-form .btn-primary{
+  padding:10px 20px; background:var(--olive); color:#FFF;
+  border:none; border-radius:var(--radius-sm); font-size:14px;
+  font-weight:600; cursor:pointer;
+}
+.exercise-form .btn-primary:active{ background:var(--olive-dark); }
+
+.exercise-records{ max-height:350px; overflow-y:auto; }
+.exercise-records .ex-date-group{ margin-bottom:10px; }
+.exercise-records .ex-date-label{
+  font-size:12px; color:var(--text3); font-weight:600;
+  padding:6px 4px 4px; border-bottom:1px solid #f5f5f5; margin-bottom:4px;
+  display:flex; align-items:center; gap:6px;
+}
+.exercise-records .ex-date-label .ex-date-total{
+  font-size:11px; color:var(--olive); font-weight:500;
+}
+.exercise-records .ex-item{
+  display:flex; align-items:center; gap:8px;
+  padding:10px 4px; border-bottom:1px solid #fafafa;
+  font-size:13px;
+}
+.exercise-records .ex-item .ex-icon{
+  font-size:20px; width:28px; text-align:center; flex-shrink:0;
+}
+.exercise-records .ex-item .ex-info{ flex:1; min-width:0; }
+.exercise-records .ex-item .ex-type-name{
+  font-weight:600; color:var(--text);
+}
+.exercise-records .ex-item .ex-meta{
+  font-size:11px; color:var(--text3); margin-top:2px;
+  display:flex; gap:10px;
+}
+.exercise-records .ex-item .ex-feeling{
+  font-size:11px; color:var(--text2); margin-top:3px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.exercise-records .ex-item .ex-duration-badge{
+  font-size:12px; font-weight:700; color:var(--olive);
+  background:var(--olive-light); padding:3px 8px; border-radius:10px;
+  white-space:nowrap; flex-shrink:0;
+}
+.exercise-records .ex-item .ex-del{
+  border:none; background:transparent; color:var(--text3);
+  font-size:16px; cursor:pointer; padding:2px 4px; flex-shrink:0;
+}
+.exercise-records .ex-item .ex-del:active{ color:var(--danger); }
+
+/* ============================================================
    模块管理弹窗
    ============================================================ */
 .modal-overlay{
@@ -590,6 +812,8 @@ const DEFAULT_MODULES = [
   { id:'hot-remix',    icon:'🔥', name:'爆款热点视频二创', builtin:true },
   { id:'review',       icon:'📊', name:'内容复盘',   builtin:true },
   { id:'memo',         icon:'📝', name:'备忘录',     builtin:true },
+  { id:'finance',      icon:'💰', name:'日常记账',   builtin:true },
+  { id:'exercise',     icon:'🏃', name:'每日运动记录', builtin:true },
 ];
 
 // ---------- localStorage keys ----------
@@ -599,6 +823,8 @@ const LS_MEMOS  = 'cw_memos_v2';
 const LS_REVIEW = 'cw_review_v2';
 const LS_INSPIRE= 'cw_inspire_v2';
 const LS_REMIX  = 'cw_remix_v2';
+const LS_FINANCE= 'cw_finance_v2';
+const LS_EXERCISE='cw_exercise_v2';
 
 function load(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -650,6 +876,14 @@ let review = load(LS_REVIEW, null) || {
 // ---------- 选题灵感 (Gist 数据) ----------
 let inspireData = load(LS_INSPIRE, null) || [];
 let remixData   = load(LS_REMIX, null)   || [];
+
+// ---------- 日常记账 ----------
+let financeRecords = load(LS_FINANCE, null) || [];
+let financeIdCounter = financeRecords.length ? Math.max(...financeRecords.map(r=>r.id)) : 0;
+
+// ---------- 每日运动记录 ----------
+let exerciseRecords = load(LS_EXERCISE, null) || [];
+let exerciseIdCounter = exerciseRecords.length ? Math.max(...exerciseRecords.map(r=>r.id)) : 0;
 
 // ---------- Gist 配置 (用户填写后生效) ----------
 let GIST_ID = localStorage.getItem('cw_gist_id') || 'e9b80c535dc2e91a5078e398a066554b';
@@ -1055,6 +1289,289 @@ function bindMemo(el) {
   }
 }
 
+// ---------- 模块6: 日常记账 ----------
+const FINANCE_CATEGORIES_INCOME = ['薪资','副业','理财','红包','报销','其他'];
+const FINANCE_CATEGORIES_EXPENSE= ['餐饮','交通','购物','娱乐','住房','医疗','教育','通讯','美妆','服饰','其他'];
+const EXERCISE_TYPES = [
+  {val:'跑步',icon:'🏃'},{val:'散步',icon:'🚶'},{val:'拉伸',icon:'🧘'},
+  {val:'力量训练',icon:'🏋️'},{val:'瑜伽',icon:'🧘‍♀️'},{val:'骑行',icon:'🚴'},
+  {val:'跳绳',icon:'🪢'},{val:'游泳',icon:'🏊'},{val:'健身操',icon:'💃'},
+  {val:'其他',icon:'🏅'}
+];
+
+function renderFinance() {
+  const now = new Date();
+  let finYear = calYear || now.getFullYear();
+  let finMonth = calMonth !== undefined ? calMonth : now.getMonth(); // 0-based
+
+  // period切换
+  const isMonthly = (window._finPeriod||'monthly') === 'monthly';
+
+  // 筛选记录
+  let filtered = financeRecords.filter(r=>{
+    const d = new Date(r.date);
+    if(isMonthly) return d.getFullYear()===finYear && d.getMonth()===finMonth;
+    return d.getFullYear()===finYear;
+  });
+
+  // 汇总
+  const totalIncome = filtered.filter(r=>r.type==='income').reduce((s,r)=>s+Number(r.amount),0);
+  const totalExpense= filtered.filter(r=>r.type==='expense').reduce((s,r)=>s+Number(r.amount),0);
+  const balance = totalIncome - totalExpense;
+
+  // 支出分类占比（只看当前周期的支出）
+  const expenseList = filtered.filter(r=>r.type==='expense');
+  const catMap = {};
+  expenseList.forEach(r=>{
+    const cat = r.category||'其他';
+    catMap[cat] = (catMap[cat]||0) + Number(r.amount);
+  });
+  const catEntries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  const maxCatAmount = catEntries.length ? catEntries[0][1] : 1;
+
+  // 按日期分组最近的记录
+  const recent = [...financeRecords].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,50);
+  const groups = {};
+  recent.forEach(r=>{
+    if(!groups[r.date]) groups[r.date]=[];
+    groups[r.date].push(r);
+  });
+
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const summaryLabel = isMonthly ? `${finYear}年${monthNames[finMonth]}` : `${finYear}年全年`;
+
+  // 汇总区HTML
+  const summaryHTML = `
+    <div class="finance-period">
+      <button class="period-btn${isMonthly?' active':''}" id="finPeriodMonthly">月度</button>
+      <button class="period-btn${!isMonthly?' active':''}" id="finPeriodYearly">年度</button>
+    </div>
+    <div class="finance-summary">
+      <div class="sum-item"><span class="sum-num income">¥${totalIncome.toFixed(0)}</span><span class="sum-label">收入</span></div>
+      <div class="sum-item"><span class="sum-num expense">¥${totalExpense.toFixed(0)}</span><span class="sum-label">支出</span></div>
+      <div class="sum-item"><span class="sum-num balance" style="color:${balance>=0?'var(--olive)':'var(--danger)'}">¥${balance>=0?'+':''}${balance.toFixed(0)}</span><span class="sum-label">${summaryLabel}结余</span></div>
+    </div>
+    ${catEntries.length ? `<div class="finance-categories"><div class="cat-title">📊 ${summaryLabel}支出占比</div>
+      ${catEntries.map(([cat,amt])=>`
+        <div class="cat-row">
+          <span class="cat-name">${escHtml(cat)}</span>
+          <div class="cat-bar"><div class="cat-bar-fill" style="width:${Math.max((amt/maxCatAmount)*100,3)}%"></div></div>
+          <span class="cat-amount">¥${amt.toFixed(0)}</span>
+          <span class="cat-pct">${totalExpense?Math.round(amt/totalExpense*100):0}%</span>
+        </div>
+      `).join('')}</div>` : ''}
+  `;
+
+  // 录入表单
+  const formHTML = `
+    <div class="finance-form">
+      <div class="finance-type-toggle">
+        <button class="type-btn income active" id="finTypeIncome">💰 收入</button>
+        <button class="type-btn expense" id="finTypeExpense">💸 支出</button>
+      </div>
+      <div class="finance-row">
+        <input type="number" class="fin-amount" id="finAmount" placeholder="金额" step="0.01" min="0" inputmode="decimal"/>
+        <select class="fin-cat" id="finCategory">${FINANCE_CATEGORIES_INCOME.map(c=>`<option>${c}</option>`).join('')}</select>
+      </div>
+      <div class="finance-row">
+        <input type="text" class="fin-note" id="finNote" placeholder="备注（可选）" style="flex:1"/>
+        <button class="btn-primary" id="addFinanceBtn">记一笔</button>
+      </div>
+    </div>
+  `;
+
+  // 记录列表（带tabs切换：录入 vs 历史）
+  const tabsHTML = `
+    <div class="finance-tabs">
+      <button class="ftab active" id="finTabForm">✏️ 录入</button>
+      <button class="ftab" id="finTabHistory">📋 记录</button>
+    </div>
+  `;
+
+  // 历史记录
+  const recordsHTML = Object.keys(groups).sort().reverse().map(date => `
+    <div class="rec-date-group">
+      <div class="rec-date-label">📅 ${date}</div>
+      ${groups[date].map(r=>`
+        <div class="rec-item" data-fid="${r.id}">
+          <span class="rec-tag ${r.type==='income'?'income-tag':'expense-tag'}">${r.type==='income'?'收入':'支出'}</span>
+          <span class="rec-cat">${escHtml(r.category||'其他')}</span>
+          <span class="rec-desc">${escHtml(r.note||'')}</span>
+          <span class="rec-amount ${r.type}">${r.type==='income'?'+':'-'}¥${Number(r.amount).toFixed(0)}</span>
+          <button class="rec-del" title="删除">×</button>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  return `
+    ${tabsHTML}
+    <div id="finFormWrap">${formHTML}</div>
+    <div id="finSummaryWrap">${summaryHTML}</div>
+    <div id="finRecordsWrap" style="display:none;"><div class="finance-records">${recordsHTML || '<div class="empty-state" style="padding:20px;">暂无记账记录</div>'}</div></div>
+  `;
+}
+
+function bindFinance(el) {
+  const finType = { current: 'income' };
+
+  // 类型切换
+  const incomeBtn = el.querySelector('#finTypeIncome');
+  const expenseBtn = el.querySelector('#finTypeExpense');
+  const catSelect = el.querySelector('#finCategory');
+  if(incomeBtn && expenseBtn) {
+    const toggleType = (type) => {
+      finType.current = type;
+      incomeBtn.classList.toggle('active', type==='income');
+      expenseBtn.classList.toggle('active', type==='expense');
+      if(catSelect) {
+        const cats = type==='income' ? FINANCE_CATEGORIES_INCOME : FINANCE_CATEGORIES_EXPENSE;
+        catSelect.innerHTML = cats.map(c=>`<option>${c}</option>`).join('');
+      }
+    };
+    incomeBtn.addEventListener('click', ()=> toggleType('income'));
+    expenseBtn.addEventListener('click', ()=> toggleType('expense'));
+  }
+
+  // Tab切换
+  el.querySelector('#finTabForm')?.addEventListener('click', function(){
+    this.classList.add('active');
+    el.querySelector('#finTabHistory')?.classList.remove('active');
+    el.querySelector('#finFormWrap').style.display='block';
+    el.querySelector('#finSummaryWrap').style.display='block';
+    el.querySelector('#finRecordsWrap').style.display='none';
+  });
+  el.querySelector('#finTabHistory')?.addEventListener('click', function(){
+    this.classList.add('active');
+    el.querySelector('#finTabForm')?.classList.remove('active');
+    el.querySelector('#finFormWrap').style.display='none';
+    el.querySelector('#finSummaryWrap').style.display='none';
+    el.querySelector('#finRecordsWrap').style.display='block';
+  });
+
+  // 添加记录
+  el.querySelector('#addFinanceBtn')?.addEventListener('click', ()=>{
+    const amount = parseFloat(el.querySelector('#finAmount')?.value);
+    if(isNaN(amount) || amount<=0) { showToast('请输入有效金额'); return; }
+    const category = el.querySelector('#finCategory')?.value || '其他';
+    const note = el.querySelector('#finNote')?.value?.trim() || '';
+    financeIdCounter++;
+    financeRecords.push({
+      id: financeIdCounter,
+      type: finType.current,
+      amount: amount,
+      category: category,
+      note: note,
+      date: todayStr()
+    });
+    save(LS_FINANCE, financeRecords);
+    // 清空
+    el.querySelector('#finAmount').value = '';
+    el.querySelector('#finNote').value = '';
+    renderModule('finance');
+    showToast('✅ 已记账');
+  });
+
+  // 删除记录（事件委托在renderModule时重新绑定，这里查records区）
+  el.querySelectorAll('.rec-del').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      const fid = +this.closest('.rec-item').dataset.fid;
+      financeRecords = financeRecords.filter(r=>r.id!==fid);
+      save(LS_FINANCE, financeRecords);
+      renderModule('finance');
+    });
+  });
+
+  // 月度/年度切换
+  el.querySelector('#finPeriodMonthly')?.addEventListener('click', ()=>{
+    window._finPeriod = 'monthly';
+    renderModule('finance');
+  });
+  el.querySelector('#finPeriodYearly')?.addEventListener('click', ()=>{
+    window._finPeriod = 'yearly';
+    renderModule('finance');
+  });
+}
+
+// ---------- 模块7: 每日运动记录 ----------
+function renderExercise() {
+  // 按日期分组最近的记录
+  const recent = [...exerciseRecords].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,60);
+  const groups = {};
+  recent.forEach(r=>{
+    if(!groups[r.date]) groups[r.date]=[];
+    groups[r.date].push(r);
+  });
+
+  const typeIcon = (t) => {
+    const found = EXERCISE_TYPES.find(e=>e.val===t);
+    return found ? found.icon : '🏅';
+  };
+
+  const recordsHTML = Object.keys(groups).sort().reverse().map(date => {
+    const dayTotal = groups[date].reduce((s,r)=>s+(Number(r.duration)||0),0);
+    return `
+    <div class="ex-date-group">
+      <div class="ex-date-label">📅 ${date}<span class="ex-date-total">共 ${dayTotal} 分钟</span></div>
+      ${groups[date].map(r=>`
+        <div class="ex-item" data-eid="${r.id}">
+          <span class="ex-icon">${typeIcon(r.type)}</span>
+          <div class="ex-info">
+            <div class="ex-type-name">${escHtml(r.type||'运动')}</div>
+            <div class="ex-meta"><span>⏱ ${r.duration||0}分钟</span></div>
+            ${r.feeling ? `<div class="ex-feeling">💬 ${escHtml(r.feeling)}</div>` : ''}
+          </div>
+          <span class="ex-duration-badge">${r.duration||0}分钟</span>
+          <button class="ex-del" title="删除">×</button>
+        </div>
+      `).join('')}
+    </div>
+  `}).join('');
+
+  return `
+    <div class="exercise-form">
+      <div class="ex-row">
+        <select class="ex-type" id="exType">${EXERCISE_TYPES.map(e=>`<option value="${e.val}">${e.icon} ${e.val}</option>`).join('')}</select>
+        <input type="number" class="ex-duration" id="exDuration" placeholder="分钟" min="1" inputmode="numeric"/>
+      </div>
+      <textarea id="exFeeling" placeholder="运动感受（可选）…"></textarea>
+      <button class="btn-primary" id="addExerciseBtn">💪 记录运动</button>
+    </div>
+    <div class="exercise-records">${recordsHTML || '<div class="empty-state" style="padding:20px;">🏃 还没有运动记录，开始记录吧！</div>'}</div>
+  `;
+}
+
+function bindExercise(el) {
+  el.querySelector('#addExerciseBtn')?.addEventListener('click', ()=>{
+    const type = el.querySelector('#exType')?.value || '其他';
+    const duration = parseInt(el.querySelector('#exDuration')?.value) || 0;
+    if(duration <= 0) { showToast('请填写运动时长'); return; }
+    const feeling = el.querySelector('#exFeeling')?.value?.trim() || '';
+    exerciseIdCounter++;
+    exerciseRecords.push({
+      id: exerciseIdCounter,
+      type: type,
+      duration: duration,
+      feeling: feeling,
+      date: todayStr()
+    });
+    save(LS_EXERCISE, exerciseRecords);
+    el.querySelector('#exDuration').value = '';
+    el.querySelector('#exFeeling').value = '';
+    renderModule('exercise');
+    showToast('✅ 运动已记录');
+  });
+
+  el.querySelectorAll('.ex-del').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      const eid = +this.closest('.ex-item').dataset.eid;
+      exerciseRecords = exerciseRecords.filter(r=>r.id!==eid);
+      save(LS_EXERCISE, exerciseRecords);
+      renderModule('exercise');
+    });
+  });
+}
+
 // ---------- 自定义模块（纯笔记型） ----------
 function renderCustomModule(mod) {
   const key = 'cw_custom_'+mod.id;
@@ -1091,6 +1608,8 @@ function renderModule(mid) {
     case 'hot-remix':   html = renderHotRemix(); break;
     case 'review':      html = renderReview(); break;
     case 'memo':        html = renderMemo(); break;
+    case 'finance':     html = renderFinance(); break;
+    case 'exercise':    html = renderExercise(); break;
     default:            html = renderCustomModule(mod); break;
   }
 
@@ -1104,6 +1623,8 @@ function renderModule(mid) {
     case 'hot-remix':   bindHotRemix(card); break;
     case 'review':      bindReview(card); break;
     case 'memo':        bindMemo(card); break;
+    case 'finance':     bindFinance(card); break;
+    case 'exercise':    bindExercise(card); break;
     default:            bindCustomModule(card, mod); break;
   }
 }
