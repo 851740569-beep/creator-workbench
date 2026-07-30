@@ -748,6 +748,382 @@ body{
   opacity:0; transition:opacity .3s;
 }
 .toast.show{ opacity:1; }
+
+/* ============================================================
+   记账模块 V2 — 4分页结构（首页/账单/统计/我的）
+   ============================================================ */
+.fin-v2{ position:relative; }
+.fin-v2 .fin-page{ display:none; }
+.fin-v2 .fin-page.active{ display:block; }
+
+/* 底部导航 */
+.fin-bottom-nav{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:430px; background:#FFF;
+  display:flex; justify-content:space-around;
+  padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--border); z-index:90;
+  box-shadow:0 -2px 10px rgba(0,0,0,.04);
+}
+.fin-bottom-nav .fin-nav-item{
+  display:flex; flex-direction:column; align-items:center;
+  gap:2px; padding:4px 14px; cursor:pointer;
+  color:var(--text3); font-size:11px; border:none; background:transparent;
+  font-family:var(--font);
+}
+.fin-bottom-nav .fin-nav-item .nav-icon{ font-size:20px; line-height:1; }
+.fin-bottom-nav .fin-nav-item.active{ color:var(--olive); font-weight:600; }
+
+/* 首页 */
+.fin-home{ padding-bottom:70px; }
+.fin-balance-card{
+  background:linear-gradient(135deg, var(--olive-dark) 0%, var(--olive) 100%);
+  border-radius:var(--radius); padding:20px; color:#FFF; margin-bottom:14px;
+}
+.fin-balance-card .fin-balance-label{ font-size:12px; opacity:.85; }
+.fin-balance-card .fin-balance-num{ font-size:32px; font-weight:700; margin:6px 0 2px; }
+.fin-balance-card .fin-balance-row{
+  display:flex; justify-content:space-between; margin-top:14px;
+  padding-top:12px; border-top:1px solid rgba(255,255,255,.15);
+}
+.fin-balance-card .fin-balance-row div{ text-align:center; flex:1; }
+.fin-balance-card .fin-balance-row .lbl{ font-size:11px; opacity:.7; }
+.fin-balance-card .fin-balance-row .num{ font-size:16px; font-weight:600; margin-top:2px; }
+.fin-balance-card .income-num{ color:#A8E6A3; }
+.fin-balance-card .expense-num{ color:#FFB3B3; }
+
+/* 预算卡片 */
+.fin-budget-card{
+  background:#FFF; border-radius:var(--radius); padding:14px 16px;
+  margin-bottom:14px; box-shadow:var(--shadow);
+}
+.fin-budget-card .fin-budget-header{
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+}
+.fin-budget-card .fin-budget-title{ font-size:14px; font-weight:600; }
+.fin-budget-card .fin-budget-remain{ font-size:13px; font-weight:600; }
+.fin-budget-card .fin-budget-bar{
+  width:100%; height:8px; background:var(--olive-light); border-radius:4px; overflow:hidden;
+}
+.fin-budget-card .fin-budget-bar-fill{
+  height:100%; border-radius:4px; transition:width .4s;
+}
+.fin-budget-card .fin-budget-info{
+  display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:var(--text3);
+}
+
+/* 快捷按钮 */
+.fin-quick-actions{
+  display:flex; gap:10px; margin-bottom:14px;
+}
+.fin-quick-actions .fin-quick-btn{
+  flex:1; padding:14px; border-radius:var(--radius-sm);
+  border:none; font-size:14px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  font-family:var(--font);
+}
+.fin-quick-actions .fin-quick-btn.expense{ background:#FDEDED; color:var(--danger); }
+.fin-quick-actions .fin-quick-btn.income{ background:#E8F5E9; color:var(--olive); }
+
+/* 快捷分类网格 */
+.fin-section-title{ font-size:14px; font-weight:600; margin:0 0 10px; color:var(--text); }
+.fin-cat-grid{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;
+}
+.fin-cat-item{
+  display:flex; flex-direction:column; align-items:center;
+  gap:6px; padding:12px 4px; background:#FFF;
+  border-radius:var(--radius-sm); border:1px solid var(--border);
+  cursor:pointer; transition:all .15s; position:relative;
+}
+.fin-cat-item:active{ background:var(--olive-light); transform:scale(.95); }
+.fin-cat-item .cat-icon{ font-size:24px; line-height:1; }
+.fin-cat-item .cat-name{ font-size:11px; color:var(--text2); }
+.fin-cat-item .cat-del{
+  position:absolute; top:2px; right:4px; font-size:14px; color:var(--text3);
+  background:transparent; border:none; cursor:pointer; display:none;
+}
+.fin-cat-item:hover .cat-del{ display:block; }
+.fin-cat-add{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; padding:12px 4px; background:var(--olive-light);
+  border-radius:var(--radius-sm); border:1px dashed var(--olive);
+  cursor:pointer; color:var(--olive); font-size:12px;
+}
+
+/* 账单页 */
+.fin-bills{ padding-bottom:70px; }
+.fin-bills-header{
+  display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;
+}
+.fin-bills-header select,.fin-bills-header .fin-filter-btn{
+  padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm);
+  font-size:13px; background:#FFF; outline:none; font-family:var(--font);
+  cursor:pointer;
+}
+.fin-bills-header .fin-filter-btn.active{
+  background:var(--olive); color:#FFF; border-color:var(--olive); font-weight:600;
+}
+.fin-bill-item{
+  display:flex; align-items:center; gap:10px;
+  padding:12px; background:#FFF; border-radius:var(--radius-sm);
+  margin-bottom:8px; box-shadow:var(--shadow);
+}
+.fin-bill-item .bill-icon{
+  width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; background:var(--olive-light); flex-shrink:0;
+}
+.fin-bill-item .bill-icon.expense{ background:#FDEDED; }
+.fin-bill-item .bill-info{ flex:1; min-width:0; }
+.fin-bill-item .bill-title{ font-size:14px; font-weight:500; }
+.fin-bill-item .bill-meta{ font-size:11px; color:var(--text3); margin-top:2px; }
+.fin-bill-item .bill-amount{ font-size:15px; font-weight:700; flex-shrink:0; }
+.fin-bill-item .bill-amount.income{ color:var(--olive); }
+.fin-bill-item .bill-amount.expense{ color:var(--danger); }
+.fin-bill-item .bill-del{
+  border:none; background:transparent; color:var(--text3);
+  font-size:16px; cursor:pointer; padding:2px 4px; flex-shrink:0;
+}
+
+/* 统计页 */
+.fin-stats{ padding-bottom:70px; }
+.fin-stats-tabs{ display:flex; gap:6px; margin-bottom:14px; }
+.fin-stats-tabs .st-tab{
+  flex:1; padding:8px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); background:#FFF;
+  font-size:13px; cursor:pointer; text-align:center; font-family:var(--font);
+}
+.fin-stats-tabs .st-tab.active{
+  background:var(--olive); color:#FFF; border-color:var(--olive); font-weight:600;
+}
+.fin-chart-card{
+  background:#FFF; border-radius:var(--radius); padding:16px;
+  margin-bottom:14px; box-shadow:var(--shadow);
+}
+.fin-chart-card .chart-title{ font-size:14px; font-weight:600; margin-bottom:12px; }
+.fin-pie-wrap{ display:flex; align-items:center; gap:16px; }
+.fin-pie-svg{ width:130px; height:130px; flex-shrink:0; }
+.fin-pie-legend{ flex:1; }
+.fin-pie-legend .leg-item{
+  display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:6px;
+}
+.fin-pie-legend .leg-dot{ width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.fin-pie-legend .leg-name{ flex:1; color:var(--text2); }
+.fin-pie-legend .leg-val{ font-weight:600; color:var(--text); }
+.fin-bar-wrap{ display:flex; align-items:flex-end; justify-content:space-around; height:130px; gap:4px; }
+.fin-bar-item{ display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; }
+.fin-bar-item .bar-col{
+  width:100%; max-width:32px; background:var(--olive-light); border-radius:4px 4px 0 0;
+  transition:height .4s; min-height:4px;
+}
+.fin-bar-item .bar-col.active{ background:var(--olive); }
+.fin-bar-item .bar-val{ font-size:9px; color:var(--text3); }
+.fin-bar-item .bar-day{ font-size:11px; color:var(--text2); }
+
+/* 排行榜 */
+.fin-rank-item{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0; border-bottom:1px solid #f5f5f5;
+}
+.fin-rank-item:last-child{ border-bottom:none; }
+.fin-rank-item .rank-num{
+  width:24px; height:24px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:600; background:var(--olive-light); color:var(--olive);
+  flex-shrink:0;
+}
+.fin-rank-item .rank-info{ flex:1; min-width:0; }
+.fin-rank-item .rank-name{ font-size:13px; font-weight:500; }
+.fin-rank-item .rank-bar-wrap{
+  width:100%; height:6px; background:var(--olive-light); border-radius:3px; margin-top:4px;
+}
+.fin-rank-item .rank-bar-fill{ height:100%; background:var(--olive); border-radius:3px; }
+.fin-rank-item .rank-amount{ font-size:13px; font-weight:600; color:var(--text); flex-shrink:0; }
+
+/* 我的页面 */
+.fin-settings{ padding-bottom:70px; }
+.fin-setting-group{
+  background:#FFF; border-radius:var(--radius); margin-bottom:14px;
+  overflow:hidden; box-shadow:var(--shadow);
+}
+.fin-setting-item{
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px; border-bottom:1px solid #f5f5f5;
+  cursor:pointer; font-size:14px; font-family:var(--font);
+  background:transparent; border-left:none; border-right:none; border-top:none;
+  width:100%; text-align:left;
+}
+.fin-setting-item:last-child{ border-bottom:none; }
+.fin-setting-item:active{ background:var(--olive-light); }
+.fin-setting-item .set-icon{ font-size:20px; width:24px; text-align:center; flex-shrink:0; }
+.fin-setting-item .set-name{ flex:1; }
+.fin-setting-item .set-arrow{ color:var(--text3); font-size:14px; }
+.fin-setting-item.danger .set-name{ color:var(--danger); }
+
+/* 模态框 */
+.fin-modal-overlay{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,.4); z-index:300;
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.fin-modal-overlay.open{ opacity:1; pointer-events:auto; }
+.fin-modal{
+  width:100%; max-width:430px; background:#FFF;
+  border-radius:20px 20px 0 0; padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px));
+  transform:translateY(100%); transition:transform .25s ease;
+  max-height:85vh; overflow-y:auto;
+}
+.fin-modal-overlay.open .fin-modal{ transform:translateY(0); }
+.fin-modal h4{ font-size:16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+.fin-modal .fin-modal-close{ font-size:20px; color:var(--text3); cursor:pointer; background:transparent; border:none; }
+.fin-form-row{ margin-bottom:12px; }
+.fin-form-row label{ font-size:12px; color:var(--text3); display:block; margin-bottom:4px; }
+.fin-form-row input,.fin-form-row select,.fin-form-row textarea{
+  width:100%; padding:10px 12px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); font-size:14px; outline:none; font-family:var(--font);
+  background:#FFF;
+}
+.fin-form-row input:focus,.fin-form-row select:focus,.fin-form-row textarea:focus{ border-color:var(--olive); }
+.fin-amount-big{
+  font-size:36px; font-weight:700; text-align:center; padding:10px 0;
+  border:none; border-bottom:2px solid var(--olive); width:100%;
+  outline:none; font-family:var(--font); background:transparent;
+}
+.fin-cat-picker{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:10px 0;
+}
+.fin-cat-picker .picker-item{
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:10px 4px; border:1px solid var(--border); border-radius:var(--radius-sm);
+  cursor:pointer; font-size:11px; background:#FFF;
+}
+.fin-cat-picker .picker-item.active{
+  border-color:var(--olive); background:var(--olive-light); color:var(--olive); font-weight:600;
+}
+.fin-cat-picker .picker-item .pi-icon{ font-size:22px; }
+.fin-modal .btn-save{
+  width:100%; padding:12px; background:var(--olive); color:#FFF;
+  border:none; border-radius:var(--radius-sm); font-size:15px;
+  font-weight:600; cursor:pointer; margin-top:6px; font-family:var(--font);
+}
+.fin-modal .btn-save:active{ background:var(--olive-dark); }
+
+/* ============================================================
+   模块8: 每日表达能力训练
+   ============================================================ */
+.expr-page{ padding-bottom:20px; }
+.expr-streak{
+  background:linear-gradient(135deg, var(--olive) 0%, var(--olive-dark) 100%);
+  border-radius:var(--radius); padding:18px; color:#FFF;
+  margin-bottom:14px; text-align:center;
+}
+.expr-streak .streak-row{ display:flex; justify-content:space-around; align-items:center; }
+.expr-streak .streak-num{ font-size:36px; font-weight:700; }
+.expr-streak .streak-label{ font-size:11px; opacity:.8; margin-top:2px; }
+.expr-streak .streak-divider{ width:1px; height:40px; background:rgba(255,255,255,.2); }
+.expr-streak .streak-total{ font-size:20px; font-weight:600; }
+
+.expr-diff-switch{ display:flex; gap:6px; margin-bottom:14px; }
+.expr-diff-switch .diff-btn{
+  flex:1; padding:8px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); background:#FFF;
+  font-size:13px; cursor:pointer; text-align:center; font-family:var(--font);
+}
+.expr-diff-switch .diff-btn.active{
+  background:var(--olive); color:#FFF; border-color:var(--olive); font-weight:600;
+}
+
+.expr-types-grid{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px;
+}
+.expr-type-card{
+  background:#FFF; border-radius:var(--radius-sm); padding:14px 10px;
+  border:1px solid var(--border); cursor:pointer; text-align:center;
+  transition:all .15s; font-family:var(--font);
+}
+.expr-type-card:active{ background:var(--olive-light); transform:scale(.97); }
+.expr-type-card .type-icon{ font-size:28px; margin-bottom:6px; }
+.expr-type-card .type-name{ font-size:13px; font-weight:600; }
+.expr-type-card .type-desc{ font-size:11px; color:var(--text3); margin-top:2px; }
+
+.expr-question-card{
+  background:#FFF; border-radius:var(--radius); padding:16px;
+  margin-bottom:14px; box-shadow:var(--shadow);
+}
+.expr-question-card .q-tag{
+  display:inline-block; font-size:11px; padding:3px 10px;
+  border-radius:10px; background:var(--olive-light); color:var(--olive);
+  font-weight:600; margin-bottom:8px;
+}
+.expr-question-card .q-text{ font-size:15px; font-weight:600; line-height:1.5; }
+
+.expr-timer{
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  margin-bottom:14px; flex-wrap:wrap;
+}
+.expr-timer .timer-display{
+  font-size:32px; font-weight:700; color:var(--olive);
+  font-variant-numeric:tabular-nums; min-width:80px; text-align:center;
+}
+.expr-timer .timer-btn{
+  padding:8px 18px; border:none; border-radius:var(--radius-sm);
+  background:var(--olive); color:#FFF; font-size:13px;
+  cursor:pointer; font-weight:600; font-family:var(--font);
+}
+.expr-timer .timer-btn.stop{ background:var(--danger); }
+.expr-timer .timer-btn.reset{ background:var(--olive-light); color:var(--olive); }
+.expr-timer-presets{ display:flex; gap:6px; justify-content:center; margin-bottom:10px; }
+.expr-timer-presets .preset-btn{
+  padding:5px 14px; border:1px solid var(--border); border-radius:14px;
+  font-size:12px; cursor:pointer; background:#FFF; color:var(--text2); font-family:var(--font);
+}
+.expr-timer-presets .preset-btn.active{
+  background:var(--olive); color:#FFF; border-color:var(--olive); font-weight:600;
+}
+
+.expr-draft textarea{
+  width:100%; padding:12px; border:1px solid var(--border);
+  border-radius:var(--radius-sm); font-size:14px; font-family:var(--font);
+  resize:vertical; min-height:120px; outline:none; line-height:1.6; background:#FFF;
+}
+.expr-draft textarea:focus{ border-color:var(--olive); }
+
+.expr-actions{ display:flex; gap:8px; margin:14px 0; }
+.expr-actions .expr-btn{
+  flex:1; padding:12px; border:none; border-radius:var(--radius-sm);
+  font-size:14px; font-weight:600; cursor:pointer; font-family:var(--font);
+}
+.expr-actions .expr-btn.primary{ background:var(--olive); color:#FFF; }
+.expr-actions .expr-btn.secondary{ background:var(--olive-light); color:var(--olive); }
+
+.expr-review{
+  background:#FFF; border-radius:var(--radius); padding:16px;
+  margin-bottom:14px; box-shadow:var(--shadow);
+}
+.expr-review .review-title{ font-size:14px; font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.expr-review .review-content{ font-size:13px; line-height:1.7; color:var(--text2); }
+.expr-review .review-content p{ margin-bottom:8px; }
+.expr-review .review-content .tip{ color:var(--olive); font-weight:500; }
+.expr-review .review-score{
+  display:inline-block; padding:3px 12px; border-radius:12px;
+  background:var(--olive-light); color:var(--olive); font-weight:600; font-size:13px; margin-bottom:8px;
+}
+
+.expr-history-item{
+  background:#FFF; border-radius:var(--radius-sm); padding:12px;
+  margin-bottom:8px; border:1px solid var(--border);
+}
+.expr-history-item .h-date{ font-size:11px; color:var(--text3); margin-bottom:4px; }
+.expr-history-item .h-type{ font-size:12px; font-weight:600; color:var(--olive); display:inline-block; padding:1px 8px; border-radius:8px; background:var(--olive-light); }
+.expr-history-item .h-question{ font-size:13px; margin:6px 0 4px; line-height:1.4; }
+.expr-history-item .h-draft{ font-size:12px; color:var(--text2); background:var(--olive-bg); padding:8px 10px; border-radius:var(--radius-xs); margin-top:6px; line-height:1.5; max-height:80px; overflow:hidden; position:relative; }
+.expr-history-item .h-draft.expanded{ max-height:none; }
+.expr-history-item .h-expand{ font-size:11px; color:var(--olive); cursor:pointer; margin-top:4px; display:inline-block; }
+
+.expr-empty{ text-align:center; padding:30px 16px; color:var(--text3); font-size:13px; }
+
 </style>
 </head>
 <body>
@@ -814,6 +1190,7 @@ const DEFAULT_MODULES = [
   { id:'memo',         icon:'📝', name:'备忘录',     builtin:true },
   { id:'finance',      icon:'💰', name:'日常记账',   builtin:true },
   { id:'exercise',     icon:'🏃', name:'每日运动记录', builtin:true },
+  { id:'expression',  icon:'🎤', name:'表达能力训练', builtin:true },
 ];
 
 // ---------- localStorage keys ----------
@@ -825,6 +1202,8 @@ const LS_INSPIRE= 'cw_inspire_v2';
 const LS_REMIX  = 'cw_remix_v2';
 const LS_FINANCE= 'cw_finance_v2';
 const LS_EXERCISE='cw_exercise_v2';
+const LS_EXPRESSION='cw_expression_v2';
+const LS_EXPR_STREAK='cw_expr_streak_v2';
 
 function load(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -884,6 +1263,11 @@ let financeIdCounter = financeRecords.length ? Math.max(...financeRecords.map(r=
 // ---------- 每日运动记录 ----------
 let exerciseRecords = load(LS_EXERCISE, null) || [];
 let exerciseIdCounter = exerciseRecords.length ? Math.max(...exerciseRecords.map(r=>r.id)) : 0;
+
+// ---------- 表达能力训练 ----------
+let expressionRecords = load(LS_EXPRESSION, null) || [];
+let exprIdCounter = expressionRecords.length ? Math.max(...expressionRecords.map(r=>r.id)) : 0;
+let exprStreak = load(LS_EXPR_STREAK, null) || { count:0, lastDate:'' };
 
 // ---------- Gist 配置 (用户填写后生效) ----------
 let GIST_ID = localStorage.getItem('cw_gist_id') || 'e9b80c535dc2e91a5078e398a066554b';
@@ -1289,209 +1673,534 @@ function bindMemo(el) {
   }
 }
 
-// ---------- 模块6: 日常记账 ----------
-const FINANCE_CATEGORIES_INCOME = ['薪资','副业','理财','红包','报销','其他'];
-const FINANCE_CATEGORIES_EXPENSE= ['餐饮','交通','购物','娱乐','住房','医疗','教育','通讯','美妆','服饰','其他'];
+// ---------- 模块6: 日常记账 V2（4分页结构） ----------
+const FINANCE_CAT_ICONS = {
+  '餐饮':'🍽️','交通':'🚌','购物':'🛍️','娱乐':'🎮','居住':'🏠','医疗':'💊','学习':'📚','其他':'📦',
+  '薪资':'💰','副业':'💼','理财':'📈','红包':'🧧','报销':'📋','通讯':'📱','美妆':'💄','服饰':'👔'
+};
+const DEFAULT_EXPENSE_CATS = ['餐饮','交通','购物','娱乐','居住','医疗','学习','其他'];
+const DEFAULT_INCOME_CATS  = ['薪资','副业','理财','红包','报销','其他'];
+const FINANCE_COLORS = ['#4A7C3F','#F0833A','#3B82F6','#8B5CF6','#E94560','#F9A825','#00ACC1','#66BB6A','#AB47BC','#FF7043'];
+const LS_FIN_BUDGET = 'cw_fin_budget_v2';
+const LS_FIN_CATS   = 'cw_fin_cats_v2';
+
+let financeBudget = load(LS_FIN_BUDGET, 0) || 0;
+let financeCats = load(LS_FIN_CATS, null) || { expense: [...DEFAULT_EXPENSE_CATS], income: [...DEFAULT_INCOME_CATS] };
+window._finTab = window._finTab || 'home';
+window._finBillFilter = window._finBillFilter || 'all';
+window._finBillYear = window._finBillYear || new Date().getFullYear();
+window._finBillMonth = window._finBillMonth !== undefined ? window._finBillMonth : new Date().getMonth();
+window._finStatsPeriod = window._finStatsPeriod || 'month';
+
+function finCatIcon(cat){ return FINANCE_CAT_ICONS[cat] || '📦'; }
+
+function getFinRecords(period){
+  const now = new Date();
+  if(period==='month'){
+    return financeRecords.filter(r=>{ const d=new Date(r.date); return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth(); });
+  } else if(period==='week'){
+    const now2=new Date(now); now2.setDate(now2.getDate()-6);
+    return financeRecords.filter(r=>{ const d=new Date(r.date); return d>=now2; });
+  } else {
+    return financeRecords.filter(r=>{ const d=new Date(r.date); return d.getFullYear()===now.getFullYear(); });
+  }
+}
+
+function renderFinance() {
+  const tab = window._finTab || 'home';
+  let pageHTML = '';
+  if(tab==='home') pageHTML = renderFinHome();
+  else if(tab==='bills') pageHTML = renderFinBills();
+  else if(tab==='stats') pageHTML = renderFinStats();
+  else if(tab==='settings') pageHTML = renderFinSettings();
+
+  return `
+    <div class="fin-v2">
+      <div class="fin-page active">${pageHTML}</div>
+      <nav class="fin-bottom-nav">
+        <button class="fin-nav-item ${tab==='home'?'active':''}" data-fintab="home"><span class="nav-icon">🏠</span>首页</button>
+        <button class="fin-nav-item ${tab==='bills'?'active':''}" data-fintab="bills"><span class="nav-icon">📋</span>账单</button>
+        <button class="fin-nav-item ${tab==='stats'?'active':''}" data-fintab="stats"><span class="nav-icon">📊</span>统计</button>
+        <button class="fin-nav-item ${tab==='settings'?'active':''}" data-fintab="settings"><span class="nav-icon">👤</span>我的</button>
+      </nav>
+    </div>
+  `;
+}
+
+function renderFinHome(){
+  const now=new Date();
+  const monthRecs = financeRecords.filter(r=>{ const d=new Date(r.date); return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth(); });
+  const totalIncome = monthRecs.filter(r=>r.type==='income').reduce((s,r)=>s+Number(r.amount),0);
+  const totalExpense = monthRecs.filter(r=>r.type==='expense').reduce((s,r)=>s+Number(r.amount),0);
+  const balance = totalIncome - totalExpense;
+  const budget = financeBudget || 0;
+  const budgetUsed = totalExpense;
+  const budgetRemain = budget - budgetUsed;
+  const budgetPct = budget>0 ? Math.min(budgetUsed/budget*100,100) : 0;
+  const budgetColor = budgetPct>=90 ? '#D94A4A' : budgetPct>=70 ? '#F0833A' : '#4A7C3F';
+
+  const cats = financeCats.expense || DEFAULT_EXPENSE_CATS;
+  const catGrid = cats.map(c=>`
+    <div class="fin-cat-item" data-cat="${escHtml(c)}" data-type="expense">
+      <span class="cat-icon">${finCatIcon(c)}</span>
+      <span class="cat-name">${escHtml(c)}</span>
+      ${!DEFAULT_EXPENSE_CATS.includes(c) ? '<button class="cat-del" data-delcat="'+escHtml(c)+'" data-deltype="expense">×</button>' : ''}
+    </div>
+  `).join('') + `<div class="fin-cat-add" data-addcat="expense"><span style="font-size:24px">＋</span><span>添加</span></div>`;
+
+  return `
+    <div class="fin-home">
+      <div class="fin-balance-card">
+        <div class="fin-balance-label">本月结余 (¥)</div>
+        <div class="fin-balance-num">${balance>=0?'+':''}${balance.toFixed(2)}</div>
+        <div class="fin-balance-row">
+          <div><div class="lbl">本月收入</div><div class="num income-num">¥${totalIncome.toFixed(0)}</div></div>
+          <div><div class="lbl">本月支出</div><div class="num expense-num">¥${totalExpense.toFixed(0)}</div></div>
+        </div>
+      </div>
+      ${budget>0 ? `
+      <div class="fin-budget-card">
+        <div class="fin-budget-header">
+          <span class="fin-budget-title">💳 月度预算</span>
+          <span class="fin-budget-remain" style="color:${budgetColor}">剩余 ¥${budgetRemain>0?budgetRemain.toFixed(0):0}</span>
+        </div>
+        <div class="fin-budget-bar"><div class="fin-budget-bar-fill" style="width:${budgetPct}%;background:${budgetColor}"></div></div>
+        <div class="fin-budget-info">
+          <span>已花 ¥${budgetUsed.toFixed(0)}</span>
+          <span>预算 ¥${budget.toFixed(0)}</span>
+          <span>${Math.round(budgetPct)}%</span>
+        </div>
+      </div>` : ''}
+      <div class="fin-quick-actions">
+        <button class="fin-quick-btn expense" data-quick="expense">💸 记支出</button>
+        <button class="fin-quick-btn income" data-quick="income">💰 记收入</button>
+      </div>
+      <div class="fin-section-title">收支分类</div>
+      <div class="fin-cat-grid">${catGrid}</div>
+    </div>
+  `;
+}
+
+function renderFinBills(){
+  const yr = window._finBillYear;
+  const mo = window._finBillMonth;
+  const filter = window._finBillFilter;
+  let recs = financeRecords.filter(r=>{ const d=new Date(r.date); return d.getFullYear()===yr && d.getMonth()===mo; });
+  if(filter!=='all') recs = recs.filter(r=>r.type===filter);
+  recs.sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const nowY=new Date().getFullYear();
+  const yearOpts=[]; for(let y=nowY-3;y<=nowY+1;y++) yearOpts.push(`<option value="${y}" ${y===yr?'selected':''}>${y}年</option>`);
+  const monthOpts = months.map((m,i)=>`<option value="${i}" ${i===mo?'selected':''}>${m}</option>`).join('');
+
+  const listHTML = recs.length ? recs.map(r=>`
+    <div class="fin-bill-item" data-fid="${r.id}">
+      <div class="bill-icon ${r.type}">${finCatIcon(r.category)}</div>
+      <div class="bill-info">
+        <div class="bill-title">${escHtml(r.category||'其他')}${r.note?' · '+escHtml(r.note):''}</div>
+        <div class="bill-meta">${r.date} · ${r.type==='income'?'收入':'支出'}</div>
+      </div>
+      <div class="bill-amount ${r.type}">${r.type==='income'?'+':'-'}¥${Number(r.amount).toFixed(2)}</div>
+      <button class="bill-del" title="删除">×</button>
+    </div>
+  `).join('') : '<div class="expr-empty">📭 该月份暂无账单记录</div>';
+
+  return `
+    <div class="fin-bills">
+      <div class="fin-bills-header">
+        <select id="finBillYear">${yearOpts.join('')}</select>
+        <select id="finBillMonth">${monthOpts}</select>
+        <button class="fin-filter-btn ${filter==='all'?'active':''}" data-filter="all">全部</button>
+        <button class="fin-filter-btn ${filter==='income'?'active':''}" data-filter="income">收入</button>
+        <button class="fin-filter-btn ${filter==='expense'?'active':''}" data-filter="expense">支出</button>
+      </div>
+      <div class="fin-bill-list">${listHTML}</div>
+    </div>
+  `;
+}
+
+function renderFinStats(){
+  const period = window._finStatsPeriod;
+  const recs = getFinRecords(period);
+  const expenseRecs = recs.filter(r=>r.type==='expense');
+
+  // 饼图数据
+  const catMap={};
+  expenseRecs.forEach(r=>{ const c=r.category||'其他'; catMap[c]=(catMap[c]||0)+Number(r.amount); });
+  const catEntries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  const totalExp = catEntries.reduce((s,[,v])=>s+v,0);
+
+  // SVG饼图
+  let pieSVG='';
+  if(catEntries.length){
+    let acc=0; const R=55, cx=65, cy=65;
+    const arcs = catEntries.map(([cat,amt],i)=>{
+      const pct = totalExp>0 ? amt/totalExp : 0;
+      const startAngle = acc*2*Math.PI - Math.PI/2;
+      acc += pct;
+      const endAngle = acc*2*Math.PI - Math.PI/2;
+      const x1=cx+R*Math.cos(startAngle), y1=cy+R*Math.sin(startAngle);
+      const x2=cx+R*Math.cos(endAngle), y2=cy+R*Math.sin(endAngle);
+      const largeArc = pct>0.5?1:0;
+      const color = FINANCE_COLORS[i%FINANCE_COLORS.length];
+      if(pct>=0.999) return `<circle cx="${cx}" cy="${cy}" r="${R}" fill="${color}"/>`;
+      return `<path d="M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${R} ${R} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z" fill="${color}"/>`;
+    }).join('');
+    pieSVG = `<svg class="fin-pie-svg" viewBox="0 0 130 130"><circle cx="65" cy="65" r="55" fill="#F5F7F0"/>${arcs}<circle cx="65" cy="65" r="30" fill="#FFF"/><text x="65" y="62" text-anchor="middle" font-size="10" fill="#999">总支出</text><text x="65" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#333">¥${totalExp.toFixed(0)}</text></svg>`;
+  } else {
+    pieSVG = `<svg class="fin-pie-svg" viewBox="0 0 130 130"><circle cx="65" cy="65" r="55" fill="#F5F7F0"/><text x="65" y="70" text-anchor="middle" font-size="12" fill="#999">暂无数据</text></svg>`;
+  }
+  const legendHTML = catEntries.length ? catEntries.slice(0,8).map(([cat,amt],i)=>`
+    <div class="leg-item">
+      <span class="leg-dot" style="background:${FINANCE_COLORS[i%FINANCE_COLORS.length]}"></span>
+      <span class="leg-name">${escHtml(cat)}</span>
+      <span class="leg-val">¥${amt.toFixed(0)}</span>
+    </div>
+  `).join('') : '<div style="font-size:12px;color:#999;padding:10px 0">暂无支出数据</div>';
+
+  // 柱状图 — 近7天
+  const now=new Date();
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(now); d.setDate(d.getDate()-i);
+    const ds=dateStr(d);
+    const dayExp = expenseRecs.filter(r=>r.date===ds).reduce((s,r)=>s+Number(r.amount),0);
+    days.push({ date:ds, exp:dayExp, label:(d.getMonth()+1)+'/'+d.getDate(), isToday:i===0 });
+  }
+  const maxDayExp = Math.max(...days.map(d=>d.exp),1);
+  const barHTML = days.map(d=>`
+    <div class="fin-bar-item">
+      <span class="bar-val">${d.exp>0?'¥'+d.exp.toFixed(0):''}</span>
+      <div class="bar-col ${d.isToday?'active':''}" style="height:${Math.max(d.exp/maxDayExp*90,4)}px"></div>
+      <span class="bar-day">${d.label}</span>
+    </div>
+  `).join('');
+
+  // 排行榜
+  const rankHTML = catEntries.length ? catEntries.map(([cat,amt],i)=>`
+    <div class="fin-rank-item">
+      <span class="rank-num">${i+1}</span>
+      <div class="rank-info">
+        <div class="rank-name">${finCatIcon(cat)} ${escHtml(cat)}</div>
+        <div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:${catEntries[0][1]>0?amt/catEntries[0][1]*100:0}%"></div></div>
+      </div>
+      <span class="rank-amount">¥${amt.toFixed(0)}</span>
+    </div>
+  `).join('') : '<div class="expr-empty">暂无排行数据</div>';
+
+  const periodLabel = period==='month'?'本月':period==='week'?'本周':'本年';
+
+  return `
+    <div class="fin-stats">
+      <div class="fin-stats-tabs">
+        <button class="st-tab ${period==='month'?'active':''}" data-period="month">本月</button>
+        <button class="st-tab ${period==='week'?'active':''}" data-period="week">本周</button>
+        <button class="st-tab ${period==='year'?'active':''}" data-period="year">本年</button>
+      </div>
+      <div class="fin-chart-card">
+        <div class="chart-title">🥧 ${periodLabel}支出分类</div>
+        <div class="fin-pie-wrap">${pieSVG}<div class="fin-pie-legend">${legendHTML}</div></div>
+      </div>
+      <div class="fin-chart-card">
+        <div class="chart-title">📈 近7天支出趋势</div>
+        <div class="fin-bar-wrap">${barHTML}</div>
+      </div>
+      <div class="fin-chart-card">
+        <div class="chart-title">🏆 ${periodLabel}支出排行榜</div>
+        <div class="fin-rank-list">${rankHTML}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderFinSettings(){
+  return `
+    <div class="fin-settings">
+      <div class="fin-setting-group">
+        <button class="fin-setting-item" data-set="export"><span class="set-icon">📤</span><span class="set-name">账单导出</span><span class="set-arrow">›</span></button>
+        <button class="fin-setting-item" data-set="backup"><span class="set-icon">💾</span><span class="set-name">数据备份</span><span class="set-arrow">›</span></button>
+        <button class="fin-setting-item" data-set="budget"><span class="set-icon">🎯</span><span class="set-name">预算设置</span><span class="set-arrow">›</span></button>
+        <button class="fin-setting-item" data-set="catmgmt"><span class="set-icon">🏷️</span><span class="set-name">分类管理</span><span class="set-arrow">›</span></button>
+      </div>
+      <div class="fin-setting-group">
+        <button class="fin-setting-item danger" data-set="clear"><span class="set-icon">🗑️</span><span class="set-name">清除所有数据</span><span class="set-arrow">›</span></button>
+      </div>
+      <div style="text-align:center;padding:16px;font-size:12px;color:var(--text3)">
+        创作工作台 · 记账模块 V2<br/>共 ${financeRecords.length} 条记录
+      </div>
+    </div>
+  `;
+}
+
+function finOpenModal(type, presetCat){
+  const cats = type==='income' ? (financeCats.income||DEFAULT_INCOME_CATS) : (financeCats.expense||DEFAULT_EXPENSE_CATS);
+  const catPicker = cats.map(c=>`<div class="picker-item ${c===presetCat?'active':''}" data-pickcat="${escHtml(c)}"><span class="pi-icon">${finCatIcon(c)}</span><span>${escHtml(c)}</span></div>`).join('');
+  const overlay = document.createElement('div');
+  overlay.className='fin-modal-overlay';
+  overlay.innerHTML=`
+    <div class="fin-modal">
+      <h4>${type==='income'?'💰 记收入':'💸 记支出'}<button class="fin-modal-close">×</button></h4>
+      <div class="fin-form-row">
+        <input type="number" class="fin-amount-big" id="finModalAmount" placeholder="0.00" step="0.01" min="0" inputmode="decimal" autofocus/>
+      </div>
+      <div class="fin-form-row">
+        <label>选择分类</label>
+        <div class="fin-cat-picker" id="finModalCatPicker">${catPicker}</div>
+      </div>
+      <div class="fin-form-row">
+        <label>日期</label>
+        <input type="date" id="finModalDate" value="${todayStr()}"/>
+      </div>
+      <div class="fin-form-row">
+        <label>备注（可选）</label>
+        <input type="text" id="finModalNote" placeholder="写点什么..."/>
+      </div>
+      <button class="btn-save" id="finModalSave">✅ 保存</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(()=>overlay.classList.add('open'),10);
+  let selectedCat = presetCat || cats[0];
+
+  overlay.querySelector('.fin-modal-close').addEventListener('click',()=>finCloseModal(overlay));
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) finCloseModal(overlay); });
+
+  overlay.querySelectorAll('.picker-item').forEach(pi=>{
+    pi.addEventListener('click',()=>{
+      overlay.querySelectorAll('.picker-item').forEach(x=>x.classList.remove('active'));
+      pi.classList.add('active');
+      selectedCat = pi.dataset.pickcat;
+    });
+  });
+
+  overlay.querySelector('#finModalSave').addEventListener('click',()=>{
+    const amount = parseFloat(overlay.querySelector('#finModalAmount').value);
+    if(isNaN(amount)||amount<=0){ showToast('请输入有效金额'); return; }
+    const date = overlay.querySelector('#finModalDate').value || todayStr();
+    const note = overlay.querySelector('#finModalNote').value.trim();
+    financeIdCounter++;
+    financeRecords.push({ id:financeIdCounter, type, amount, category:selectedCat, note, date });
+    save(LS_FINANCE, financeRecords);
+    finCloseModal(overlay);
+    renderModule('finance');
+    showToast('✅ 已记录'+(type==='income'?'收入':'支出')+' ¥'+amount.toFixed(2));
+  });
+}
+function finCloseModal(overlay){ overlay.classList.remove('open'); setTimeout(()=>overlay.remove(),250); }
+
+function finOpenBudgetModal(){
+  const overlay=document.createElement('div');
+  overlay.className='fin-modal-overlay';
+  overlay.innerHTML=`
+    <div class="fin-modal">
+      <h4>🎯 设置月度预算<button class="fin-modal-close">×</button></h4>
+      <div class="fin-form-row">
+        <label>每月预算金额（元）</label>
+        <input type="number" id="finBudgetInput" value="${financeBudget||''}" placeholder="0" step="0.01" min="0" inputmode="decimal"/>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px">设置后，首页将显示预算使用进度条</div>
+      <button class="btn-save" id="finBudgetSave">✅ 保存</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>overlay.classList.add('open'),10);
+  overlay.querySelector('.fin-modal-close').addEventListener('click',()=>finCloseModal(overlay));
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) finCloseModal(overlay); });
+  overlay.querySelector('#finBudgetSave').addEventListener('click',()=>{
+    const v=parseFloat(overlay.querySelector('#finBudgetInput').value);
+    financeBudget = (isNaN(v)||v<0)?0:v;
+    save(LS_FIN_BUDGET, financeBudget);
+    finCloseModal(overlay);
+    renderModule('finance');
+    showToast('✅ 预算已设置');
+  });
+}
+
+function finOpenCatMgmtModal(){
+  const overlay=document.createElement('div');
+  overlay.className='fin-modal-overlay';
+  const renderCatList=(type)=>{
+    const cats = type==='income'?(financeCats.income||DEFAULT_INCOME_CATS):(financeCats.expense||DEFAULT_EXPENSE_CATS);
+    return cats.map(c=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f5f5">
+        <span style="font-size:18px">${finCatIcon(c)}</span>
+        <span style="flex:1;font-size:14px">${escHtml(c)}</span>
+        ${!DEFAULT_EXPENSE_CATS.includes(c)&&!DEFAULT_INCOME_CATS.includes(c)?`<button class="fin-cat-del-btn" data-delcat="${escHtml(c)}" data-deltype="${type}" style="border:none;background:transparent;color:var(--danger);cursor:pointer;font-size:16px">×</button>`:'<span style="font-size:11px;color:var(--text3)">默认</span>'}
+      </div>
+    `).join('');
+  };
+  overlay.innerHTML=`
+    <div class="fin-modal">
+      <h4>🏷️ 分类管理<button class="fin-modal-close">×</button></h4>
+      <div class="fin-form-row">
+        <label>支出分类</label>
+        <div id="finCatListExpense">${renderCatList('expense')}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="finNewCatExpense" placeholder="新分类名称" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px"/>
+          <button id="finAddCatExpense" style="padding:8px 14px;background:var(--olive);color:#FFF;border:none;border-radius:var(--radius-sm);font-size:13px;cursor:pointer">添加</button>
+        </div>
+      </div>
+      <div class="fin-form-row">
+        <label>收入分类</label>
+        <div id="finCatListIncome">${renderCatList('income')}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="finNewCatIncome" placeholder="新分类名称" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px"/>
+          <button id="finAddCatIncome" style="padding:8px 14px;background:var(--olive);color:#FFF;border:none;border-radius:var(--radius-sm);font-size:13px;cursor:pointer">添加</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>overlay.classList.add('open'),10);
+  const refresh=()=>{ overlay.querySelector('#finCatListExpense').innerHTML=renderCatList('expense'); overlay.querySelector('#finCatListIncome').innerHTML=renderCatList('income'); bindDels(); };
+  const bindDels=()=>{
+    overlay.querySelectorAll('.fin-cat-del-btn').forEach(b=>{
+      b.onclick=()=>{
+        const cat=b.dataset.delcat, type=b.dataset.deltype;
+        financeCats[type]=financeCats[type].filter(c=>c!==cat);
+        save(LS_FIN_CATS, financeCats); refresh();
+      };
+    });
+  };
+  bindDels();
+  overlay.querySelector('.fin-modal-close').addEventListener('click',()=>finCloseModal(overlay));
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) finCloseModal(overlay); });
+  overlay.querySelector('#finAddCatExpense').addEventListener('click',()=>{
+    const v=overlay.querySelector('#finNewCatExpense').value.trim();
+    if(!v){ showToast('请输入分类名称'); return; }
+    if(!financeCats.expense.includes(v)){ financeCats.expense.push(v); save(LS_FIN_CATS,financeCats); overlay.querySelector('#finNewCatExpense').value=''; refresh(); showToast('✅ 已添加'); }
+    else showToast('该分类已存在');
+  });
+  overlay.querySelector('#finAddCatIncome').addEventListener('click',()=>{
+    const v=overlay.querySelector('#finNewCatIncome').value.trim();
+    if(!v){ showToast('请输入分类名称'); return; }
+    if(!financeCats.income.includes(v)){ financeCats.income.push(v); save(LS_FIN_CATS,financeCats); overlay.querySelector('#finNewCatIncome').value=''; refresh(); showToast('✅ 已添加'); }
+    else showToast('该分类已存在');
+  });
+}
+
+function finExportData(fmt){
+  if(!financeRecords.length){ showToast('暂无数据可导出'); return; }
+  let content, filename, mime;
+  if(fmt==='json'){
+    content=JSON.stringify(financeRecords,null,2);
+    filename='finance_records.json'; mime='application/json';
+  } else {
+    const header='日期,类型,分类,金额,备注\n';
+    const rows=financeRecords.map(r=>`${r.date},${r.type==='income'?'收入':'支出'},${r.category||''},${r.amount},${r.note||''}`).join('\n');
+    content='\ufeff'+header+rows;
+    filename='finance_records.csv'; mime='text/csv;charset=utf-8';
+  }
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ 已导出 '+filename);
+}
+
+function finBackup(){
+  const data={ records:financeRecords, budget:financeBudget, cats:financeCats };
+  const content=JSON.stringify(data,null,2);
+  const blob=new Blob([content],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='finance_backup_'+todayStr()+'.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ 备份文件已下载');
+}
+
+function bindFinance(el) {
+  // 底部导航切换
+  el.querySelectorAll('.fin-nav-item').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      window._finTab = btn.dataset.fintab;
+      renderModule('finance');
+    });
+  });
+
+  // 首页 — 快捷按钮
+  el.querySelectorAll('[data-quick]').forEach(btn=>{
+    btn.addEventListener('click',()=> finOpenModal(btn.dataset.quick));
+  });
+
+  // 首页 — 分类点击快速记账
+  el.querySelectorAll('.fin-cat-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      if(e.target.classList.contains('cat-del')) return;
+      finOpenModal(item.dataset.type, item.dataset.cat);
+    });
+  });
+  // 首页 — 删除自定义分类
+  el.querySelectorAll('.cat-del').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const cat=btn.dataset.delcat, type=btn.dataset.deltype;
+      financeCats[type]=financeCats[type].filter(c=>c!==cat);
+      save(LS_FIN_CATS, financeCats);
+      renderModule('finance');
+      showToast('已删除分类');
+    });
+  });
+  // 首页 — 添加分类
+  el.querySelectorAll('[data-addcat]').forEach(btn=>{
+    btn.addEventListener('click',()=> finOpenCatMgmtModal());
+  });
+
+  // 账单页 — 筛选
+  el.querySelectorAll('[data-filter]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      window._finBillFilter=btn.dataset.filter;
+      renderModule('finance');
+    });
+  });
+  // 账单页 — 年月切换
+  el.querySelector('#finBillYear')?.addEventListener('change',e=>{ window._finBillYear=parseInt(e.target.value); renderModule('finance'); });
+  el.querySelector('#finBillMonth')?.addEventListener('change',e=>{ window._finBillMonth=parseInt(e.target.value); renderModule('finance'); });
+  // 账单页 — 删除
+  el.querySelectorAll('.bill-del').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const fid=+btn.closest('.fin-bill-item').dataset.fid;
+      financeRecords=financeRecords.filter(r=>r.id!==fid);
+      save(LS_FINANCE, financeRecords);
+      renderModule('finance');
+      showToast('已删除');
+    });
+  });
+
+  // 统计页 — 周期切换
+  el.querySelectorAll('[data-period]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      window._finStatsPeriod=btn.dataset.period;
+      renderModule('finance');
+    });
+  });
+
+  // 我的页面 — 设置项
+  el.querySelectorAll('[data-set]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const action=btn.dataset.set;
+      if(action==='budget') finOpenBudgetModal();
+      else if(action==='catmgmt') finOpenCatMgmtModal();
+      else if(action==='export') finExportData('csv');
+      else if(action==='backup') finBackup();
+      else if(action==='clear'){
+        if(confirm('⚠️ 确定清除所有记账数据？此操作不可恢复！')){
+          financeRecords=[]; financeIdCounter=0; financeBudget=0;
+          financeCats={expense:[...DEFAULT_EXPENSE_CATS],income:[...DEFAULT_INCOME_CATS]};
+          save(LS_FINANCE,financeRecords); save(LS_FIN_BUDGET,0); save(LS_FIN_CATS,financeCats);
+          renderModule('finance');
+          showToast('已清除所有数据');
+        }
+      }
+    });
+  });
+}
+
+
 const EXERCISE_TYPES = [
   {val:'跑步',icon:'🏃'},{val:'散步',icon:'🚶'},{val:'拉伸',icon:'🧘'},
   {val:'力量训练',icon:'🏋️'},{val:'瑜伽',icon:'🧘‍♀️'},{val:'骑行',icon:'🚴'},
   {val:'跳绳',icon:'🪢'},{val:'游泳',icon:'🏊'},{val:'健身操',icon:'💃'},
   {val:'其他',icon:'🏅'}
 ];
-
-function renderFinance() {
-  const now = new Date();
-  let finYear = calYear || now.getFullYear();
-  let finMonth = calMonth !== undefined ? calMonth : now.getMonth(); // 0-based
-
-  // period切换
-  const isMonthly = (window._finPeriod||'monthly') === 'monthly';
-
-  // 筛选记录
-  let filtered = financeRecords.filter(r=>{
-    const d = new Date(r.date);
-    if(isMonthly) return d.getFullYear()===finYear && d.getMonth()===finMonth;
-    return d.getFullYear()===finYear;
-  });
-
-  // 汇总
-  const totalIncome = filtered.filter(r=>r.type==='income').reduce((s,r)=>s+Number(r.amount),0);
-  const totalExpense= filtered.filter(r=>r.type==='expense').reduce((s,r)=>s+Number(r.amount),0);
-  const balance = totalIncome - totalExpense;
-
-  // 支出分类占比（只看当前周期的支出）
-  const expenseList = filtered.filter(r=>r.type==='expense');
-  const catMap = {};
-  expenseList.forEach(r=>{
-    const cat = r.category||'其他';
-    catMap[cat] = (catMap[cat]||0) + Number(r.amount);
-  });
-  const catEntries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
-  const maxCatAmount = catEntries.length ? catEntries[0][1] : 1;
-
-  // 按日期分组最近的记录
-  const recent = [...financeRecords].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,50);
-  const groups = {};
-  recent.forEach(r=>{
-    if(!groups[r.date]) groups[r.date]=[];
-    groups[r.date].push(r);
-  });
-
-  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const summaryLabel = isMonthly ? `${finYear}年${monthNames[finMonth]}` : `${finYear}年全年`;
-
-  // 汇总区HTML
-  const summaryHTML = `
-    <div class="finance-period">
-      <button class="period-btn${isMonthly?' active':''}" id="finPeriodMonthly">月度</button>
-      <button class="period-btn${!isMonthly?' active':''}" id="finPeriodYearly">年度</button>
-    </div>
-    <div class="finance-summary">
-      <div class="sum-item"><span class="sum-num income">¥${totalIncome.toFixed(0)}</span><span class="sum-label">收入</span></div>
-      <div class="sum-item"><span class="sum-num expense">¥${totalExpense.toFixed(0)}</span><span class="sum-label">支出</span></div>
-      <div class="sum-item"><span class="sum-num balance" style="color:${balance>=0?'var(--olive)':'var(--danger)'}">¥${balance>=0?'+':''}${balance.toFixed(0)}</span><span class="sum-label">${summaryLabel}结余</span></div>
-    </div>
-    ${catEntries.length ? `<div class="finance-categories"><div class="cat-title">📊 ${summaryLabel}支出占比</div>
-      ${catEntries.map(([cat,amt])=>`
-        <div class="cat-row">
-          <span class="cat-name">${escHtml(cat)}</span>
-          <div class="cat-bar"><div class="cat-bar-fill" style="width:${Math.max((amt/maxCatAmount)*100,3)}%"></div></div>
-          <span class="cat-amount">¥${amt.toFixed(0)}</span>
-          <span class="cat-pct">${totalExpense?Math.round(amt/totalExpense*100):0}%</span>
-        </div>
-      `).join('')}</div>` : ''}
-  `;
-
-  // 录入表单
-  const formHTML = `
-    <div class="finance-form">
-      <div class="finance-type-toggle">
-        <button class="type-btn income active" id="finTypeIncome">💰 收入</button>
-        <button class="type-btn expense" id="finTypeExpense">💸 支出</button>
-      </div>
-      <div class="finance-row">
-        <input type="number" class="fin-amount" id="finAmount" placeholder="金额" step="0.01" min="0" inputmode="decimal"/>
-        <select class="fin-cat" id="finCategory">${FINANCE_CATEGORIES_INCOME.map(c=>`<option>${c}</option>`).join('')}</select>
-      </div>
-      <div class="finance-row">
-        <input type="text" class="fin-note" id="finNote" placeholder="备注（可选）" style="flex:1"/>
-        <button class="btn-primary" id="addFinanceBtn">记一笔</button>
-      </div>
-    </div>
-  `;
-
-  // 记录列表（带tabs切换：录入 vs 历史）
-  const tabsHTML = `
-    <div class="finance-tabs">
-      <button class="ftab active" id="finTabForm">✏️ 录入</button>
-      <button class="ftab" id="finTabHistory">📋 记录</button>
-    </div>
-  `;
-
-  // 历史记录
-  const recordsHTML = Object.keys(groups).sort().reverse().map(date => `
-    <div class="rec-date-group">
-      <div class="rec-date-label">📅 ${date}</div>
-      ${groups[date].map(r=>`
-        <div class="rec-item" data-fid="${r.id}">
-          <span class="rec-tag ${r.type==='income'?'income-tag':'expense-tag'}">${r.type==='income'?'收入':'支出'}</span>
-          <span class="rec-cat">${escHtml(r.category||'其他')}</span>
-          <span class="rec-desc">${escHtml(r.note||'')}</span>
-          <span class="rec-amount ${r.type}">${r.type==='income'?'+':'-'}¥${Number(r.amount).toFixed(0)}</span>
-          <button class="rec-del" title="删除">×</button>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
-
-  return `
-    ${tabsHTML}
-    <div id="finFormWrap">${formHTML}</div>
-    <div id="finSummaryWrap">${summaryHTML}</div>
-    <div id="finRecordsWrap" style="display:none;"><div class="finance-records">${recordsHTML || '<div class="empty-state" style="padding:20px;">暂无记账记录</div>'}</div></div>
-  `;
-}
-
-function bindFinance(el) {
-  const finType = { current: 'income' };
-
-  // 类型切换
-  const incomeBtn = el.querySelector('#finTypeIncome');
-  const expenseBtn = el.querySelector('#finTypeExpense');
-  const catSelect = el.querySelector('#finCategory');
-  if(incomeBtn && expenseBtn) {
-    const toggleType = (type) => {
-      finType.current = type;
-      incomeBtn.classList.toggle('active', type==='income');
-      expenseBtn.classList.toggle('active', type==='expense');
-      if(catSelect) {
-        const cats = type==='income' ? FINANCE_CATEGORIES_INCOME : FINANCE_CATEGORIES_EXPENSE;
-        catSelect.innerHTML = cats.map(c=>`<option>${c}</option>`).join('');
-      }
-    };
-    incomeBtn.addEventListener('click', ()=> toggleType('income'));
-    expenseBtn.addEventListener('click', ()=> toggleType('expense'));
-  }
-
-  // Tab切换
-  el.querySelector('#finTabForm')?.addEventListener('click', function(){
-    this.classList.add('active');
-    el.querySelector('#finTabHistory')?.classList.remove('active');
-    el.querySelector('#finFormWrap').style.display='block';
-    el.querySelector('#finSummaryWrap').style.display='block';
-    el.querySelector('#finRecordsWrap').style.display='none';
-  });
-  el.querySelector('#finTabHistory')?.addEventListener('click', function(){
-    this.classList.add('active');
-    el.querySelector('#finTabForm')?.classList.remove('active');
-    el.querySelector('#finFormWrap').style.display='none';
-    el.querySelector('#finSummaryWrap').style.display='none';
-    el.querySelector('#finRecordsWrap').style.display='block';
-  });
-
-  // 添加记录
-  el.querySelector('#addFinanceBtn')?.addEventListener('click', ()=>{
-    const amount = parseFloat(el.querySelector('#finAmount')?.value);
-    if(isNaN(amount) || amount<=0) { showToast('请输入有效金额'); return; }
-    const category = el.querySelector('#finCategory')?.value || '其他';
-    const note = el.querySelector('#finNote')?.value?.trim() || '';
-    financeIdCounter++;
-    financeRecords.push({
-      id: financeIdCounter,
-      type: finType.current,
-      amount: amount,
-      category: category,
-      note: note,
-      date: todayStr()
-    });
-    save(LS_FINANCE, financeRecords);
-    // 清空
-    el.querySelector('#finAmount').value = '';
-    el.querySelector('#finNote').value = '';
-    renderModule('finance');
-    showToast('✅ 已记账');
-  });
-
-  // 删除记录（事件委托在renderModule时重新绑定，这里查records区）
-  el.querySelectorAll('.rec-del').forEach(btn=>{
-    btn.addEventListener('click', function(){
-      const fid = +this.closest('.rec-item').dataset.fid;
-      financeRecords = financeRecords.filter(r=>r.id!==fid);
-      save(LS_FINANCE, financeRecords);
-      renderModule('finance');
-    });
-  });
-
-  // 月度/年度切换
-  el.querySelector('#finPeriodMonthly')?.addEventListener('click', ()=>{
-    window._finPeriod = 'monthly';
-    renderModule('finance');
-  });
-  el.querySelector('#finPeriodYearly')?.addEventListener('click', ()=>{
-    window._finPeriod = 'yearly';
-    renderModule('finance');
-  });
-}
 
 // ---------- 模块7: 每日运动记录 ----------
 function renderExercise() {
@@ -1572,6 +2281,443 @@ function bindExercise(el) {
   });
 }
 
+// ---------- 模块8: 每日表达能力训练 ----------
+window._exprView = window._exprView || 'home';
+window._exprDifficulty = window._exprDifficulty || 'easy';
+window._exprPractice = null; // {type, question, material, duration, draft}
+
+const EXPR_TYPES = [
+  { id:'impromptu', icon:'🎤', name:'即兴口述', desc:'随机话题3分钟' },
+  { id:'logic',     icon:'🧠', name:'逻辑简答', desc:'观点结构化梳理' },
+  { id:'scenario',  icon:'💬', name:'情景沟通', desc:'模拟对话场景' },
+  { id:'retell',    icon:'📖', name:'复述练习', desc:'概括复述能力' }
+];
+
+const EXPR_QUESTIONS = {
+  impromptu: {
+    easy: [
+      '描述你最喜欢的一本书或一部电影，说说它为什么打动你。',
+      '如果你有周末两天完全自由，你会怎么安排？',
+      '介绍一道你最拿手的菜，或者你最想学的菜。',
+      '说说你最近学会的一项新技能或新知识。',
+      '描述一次让你印象深刻的旅行经历。',
+      '如果你能拥有一个超能力，你希望是什么？为什么？',
+      '介绍你的家乡，推荐一个值得去的地方。'
+    ],
+    advanced: [
+      '谈谈人工智能对未来工作方式的影响，你的看法是什么？',
+      '如何在信息爆炸时代保持独立思考能力？',
+      '社交媒体对人际关系的影响是正面还是负面的？',
+      '谈谈你对"延迟满足"的理解，它重要吗？',
+      '如果你可以给10年前的自己一个建议，你会说什么？',
+      '你认为成功的定义是什么？金钱、地位、还是其他？',
+      '远程办公和坐班，哪种模式更适合创意工作者？'
+    ]
+  },
+  logic: {
+    easy: [
+      '为什么早起对有些人来说能提高效率？请分点说明。',
+      '描述一个你解决过的难题，你用了什么方法？',
+      '分享一个你认为最重要的时间管理技巧，说明理由。',
+      '为什么要多读书？请给出至少3个理由。',
+      '你认为坚持运动有哪些好处？分条论述。'
+    ],
+    advanced: [
+      '分析一个你不同意的观点，说明你的理由和论据。',
+      '如何论证"终身学习"在当今社会的必要性？',
+      '描述一次你做重要决策时的完整思考过程。',
+      '比较线上学习和线下学习各自的优劣。',
+      '你认为"失败是成功之母"这句话成立吗？请论证。'
+    ]
+  },
+  scenario: {
+    easy: [
+      '你向朋友推荐一款你最近在用的APP，你会怎么说？',
+      '你需要向领导汇报本周工作进展，请模拟汇报。',
+      '朋友请你帮忙但你不方便，请礼貌地拒绝。',
+      '在餐厅吃饭发现菜品有问题，你怎么跟服务员沟通？',
+      '你想约朋友周末一起运动，怎么开口？'
+    ],
+    advanced: [
+      '团队中两位同事产生冲突，你作为协调者怎么处理？',
+      '向客户解释产品交付延迟的原因，并给出方案。',
+      '面试中被问"你最大的缺点是什么"，你怎么回答？',
+      '你需要说服领导采纳你的新方案，如何表达？',
+      '同事在会议上否定你的提案，你如何得体地回应？'
+    ]
+  },
+  retell: {
+    easy: [
+      '请阅读以下素材，然后用自己的话复述要点：\n\n"今天早晨阳光明媚，小李决定去公园跑步。他穿好运动鞋，带上水壶，沿着湖边慢跑了三公里。跑完后他感到神清气爽，坐在长椅上喝了水，看着湖面上的鸭子游来游去，觉得生活很美好。"',
+      '请阅读后复述：\n\n"张阿姨去菜市场买菜，先买了两斤西红柿，又挑了一把新鲜的青菜。摊主说今天鱼很新鲜，她就买了一条鲈鱼。回家后她做了西红柿炒蛋、清炒青菜和红烧鱼，一家人吃得开心。"',
+      '请阅读后复述：\n\n"小王刚入职新公司，第一天他提前到了办公室，找到自己的工位。同事热情地带他参观了公司，介绍了各部门。中午大家一起吃了饭，下午他开始熟悉项目文档，觉得新环境很不错。"'
+    ],
+    advanced: [
+      '请阅读后概括复述核心观点：\n\n"研究表明，长期睡眠不足会导致注意力下降、免疫力降低和情绪波动。成年人每天需要7-8小时的睡眠。睡前使用手机会影响褪黑素分泌，建议睡前一小时远离电子屏幕。保持规律的作息时间、营造安静黑暗的睡眠环境，都有助于提高睡眠质量。良好的睡眠是健康生活的基础。"',
+      '请阅读后复述逻辑链条：\n\n"阅读习惯的养成需要三个条件：兴趣、环境和坚持。首先，选择自己感兴趣的领域开始阅读，降低入门门槛。其次，营造阅读环境，比如固定时间、固定地点、减少干扰。最后，利用打卡和记录来保持动力。当这三个条件同时满足时，阅读就会从"任务"变成"习惯"，最终成为生活的一部分。"',
+      '请概括复述：\n\n"时间管理的核心不是做更多的事，而是做更重要的事。艾森豪威尔矩阵将任务按紧急性和重要性分为四类：重要且紧急、重要不紧急、紧急不重要、不紧急不重要。高效的人会把大部分时间花在"重要不紧急"的事情上，比如学习、规划、锻炼，从而减少"重要且紧急"的危机发生频率。"'
+    ]
+  }
+};
+
+const EXPR_REFERENCE = {
+  impromptu: '参考框架：① 开头引入话题（10秒）→ ② 核心观点/故事（2分钟）→ ③ 总结感受/收获（30秒）。建议用一个具体故事或细节来支撑，避免空泛。',
+  logic: '参考框架：① 总论点（一句话亮明观点）→ ② 分点论证（2-3个理由，每个配例子）→ ③ 总结呼应。可用"首先/其次/最后"或"一方面/另一方面"连接。',
+  scenario: '参考框架：① 先共情/认可对方 → ② 表达自己的立场或方案 → ③ 给出替代方案或下一步行动。注意语气得体，先肯定再建议。',
+  retell: '参考框架：① 抓住核心人物和事件 → ② 按时间或逻辑顺序复述 → ③ 提炼关键结论。复述不是背诵，重在用自己的话概括。'
+};
+
+function exprUpdateStreak(){
+  const today=todayStr();
+  if(exprStreak.lastDate===today) return;
+  const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1);
+  const yd=dateStr(yesterday);
+  if(exprStreak.lastDate===yd || exprStreak.lastDate===''){
+    exprStreak.count = exprStreak.lastDate==='' ? 1 : exprStreak.count+1;
+  } else {
+    exprStreak.count=1;
+  }
+  exprStreak.lastDate=today;
+  save(LS_EXPR_STREAK, exprStreak);
+}
+
+function exprGetQuestion(type){
+  const diff=window._exprDifficulty;
+  const pool=EXPR_QUESTIONS[type][diff]||EXPR_QUESTIONS[type].easy;
+  const idx=Math.floor(Math.random()*pool.length);
+  return pool[idx];
+}
+
+function exprAIReview(type, difficulty, question, answer){
+  if(!answer||answer.trim().length<10){
+    return { score:'需展开', tips:[
+      '⚠️ 回答篇幅过短，建议至少展开100字以上。',
+      '表达训练的核心是"说清楚"，尝试多展开一些细节。',
+      '可以先列提纲，再逐点展开。'
+    ]};
+  }
+  const len=answer.length;
+  const tips=[];
+  let scoreNum=60;
+
+  // 结构化检测
+  const structWords=['首先','其次','最后','第一','第二','第三','一方面','另一方面','总之','综上','因此'];
+  const hasStruct = structWords.some(w=>answer.includes(w));
+  if(hasStruct){ scoreNum+=15; tips.push('✅ 使用了结构化表达词（首先/其次等），逻辑层次清晰。'); }
+  else tips.push('💡 建议使用"首先、其次、最后"等结构词，让表达更有层次。');
+
+  // 篇幅评分
+  if(len>200) scoreNum+=15;
+  else if(len>100) scoreNum+=10;
+  else tips.push('💡 回答可以再展开一些，加入具体例子或细节会让表达更有说服力。');
+
+  // 举例检测
+  const exampleWords=['例如','比如','举个例子','记得','有一次','上次'];
+  const hasExample = exampleWords.some(w=>answer.includes(w));
+  if(hasExample){ scoreNum+=10; tips.push('✅ 用了具体例子来支撑观点，很好！'); }
+  else tips.push('💡 可以加入一个具体例子（"比如…"），让抽象观点变生动。');
+
+  // 题型特定建议
+  if(type==='impromptu'){
+    if(len<150) tips.push('🎤 即兴口述建议练习时多说一些，模拟真实场景的连贯表达。');
+    else tips.push('✅ 篇幅适中，即兴表达有完整度。');
+  } else if(type==='logic'){
+    if(!hasStruct) tips.push('🧠 逻辑简答重在结构化，建议用"总-分-总"框架组织回答。');
+    else tips.push('✅ 逻辑框架完整，观点清晰。');
+  } else if(type==='scenario'){
+    const empathyWords=['理解','明白','体谅','辛苦','感谢','不好意思'];
+    const hasEmpathy = empathyWords.some(w=>answer.includes(w));
+    if(hasEmpathy){ scoreNum+=10; tips.push('✅ 体现了共情意识，沟通语气得体。'); }
+    else tips.push('💡 情景沟通建议先共情/认可对方，再表达自己的立场。');
+  } else if(type==='retell'){
+    if(len>80) tips.push('✅ 复述内容完整，有概括能力。');
+    else tips.push('📖 复述练习重在抓住核心要点，尝试更完整地概括。');
+  }
+
+  // 连贯性
+  const connectors=['然后','接着','所以','因为','不过','但是','而且','另外'];
+  const hasConn = connectors.some(w=>answer.includes(w));
+  if(hasConn) scoreNum+=5;
+  else tips.push('💡 多用连接词（然后、所以、不过），让表达更连贯。');
+
+  if(difficulty==='advanced' && len<150){
+    tips.push('⚡ 进阶模式要求更高，建议深入展开，字数至少200字。');
+  }
+
+  scoreNum=Math.min(scoreNum,95);
+  let score;
+  if(scoreNum>=85) score='优秀';
+  else if(scoreNum>=70) score='良好';
+  else if(scoreNum>=60) score='合格';
+  else score='需提升';
+
+  return { score, tips };
+}
+
+function renderExpression(){
+  const view=window._exprView||'home';
+  if(view==='practice' && window._exprPractice) return renderExprPractice();
+  if(view==='history') return renderExprHistory();
+  return renderExprHome();
+}
+
+function renderExprHome(){
+  const total=expressionRecords.length;
+  const typeCards=EXPR_TYPES.map(t=>`
+    <div class="expr-type-card" data-exprtype="${t.id}">
+      <div class="type-icon">${t.icon}</div>
+      <div class="type-name">${t.name}</div>
+      <div class="type-desc">${t.desc}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="expr-page">
+      <div class="expr-streak">
+        <div class="streak-row">
+          <div><div class="streak-num">${exprStreak.count||0}</div><div class="streak-label">连续训练天数</div></div>
+          <div class="streak-divider"></div>
+          <div><div class="streak-total">${total}</div><div class="streak-label">累计训练次数</div></div>
+        </div>
+      </div>
+      <div class="expr-diff-switch">
+        <button class="diff-btn ${window._exprDifficulty==='easy'?'active':''}" data-diff="easy">🌱 简易模式</button>
+        <button class="diff-btn ${window._exprDifficulty==='advanced'?'active':''}" data-diff="advanced">⚡ 进阶模式</button>
+      </div>
+      <div class="fin-section-title">选择训练题型</div>
+      <div class="expr-types-grid">${typeCards}</div>
+      ${total>0 ? `<button class="expr-btn secondary" style="width:100%;padding:12px;border:none;border-radius:var(--radius-sm);background:var(--olive-light);color:var(--olive);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font)" data-view="history">📋 查看训练历史 (${total})</button>` : ''}
+    </div>
+  `;
+}
+
+function renderExprPractice(){
+  const p=window._exprPractice;
+  if(!p) return renderExprHome();
+  const typeName=EXPR_TYPES.find(t=>t.id===p.type)?.name||'';
+  const isRetell=p.type==='retell';
+  const qText=isRetell ? p.question.split('\n').filter(l=>l.trim()).map((l,i)=> i===0?`<strong>${escHtml(l)}</strong>`:escHtml(l)).join('<br/>') : escHtml(p.question);
+
+  return `
+    <div class="expr-page">
+      <div class="expr-question-card">
+        <span class="q-tag">${typeName} · ${window._exprDifficulty==='easy'?'简易':'进阶'}</span>
+        <div class="q-text">${qText}</div>
+      </div>
+      <div class="expr-timer-presets">
+        <button class="preset-btn ${p.duration===1?'active':''}" data-setdur="1">1分钟</button>
+        <button class="preset-btn ${p.duration===3?'active':''}" data-setdur="3">3分钟</button>
+        <button class="preset-btn ${p.duration===5?'active':''}" data-setdur="5">5分钟</button>
+      </div>
+      <div class="expr-timer">
+        <span class="timer-display" id="exprTimerDisp">${p.duration}:00</span>
+        <button class="timer-btn" id="exprTimerStart">▶ 开始</button>
+        <button class="timer-btn reset" id="exprTimerReset">↻ 重置</button>
+      </div>
+      <div class="fin-section-title">✏️ 思路草稿 / 你的回答</div>
+      <div class="expr-draft">
+        <textarea id="exprDraft" placeholder="在这里写下你的表达提纲或完整回答...">${escHtml(p.draft||'')}</textarea>
+      </div>
+      <div class="expr-actions">
+        <button class="expr-btn secondary" id="exprShowRef">💡 参考思路</button>
+        <button class="expr-btn primary" id="exprReview">🤖 AI点评</button>
+      </div>
+      <div id="exprReviewWrap"></div>
+      <div class="expr-actions">
+        <button class="expr-btn secondary" id="exprBack">← 返回</button>
+        <button class="expr-btn primary" id="exprDone">✅ 完成打卡</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderExprHistory(){
+  const recs=[...expressionRecords].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  const listHTML=recs.length ? recs.map(r=>{
+    const typeName=EXPR_TYPES.find(t=>t.id===r.type)?.name||r.type;
+    return `
+    <div class="expr-history-item" data-eid="${r.id}">
+      <div class="h-date">📅 ${r.date} · ${r.difficulty==='easy'?'简易':'进阶'}</div>
+      <span class="h-type">${typeName}</span>
+      <div class="h-question">${escHtml(r.question.substring(0,80))}${r.question.length>80?'...':''}</div>
+      ${r.draft ? `<div class="h-draft">${escHtml(r.draft.substring(0,200))}${r.draft.length>200?'...':''}</div>${r.draft.length>200?'<span class="h-expand">展开全部</span>':''}` : '<div style="font-size:12px;color:var(--text3)">（未记录草稿）</div>'}
+      ${r.review ? `<div style="margin-top:6px"><span style="font-size:11px;padding:2px 8px;border-radius:8px;background:var(--olive-light);color:var(--olive);font-weight:600">${escHtml(r.review)}</span></div>` : ''}
+    </div>`;
+  }).join('') : '<div class="expr-empty">📝 还没有训练记录，开始第一次练习吧！</div>';
+
+  return `
+    <div class="expr-page">
+      <div class="fin-section-title">训练历史 (${recs.length})</div>
+      <div class="expr-history-list">${listHTML}</div>
+      <button class="expr-btn secondary" style="width:100%;padding:12px;border:none;border-radius:var(--radius-sm);background:var(--olive-light);color:var(--olive);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:10px" data-view="home">← 返回首页</button>
+    </div>
+  `;
+}
+
+let _exprTimerInterval=null;
+function exprStartTimer(el){
+  const p=window._exprPractice;
+  if(!p) return;
+  let total=p.duration*60;
+  const disp=el.querySelector('#exprTimerDisp');
+  const startBtn=el.querySelector('#exprTimerStart');
+  if(_exprTimerInterval){ clearInterval(_exprTimerInterval); _exprTimerInterval=null; }
+  startBtn.textContent='⏸ 暂停'; startBtn.classList.add('stop');
+  _exprTimerInterval=setInterval(()=>{
+    total--;
+    if(total<=0){
+      clearInterval(_exprTimerInterval); _exprTimerInterval=null;
+      if(disp) disp.textContent='00:00';
+      if(startBtn){ startBtn.textContent='✅ 完成'; startBtn.classList.remove('stop'); }
+      showToast('⏰ 时间到！可以提交你的回答了');
+      return;
+    }
+    const m=Math.floor(total/60), s=total%60;
+    if(disp) disp.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  },1000);
+}
+function exprStopTimer(el){
+  if(_exprTimerInterval){ clearInterval(_exprTimerInterval); _exprTimerInterval=null; }
+  const startBtn=el.querySelector('#exprTimerStart');
+  if(startBtn){ startBtn.textContent='▶ 继续'; startBtn.classList.remove('stop'); }
+}
+
+function bindExpression(el){
+  // 难度切换
+  el.querySelectorAll('[data-diff]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      window._exprDifficulty=btn.dataset.diff;
+      renderModule('expression');
+    });
+  });
+
+  // 题型选择
+  el.querySelectorAll('[data-exprtype]').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const type=card.dataset.exprtype;
+      const q=exprGetQuestion(type);
+      window._exprPractice={ type, question:q, duration:3, draft:'' };
+      window._exprView='practice';
+      renderModule('expression');
+    });
+  });
+
+  // 视图切换
+  el.querySelectorAll('[data-view]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      window._exprView=btn.dataset.view;
+      if(btn.dataset.view==='home') window._exprPractice=null;
+      if(_exprTimerInterval){ clearInterval(_exprTimerInterval); _exprTimerInterval=null; }
+      renderModule('expression');
+    });
+  });
+
+  // 练习页 — 计时器
+  const startBtn=el.querySelector('#exprTimerStart');
+  if(startBtn){
+    startBtn.addEventListener('click',()=>{
+      if(startBtn.textContent.includes('开始')||startBtn.textContent.includes('继续')){
+        exprStartTimer(el);
+      } else {
+        exprStopTimer(el);
+      }
+    });
+  }
+  el.querySelector('#exprTimerReset')?.addEventListener('click',()=>{
+    if(_exprTimerInterval){ clearInterval(_exprTimerInterval); _exprTimerInterval=null; }
+    const p=window._exprPractice;
+    if(p){
+      const disp=el.querySelector('#exprTimerDisp');
+      if(disp) disp.textContent=p.duration+':00';
+      const sb=el.querySelector('#exprTimerStart');
+      if(sb){ sb.textContent='▶ 开始'; sb.classList.remove('stop'); }
+    }
+  });
+  // 时长预设
+  el.querySelectorAll('[data-setdur]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const p=window._exprPractice;
+      if(p){
+        p.duration=parseInt(btn.dataset.setdur);
+        if(_exprTimerInterval){ clearInterval(_exprTimerInterval); _exprTimerInterval=null; }
+        renderModule('expression');
+      }
+    });
+  });
+
+  // 草稿输入
+  const draftTA=el.querySelector('#exprDraft');
+  if(draftTA){
+    draftTA.addEventListener('input',()=>{
+      if(window._exprPractice) window._exprPractice.draft=draftTA.value;
+    });
+  }
+
+  // 参考思路
+  el.querySelector('#exprShowRef')?.addEventListener('click',()=>{
+    const p=window._exprPractice;
+    if(!p) return;
+    const ref=EXPR_REFERENCE[p.type]||'';
+    const wrap=el.querySelector('#exprReviewWrap');
+    if(wrap){
+      wrap.innerHTML=`<div class="expr-review"><div class="review-title">💡 参考思路</div><div class="review-content"><p>${escHtml(ref)}</p></div></div>`;
+    }
+  });
+
+  // AI点评
+  el.querySelector('#exprReview')?.addEventListener('click',()=>{
+    const p=window._exprPractice;
+    if(!p) return;
+    const answer=draftTA?.value?.trim()||'';
+    const result=exprAIReview(p.type, window._exprDifficulty, p.question, answer);
+    const wrap=el.querySelector('#exprReviewWrap');
+    if(wrap){
+      wrap.innerHTML=`
+        <div class="expr-review">
+          <div class="review-title">🤖 AI点评结果</div>
+          <div class="review-score">${result.score}</div>
+          <div class="review-content">${result.tips.map(t=>`<p>${escHtml(t)}</p>`).join('')}</div>
+        </div>`;
+    }
+    if(window._exprPractice) window._exprPractice.review=result.score;
+  });
+
+  // 完成打卡
+  el.querySelector('#exprDone')?.addEventListener('click',()=>{
+    const p=window._exprPractice;
+    if(!p) return;
+    const answer=draftTA?.value?.trim()||'';
+    if(answer.length<10){ showToast('请先写下你的回答（至少10字）再打卡'); return; }
+    exprUpdateStreak();
+    exprIdCounter++;
+    expressionRecords.push({
+      id:exprIdCounter,
+      date:todayStr(),
+      type:p.type,
+      difficulty:window._exprDifficulty,
+      question:p.question,
+      draft:answer,
+      review:p.review||'',
+      duration:p.duration
+    });
+    save(LS_EXPRESSION, expressionRecords);
+    if(_exprTimerInterval){ clearInterval(_exprTimerInterval); _exprTimerInterval=null; }
+    window._exprPractice=null;
+    window._exprView='home';
+    renderModule('expression');
+    showToast('🎉 打卡成功！连续'+exprStreak.count+'天');
+  });
+
+  // 历史展开
+  el.querySelectorAll('.h-expand').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const draft=btn.previousElementSibling;
+      if(draft){ draft.classList.toggle('expanded'); btn.textContent=draft.classList.contains('expanded')?'收起':'展开全部'; }
+    });
+  });
+}
+
+
 // ---------- 自定义模块（纯笔记型） ----------
 function renderCustomModule(mod) {
   const key = 'cw_custom_'+mod.id;
@@ -1610,6 +2756,7 @@ function renderModule(mid) {
     case 'memo':        html = renderMemo(); break;
     case 'finance':     html = renderFinance(); break;
     case 'exercise':    html = renderExercise(); break;
+    case 'expression':  html = renderExpression(); break;
     default:            html = renderCustomModule(mod); break;
   }
 
@@ -1625,6 +2772,7 @@ function renderModule(mid) {
     case 'memo':        bindMemo(card); break;
     case 'finance':     bindFinance(card); break;
     case 'exercise':    bindExercise(card); break;
+    case 'expression':  bindExpression(card); break;
     default:            bindCustomModule(card, mod); break;
   }
 }
