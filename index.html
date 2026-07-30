@@ -2065,7 +2065,8 @@ function renderFinBills(){
       </div>
       <div class="fin-filter-row">
         <select class="fin-type-select" id="finBillTypeFilter">${typeOpts}</select>
-        <select class="fin-month-select" id="finBillMonthSel">${yearOpts.join('')}年${monthOpts}</select>
+        <select class="fin-month-select" id="finBillYearSel">${yearOpts.join('')}</select>
+        <select class="fin-month-select" id="finBillMonthSel">${monthOpts}</select>
       </div>
       <div class="fin-bill-list">${listHTML}</div>
     </div>
@@ -2345,16 +2346,14 @@ function bindFinance(el) {
     window._finBillFilter = e.target.value;
     renderModule('finance');
   });
-  // 账单页 — 年月切换（合并选择器，解析年份和月份）
+  // 账单页 — 年份切换
+  el.querySelector('#finBillYearSel')?.addEventListener('change',e=>{
+    window._finBillYear = parseInt(e.target.value);
+    renderModule('finance');
+  });
+  // 账单页 — 月份切换
   el.querySelector('#finBillMonthSel')?.addEventListener('change',e=>{
-    const val = e.target.value;
-    if(val.includes('\u5e74')){
-      const ym = val.split('\u5e74');
-      window._finBillYear = parseInt(ym[0]);
-      const mStr = ym[1] || '';
-      const moMap={'1\u6708':0,'2\u6708':1,'3\u6708':2,'4\u6708':3,'5\u6708':4,'6\u6708':5,'7\u6708':6,'8\u6708':7,'9\u6708':8,'10\u6708':9,'11\u6708':10,'12\u6708':11};
-      window._finBillMonth = moMap[mStr.trim()] || 0;
-    }
+    window._finBillMonth = parseInt(e.target.value);
     renderModule('finance');
   });
   // 账单页 — 删除
@@ -3310,10 +3309,11 @@ function renderModule(mid) {
   }
 
   // 首页模块直接渲染到容器，其他模块渲染到card
+  let card;
   if(mid === 'home'){
     container.innerHTML = html;
   } else {
-    const card = container.querySelector('.card');
+    card = container.querySelector('.card');
     if(card) card.innerHTML = html;
   }
 
