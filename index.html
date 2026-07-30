@@ -1124,6 +1124,95 @@ body{
 
 .expr-empty{ text-align:center; padding:30px 16px; color:var(--text3); font-size:13px; }
 
+/* 录音功能 */
+.expr-record-section{
+  background:#FFF; border-radius:var(--radius-sm); padding:14px;
+  border:1px solid var(--border); margin-bottom:14px; text-align:center;
+}
+.expr-record-section .rec-hint{
+  font-size:12px; color:var(--text3); margin-bottom:10px;
+}
+.expr-rec-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 24px; border:none; border-radius:24px;
+  font-size:14px; font-weight:600; cursor:pointer;
+  transition:all .2s; font-family:var(--font);
+}
+.expr-rec-btn.rec-ready{
+  background:var(--olive); color:#FFF; box-shadow:0 2px 8px rgba(74,124,63,.3);
+}
+.expr-rec-btn.rec-start{
+  background:var(--olive); color:#FFF; box-shadow:0 2px 8px rgba(74,124,63,.3);
+}
+.expr-rec-btn.rec-recording{
+  background:var(--danger); color:#FFF;
+  animation:rec-pulse 1.5s ease-in-out infinite;
+  box-shadow:0 2px 12px rgba(220,53,69,.4);
+}
+.expr-rec-btn:active{ transform:scale(.95); }
+@keyframes rec-pulse{
+  0%,100%{ box-shadow:0 0 0 0 rgba(220,53,69,.4); }
+  50%{ box-shadow:0 0 0 10px rgba(220,53,69,0); }
+}
+.expr-rec-status{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  margin-top:8px; font-size:13px;
+}
+.expr-rec-status .rec-dot{
+  width:10px; height:10px; border-radius:50%; background:var(--danger);
+  animation:rec-blink .8s step-end infinite;
+}
+@keyframes rec-blink{ 50%{ opacity:0; } }
+.expr-rec-status .rec-time{
+  font-variant-numeric:tabular-nums; font-weight:600; color:var(--danger);
+  min-width:45px; text-align:center;
+}
+.expr-rec-status .rec-label{ color:var(--text3); font-size:12px; }
+
+.expr-playback-row{
+  display:none; align-items:center; gap:10px; margin-top:10px;
+  padding:8px 12px; background:var(--olive-bg); border-radius:var(--radius-xs);
+}
+.expr-playback-row.show{ display:flex; }
+.expr-playback-row audio{
+  flex:1; height:36px; min-width:0;
+}
+.expr-playback-row .pb-del{
+  background:none; border:none; color:var(--danger); font-size:13px;
+  cursor:pointer; padding:4px 8px; border-radius:4px; white-space:nowrap;
+  font-family:var(--font);
+}
+
+/* 录音波形模拟条 */
+.expr-audio-bars{
+  display:none; align-items:center; justify-content:center; gap:3px;
+  height:24px; margin:6px 0;
+}
+.expr-audio-bars.show{ display:flex; }
+.expr-audio-bars .bar{
+  width:3px; background:var(--olive); border-radius:2px;
+  animation:bar-jump .6s ease-in-out infinite alternate;
+}
+.expr-audio-bars .bar:nth-child(1){ height:8px; animation-delay:0s; }
+.expr-audio-bars .bar:nth-child(2){ height:16px; animation-delay:.1s; }
+.expr-audio-bars .bar:nth-child(3){ height:12px; animation-delay:.2s; }
+.expr-audio-bars .bar:nth-child(4){ height:20px; animation-delay:.15s; }
+.expr-audio-bars .bar:nth-child(5){ height:10px; animation-delay:.25s; }
+.expr-audio-bars .bar:nth-child(6){ height:18px; animation-delay:.05s; }
+.expr-audio-bars .bar:nth-child(7){ height:14px; animation-delay:.3s; }
+@keyframes bar-jump{
+  from{ transform:scaleY(.4); }
+  to{ transform:scaleY(1); }
+}
+
+/* 录音提示卡片 */
+.expr-rec-tip{
+  font-size:11px; color:var(--text3); line-height:1.5; text-align:center;
+  margin-top:8px; padding:6px 10px; background:var(--olive-bg);
+  border-radius:8px;
+}
+.expr-rec-tip .lock-icon{ margin-right:2px; }
+
 </style>
 </head>
 <body>
@@ -2518,6 +2607,26 @@ function renderExprPractice(){
       <div class="expr-draft">
         <textarea id="exprDraft" placeholder="在这里写下你的表达提纲或完整回答...">${escHtml(p.draft||'')}</textarea>
       </div>
+      <div class="fin-section-title">🎙️ 语音口述练习</div>
+      <div class="expr-record-section">
+        <div class="rec-hint">点击下方按钮开始录音，模拟真实对话场景进行口述表达</div>
+        <button class="expr-rec-btn rec-start" id="exprRecBtn">🎙️ 开始录音</button>
+        <div class="expr-audio-bars" id="exprAudioBars">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <div class="expr-rec-status" id="exprRecStatus" style="display:none">
+          <span class="rec-dot"></span>
+          <span class="rec-time" id="exprRecTime">00:00</span>
+          <span class="rec-label">正在录音...</span>
+        </div>
+        <div class="expr-playback-row" id="exprPlayback">
+          <audio id="exprAudioPlayer" controls></audio>
+          <button class="pb-del" id="exprDelAudio">🗑 删除</button>
+        </div>
+        <div class="expr-rec-tip">
+          <span class="lock-icon">🔒</span> 录音仅保存在本地浏览器，不会上传到任何服务器，保障隐私安全
+        </div>
+      </div>
       <div class="expr-actions">
         <button class="expr-btn secondary" id="exprShowRef">💡 参考思路</button>
         <button class="expr-btn primary" id="exprReview">🤖 AI点评</button>
@@ -2535,12 +2644,13 @@ function renderExprHistory(){
   const recs=[...expressionRecords].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
   const listHTML=recs.length ? recs.map(r=>{
     const typeName=EXPR_TYPES.find(t=>t.id===r.type)?.name||r.type;
+    const audioBadge=r.hasAudio ? `<span style="font-size:11px;padding:2px 8px;border-radius:8px;background:#FFF3E0;color:#E65100;margin-left:6px">🎙️ 含录音</span>` : '';
     return `
     <div class="expr-history-item" data-eid="${r.id}">
-      <div class="h-date">📅 ${r.date} · ${r.difficulty==='easy'?'简易':'进阶'}</div>
+      <div class="h-date">📅 ${r.date} · ${r.difficulty==='easy'?'简易':'进阶'}${audioBadge}</div>
       <span class="h-type">${typeName}</span>
       <div class="h-question">${escHtml(r.question.substring(0,80))}${r.question.length>80?'...':''}</div>
-      ${r.draft ? `<div class="h-draft">${escHtml(r.draft.substring(0,200))}${r.draft.length>200?'...':''}</div>${r.draft.length>200?'<span class="h-expand">展开全部</span>':''}` : '<div style="font-size:12px;color:var(--text3)">（未记录草稿）</div>'}
+      ${r.draft ? `<div class="h-draft">${escHtml(r.draft.substring(0,200))}${r.draft.length>200?'...':''}</div>${r.draft.length>200?'<span class="h-expand">展开全部</span>':''}` : '<div style="font-size:12px;color:var(--text3)">（仅口述录音，未记录文字稿）</div>'}
       ${r.review ? `<div style="margin-top:6px"><span style="font-size:11px;padding:2px 8px;border-radius:8px;background:var(--olive-light);color:var(--olive);font-weight:600">${escHtml(r.review)}</span></div>` : ''}
     </div>`;
   }).join('') : '<div class="expr-empty">📝 还没有训练记录，开始第一次练习吧！</div>';
@@ -2670,13 +2780,30 @@ function bindExpression(el){
     if(!p) return;
     const answer=draftTA?.value?.trim()||'';
     const result=exprAIReview(p.type, window._exprDifficulty, p.question, answer);
+    // 如果有录音，增加口述表达专项建议
+    let oralTips='';
+    if(p._audioBlob){
+      const audioDuration=_recSeconds>0 ? Math.floor(_recSeconds/60)+'分'+(_recSeconds%60)+'秒' : '';
+      oralTips=`
+        <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)">
+          <p style="font-weight:600;color:var(--olive);margin-bottom:6px;">🎙️ 口述表达专项建议</p>
+          <p>📊 录音时长：${audioDuration||'未知'} | 题型：${EXPR_TYPES.find(t=>t.id===p.type)?.name||''}</p>
+          <p>💡 回听你的录音时，注意检查以下几点：</p>
+          <p>• 语速是否适中？过快的语速可能让听众跟不上，建议用正常对话语速</p>
+          <p>• 有没有频繁的"嗯"、"那个"等口头禅？可以刻意减少填充词</p>
+          <p>• 语调是否有起伏？平铺直叙容易让人走神，适当加重关键词</p>
+          <p>• 逻辑是否连贯？每个观点之间是否有自然的过渡？</p>
+          <p>• 时长是否合理？${p.type==='impromptu'?'即兴口述建议控制在2-3分钟':p.type==='logic'?'逻辑简答建议控制在2-4分钟':'建议控制在1-3分钟'}以内</p>
+          <p style="margin-top:8px;font-size:12px;color:var(--text3)">📝 建议：把自己当作听众回听一遍，标记需要改进的地方</p>
+        </div>`;
+    }
     const wrap=el.querySelector('#exprReviewWrap');
     if(wrap){
       wrap.innerHTML=`
         <div class="expr-review">
           <div class="review-title">🤖 AI点评结果</div>
           <div class="review-score">${result.score}</div>
-          <div class="review-content">${result.tips.map(t=>`<p>${escHtml(t)}</p>`).join('')}</div>
+          <div class="review-content">${result.tips.map(t=>`<p>${escHtml(t)}</p>`).join('')}${oralTips}</div>
         </div>`;
     }
     if(window._exprPractice) window._exprPractice.review=result.score;
@@ -2687,7 +2814,8 @@ function bindExpression(el){
     const p=window._exprPractice;
     if(!p) return;
     const answer=draftTA?.value?.trim()||'';
-    if(answer.length<10){ showToast('请先写下你的回答（至少10字）再打卡'); return; }
+    const hasAudio=!!p._audioBlob;
+    if(answer.length<10 && !hasAudio){ showToast('请先写下你的回答或完成录音再打卡'); return; }
     exprUpdateStreak();
     exprIdCounter++;
     expressionRecords.push({
@@ -2698,10 +2826,14 @@ function bindExpression(el){
       question:p.question,
       draft:answer,
       review:p.review||'',
-      duration:p.duration
+      duration:p.duration,
+      hasAudio:hasAudio,
+      audioDuration:hasAudio ? _recSeconds : 0
     });
     save(LS_EXPRESSION, expressionRecords);
-    if(_exprTimerInterval){ clearInterval(_exprTimerInterval); _exprTimerInterval=null; }
+    if(_recTimer){ clearInterval(_recTimer); _recTimer=null; }
+    // 清理录音资源
+    recCleanup();
     window._exprPractice=null;
     window._exprView='home';
     renderModule('expression');
@@ -2715,6 +2847,126 @@ function bindExpression(el){
       if(draft){ draft.classList.toggle('expanded'); btn.textContent=draft.classList.contains('expanded')?'收起':'展开全部'; }
     });
   });
+
+  // ---------- 录音功能 ----------
+  let _recMediaRecorder=null;
+  let _recChunks=[];
+  let _recTimer=null;
+  let _recSeconds=0;
+
+  function recUpdateTime(){
+    _recSeconds++;
+    const m=Math.floor(_recSeconds/60), s=_recSeconds%60;
+    const timeEl=el.querySelector('#exprRecTime');
+    if(timeEl) timeEl.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+
+  function recCleanup(){
+    if(_recTimer){ clearInterval(_recTimer); _recTimer=null; }
+    if(_recMediaRecorder && _recMediaRecorder.state!=='inactive'){
+      _recMediaRecorder.stop();
+    }
+    _recMediaRecorder=null;
+    _recChunks=[];
+    _recSeconds=0;
+  }
+
+  async function recStart(){
+    // 先请求麦克风权限
+    try {
+      const stream=await navigator.mediaDevices.getUserMedia({ audio:true });
+      const mr=new MediaRecorder(stream, { mimeType:MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm' });
+      _recMediaRecorder=mr;
+      _recChunks=[];
+      _recSeconds=0;
+
+      mr.ondataavailable=e=>{ if(e.data.size>0) _recChunks.push(e.data); };
+      mr.onstop=()=>{
+        // 停止所有轨道
+        stream.getTracks().forEach(t=>t.stop());
+        // 创建blob用于回放
+        const blob=new Blob(_recChunks, { type:'audio/webm' });
+        const url=URL.createObjectURL(blob);
+        // 显示回放
+        const pbRow=el.querySelector('#exprPlayback');
+        const player=el.querySelector('#exprAudioPlayer');
+        if(pbRow) pbRow.classList.add('show');
+        if(player){ player.src=url; player.load(); }
+        // 存储到练习状态
+        if(window._exprPractice) window._exprPractice._audioBlob=blob;
+        // 更新UI
+        const btn=el.querySelector('#exprRecBtn');
+        if(btn){ btn.textContent='🔄 重新录音'; btn.className='expr-rec-btn rec-start'; }
+        const statusEl=el.querySelector('#exprRecStatus');
+        const barsEl=el.querySelector('#exprAudioBars');
+        if(statusEl) statusEl.style.display='none';
+        if(barsEl) barsEl.classList.remove('show');
+        if(_recTimer){ clearInterval(_recTimer); _recTimer=null; }
+        showToast('✅ 录音完成，可点击播放回听');
+      };
+
+      mr.start();
+      // UI更新
+      const btn=el.querySelector('#exprRecBtn');
+      if(btn){ btn.textContent='⏹ 停止录音'; btn.className='expr-rec-btn rec-recording'; }
+      const statusEl=el.querySelector('#exprRecStatus');
+      const barsEl=el.querySelector('#exprAudioBars');
+      if(statusEl) statusEl.style.display='flex';
+      if(barsEl) barsEl.classList.add('show');
+      const timeEl=el.querySelector('#exprRecTime');
+      if(timeEl) timeEl.textContent='00:00';
+      // 启动计时
+      _recTimer=setInterval(recUpdateTime, 1000);
+      showToast('🎙️ 录音中，请开始口述回答...');
+    } catch(err){
+      console.error('麦克风权限被拒绝或设备不可用:', err);
+      showToast('⚠️ 无法访问麦克风，请检查浏览器权限设置');
+    }
+  }
+
+  function recStop(){
+    if(_recMediaRecorder && _recMediaRecorder.state==='recording'){
+      _recMediaRecorder.stop();
+    }
+    if(_recTimer){ clearInterval(_recTimer); _recTimer=null; }
+  }
+
+  el.querySelector('#exprRecBtn')?.addEventListener('click',()=>{
+    const btn=el.querySelector('#exprRecBtn');
+    if(!btn) return;
+    if(btn.classList.contains('rec-recording')){
+      // 正在录音，停止
+      recStop();
+    } else {
+      // 开始/重新录音
+      recStart();
+    }
+  });
+
+  // 删除录音
+  el.querySelector('#exprDelAudio')?.addEventListener('click',()=>{
+    const player=el.querySelector('#exprAudioPlayer');
+    const pbRow=el.querySelector('#exprPlayback');
+    if(player) player.src='';
+    if(pbRow) pbRow.classList.remove('show');
+    if(window._exprPractice) window._exprPractice._audioBlob=null;
+    const btn=el.querySelector('#exprRecBtn');
+    if(btn){ btn.textContent='🎙️ 开始录音'; btn.className='expr-rec-btn rec-start'; }
+    showToast('🗑 录音已删除');
+  });
+
+  // 页面离开时清理录音资源
+  const exprCard=el.closest('.module-card');
+  if(exprCard){
+    // 使用MutationObserver监听模块切换来清理
+    const observer=new MutationObserver(()=>{
+      if(!document.contains(exprCard)){
+        recCleanup();
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList:true, subtree:true });
+  }
 }
 
 
