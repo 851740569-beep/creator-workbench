@@ -617,195 +617,325 @@ body{
 /* ============================================================
    模块6: 日常记账 V2 — 粉色适配
    ============================================================ */
-.fin-page{ padding-bottom:20px; }
+/* ========== 小猪记账 V2 样式 ========== */
+.fin-v2{ position:relative; padding-bottom:60px; min-height:calc(100vh - 56px); }
+
+/* 首页问候区 */
+.fin-greeting{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 16px 4px;
+}
+.fin-greeting-left{}
+.fin-greeting-text{ font-size:13px; color:var(--text2); line-height:1.5; }
+.fin-greeting-title{ font-size:18px; font-weight:800; color:var(--text); letter-spacing:1px; }
+.fin-greeting-pig{
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg,#FFE0E9,#FFD1DE);
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; box-shadow:0 2px 10px rgba(240,128,160,.2);
+}
+
+/* 深色余额卡片 */
+.fin-balance-card{
+  background:linear-gradient(145deg,#5D4363 0%,#3D2840 50%,#2B1A30 100%);
+  border-radius:18px; padding:22px 20px; color:#FFF;
+  margin:12px 16px 14px; position:relative; overflow:hidden;
+  box-shadow:0 8px 32px rgba(62,35,65,.4);
+}
+.fin-balance-card::after{
+  content:''; position:absolute; right:-12px; top:-12px;
+  width:80px; height:80px; border-radius:50%;
+  background:rgba(255,200,220,.08);
+}
+.fin-balance-label{ font-size:12px; opacity:.7; margin-bottom:4px; }
+.fin-balance-num{ font-size:34px; font-weight:900; letter-spacing:-0.5px; margin-bottom:14px; }
+.fin-balance-row{ display:flex; justify-content:space-between; }
+.fin-blk{text-align:center;}
+.fin-blk .lbl{ font-size:11px; opacity:.6; margin-bottom:2px; }
+.fin-blk .num{ font-size:15px; font-weight:700; }
+.fin-blk .num.income-c{ color:#7FE7A8; }
+.fin-blk .num.expense-c{ color:#FF9AA8; }
+.fin-balance-pig{
+  position:absolute; right:18px; top:18px; font-size:40px; opacity:.85;
+}
+
+/* 预算卡片 */
+.fin-budget-card{
+  background:#FFF; border-radius:14px; padding:14px 16px;
+  margin:0 16px 14px; box-shadow:0 2px 12px rgba(180,140,170,.1);
+}
+.fin-budget-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.fin-budget-title{ font-size:14px; font-weight:700; color:var(--text); }
+.fin-budget-remain{ font-size:14px; font-weight:700; color:#4CAF50; }
+.fin-budget-bar{
+  width:100%; height:10px; background:#F0E8EC; border-radius:5px;
+  overflow:hidden; margin-bottom:8px;
+}
+.fin-budget-bar-fill{
+  height:100%; border-radius:5px; transition:width .4s ease;
+  background:linear-gradient(90deg,#7FE7A8,#4CAF50);
+}
+.fin-budget-info{ display:flex; justify-content:space-between; font-size:11px; color:var(--text3); }
+
+/* 快捷按钮（浅色风格） */
+.fin-quick-actions{ display:flex; gap:10px; margin:0 16px 14px; }
+.fin-quick-btn{
+  flex:1; padding:14px; border:none; border-radius:14px;
+  font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font);
+  transition:all .15s; display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.fin-quick-btn.expense{
+  background:#FFE8ED; color:#E84C72;
+  box-shadow:0 2px 8px rgba(232,76,114,.12);
+}
+.fin-quick-btn.income{
+  background:#E8F8EF; color:#37B24D;
+  box-shadow:0 2px 8px rgba(55,178,77,.12);
+}
+.fin-quick-btn:active{ transform:scale(.97); opacity:.8; }
+
+/* 分类标题 */
 .fin-section-title{
   font-size:14px; font-weight:700; color:var(--text);
-  margin:14px 0 8px; display:flex; align-items:center; gap:6px;
+  margin:4px 16px 10px; display:flex; align-items:center; gap:6px;
 }
-.fin-balance-card{
-  background:linear-gradient(135deg,var(--pink) 0%,var(--pink-dark) 100%);
-  border-radius:var(--radius); padding:20px; color:#FFF;
-  margin-bottom:14px; text-align:center;
-  box-shadow:0 4px 16px rgba(240,128,160,.3);
-}
-.fin-balance-card .balance-row{ display:flex; justify-content:space-around; margin-bottom:12px; }
-.fin-balance-card .balance-item{text-align:center;}
-.fin-balance-card .balance-val{ font-size:22px; font-weight:800; }
-.fin-balance-card .balance-label{ font-size:11px; opacity:.8; margin-top:2px; }
-.fin-balance-card .balance-divider{ width:1px; height:36px; background:rgba(255,255,255,.25); }
-.fin-balance-total{ font-size:28px; font-weight:800; }
-.fin-budget-section{
-  background:rgba(255,255,255,.8); backdrop-filter:blur(8px);
-  border-radius:var(--radius-sm); padding:14px; margin-bottom:14px;
-  border:1px solid rgba(240,128,160,.08);
-}
-.fin-budget-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.fin-budget-title{ font-size:13px; font-weight:600; color:var(--text); }
-.fin-budget-amount{ font-size:12px; color:var(--text3); }
-.fin-progress-bar{ width:100%; height:8px; background:var(--pink-light); border-radius:4px; overflow:hidden; margin-bottom:6px; }
-.fin-progress-fill{ height:100%; border-radius:4px; transition:width .3s; width:0%; }
-.fin-progress-fill.level-ok{ background:linear-gradient(90deg,#6BCB77,#4CAF50); }
-.fin-progress-fill.level-warn{ background:linear-gradient(90deg,#FFB74D,#FF9800); }
-.fin-progress-fill.level-danger{ background:linear-gradient(90deg,#EF5350,#E53935); }
-.fin-progress-text{ font-size:11px; color:var(--text3); display:flex; justify-content:space-between; }
-.fin-quick-actions{ display:flex; gap:10px; margin-bottom:14px; }
-.fin-quick-btn{
-  flex:1; padding:12px; border:none; border-radius:var(--radius-sm);
-  font-size:14px; font-weight:600; cursor:pointer; font-family:var(--font);
-  transition:all .15s;
-}
-.fin-quick-btn.expense{ background:linear-gradient(135deg,#FF6B81,#EE5A68); color:#FFF; box-shadow:0 2px 8px rgba(238,90,104,.25); }
-.fin-quick-btn.income{ background:linear-gradient(135deg,#51CF66,#37B24D); color:#FFF; box-shadow:0 2px 8px rgba(55,178,77,.25); }
-.fin-quick-btn:active{ transform:scale(.96); }
-.fin-cat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+
+/* 彩色圆底分类网格 */
+.fin-cat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:0 16px 14px; }
 .fin-cat-item{
-  display:flex; flex-direction:column; align-items:center; gap:4px;
-  padding:10px 4px; border-radius:var(--radius-sm);
-  background:rgba(255,255,255,.7); cursor:pointer;
-  border:1.5px solid transparent; transition:all .15s;
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  padding:12px 4px 10px; border-radius:14px;
+  cursor:pointer; transition:all .15s; border:none; background:none;
 }
-.fin-cat-item:active{ transform:scale(.93); }
-.fin-cat-item.selected{ border-color:var(--pink); background:var(--pink-light); }
-.fin-cat-icon{ font-size:24px; }
-.fin-cat-name{ font-size:10px; color:var(--text2); font-weight:500; }
+.fin-cat-item:active{ transform:scale(.92); }
+.fin-cat-icon-wrap{
+  width:48px; height:48px; border-radius:50%; display:flex;
+  align-items:center; justify-content:center; font-size:24px;
+}
+.fin-cat-name{ font-size:11px; color:var(--text2); font-weight:500; }
+/* 各分类背景色 */
+.cat-bg-meal{ background:#FFF8E1; }
+.cat-bg-transit{ background:#E3F2FD; }
+.cat-bg-shop{ background:#FCE4EC; }
+.cat-bg-fun{ background:#F3E5F5; }
+.cat-bg-home{ background:#E8F5E9; }
+.cat-bg-medical{ background:#FFEBEE; }
+.cat-bg-study{ background:#E0F2F1; }
+.cat-bg-other{ background:#F5F5F5; }
+/* 底部导航 */
 .fin-bottom-nav{
   position:fixed; bottom:0; left:50%; transform:translateX(-50%);
   width:100%; max-width:430px;
-  background:rgba(255,255,255,.92); backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  display:flex; border-top:1px solid rgba(240,128,160,.12);
-  z-index:90;
+  background:rgba(255,255,255,.95); backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  display:flex; border-top:1px solid rgba(200,170,190,.15);
+  z-index:90; padding-bottom:env(safe-area-inset-bottom,0);
 }
 .fin-nav-item{
   flex:1; display:flex; flex-direction:column; align-items:center;
-  padding:8px 0 6px; cursor:pointer; transition:all .15s;
+  padding:7px 0 5px; cursor:pointer; transition:all .15s;
   border:none; background:none; font-family:var(--font);
 }
-.fin-nav-item .nav-icon{ font-size:20px; }
-.fin-nav-item .nav-label{ font-size:10px; margin-top:2px; color:var(--text3); font-weight:500; }
-.fin-nav-item.active .nav-label{ color:var(--pink); font-weight:700; }
-.fin-nav-item.active .nav-icon{ transform:scale(1.1); }
+.fin-nav-item .nav-icon{ font-size:22px; transition:transform .15s; }
+.fin-nav-item .nav-label{ font-size:10px; margin-top:1px; color:var(--text3); font-weight:600; }
+.fin-nav-item.active .nav-label{ color:#E84C72; }
+.fin-nav-item.active .nav-icon{ transform:scale(1.15); }
+/* 弹窗 */
 .fin-modal-overlay{
   position:fixed; top:0; left:0; width:100%; height:100%;
-  background:rgba(60,30,40,.3); z-index:300; display:none;
+  background:rgba(50,25,40,.35); z-index:300; display:none;
   align-items:flex-end; justify-content:center;
 }
 .fin-modal-overlay.show{ display:flex; }
 .fin-modal{
-  background:#FFF; border-radius:20px 20px 0 0;
-  width:100%; max-width:430px; padding:20px 18px 30px;
-  animation:slideUp .3s ease;
+  background:#FFF; border-radius:22px 22px 0 0;
+  width:100%; max-width:430px; padding:22px 18px 34px;
+  animation:finSlideUp .3s ease;
 }
-@keyframes slideUp{ from{transform:translateY(100%)} to{transform:translateY(0)} }
-.fin-modal-title{ font-size:16px; font-weight:700; text-align:center; margin-bottom:16px; color:var(--text); }
-.fin-modal-type-switch{ display:flex; gap:8px; margin-bottom:14px; }
+@keyframes finSlideUp{ from{transform:translateY(100%)} to{transform:translateY(0)} }
+.fin-modal-title{ font-size:17px; font-weight:800; text-align:center; margin-bottom:18px; color:var(--text); }
+.fin-modal-type-switch{ display:flex; gap:8px; margin-bottom:16px; }
 .fin-modal-type-btn{
-  flex:1; padding:8px; border:1.5px solid var(--border); border-radius:10px;
+  flex:1; padding:9px; border:2px solid var(--border); border-radius:12px;
   font-size:13px; cursor:pointer; background:#FFF; color:var(--text2);
-  font-family:var(--font); font-weight:600; transition:all .15s;
+  font-family:var(--font); font-weight:700; transition:all .15s;
 }
-.fin-modal-type-btn.active-expense{ background:linear-gradient(135deg,#FF6B81,#EE5A68); color:#FFF; border-color:transparent; }
-.fin-modal-type-btn.active-income{ background:linear-gradient(135deg,#51CF66,#37B24D); color:#FFF; border-color:transparent; }
-.fin-modal-amount{ text-align:center; margin-bottom:14px; }
+.fin-modal-type-btn.active-expense{ background:#FFE8ED; color:#E84C72; border-color:#FFB6C8; }
+.fin-modal-type-btn.active-income{ background:#E8F8EF; color:#37B24D; border-color:#A5D6B8; }
+.fin-modal-amount{ text-align:center; margin-bottom:16px; }
 .fin-modal-amount input{
-  width:140px; font-size:32px; font-weight:800; text-align:center;
+  width:160px; font-size:36px; font-weight:900; text-align:center;
   border:none; outline:none; background:transparent;
   color:var(--text); font-family:var(--font);
-  border-bottom:2px solid var(--pink); padding:4px 0;
+  border-bottom:2.5px solid #E84C72; padding:4px 0;
 }
 .fin-modal-cats{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
 .fin-modal-cat{
   display:flex; flex-direction:column; align-items:center; gap:4px;
-  padding:8px 4px; border-radius:10px; border:1.5px solid var(--border);
-  cursor:pointer; transition:all .15s; background:#FFF;
+  padding:9px 4px; border-radius:12px; border:2px solid transparent;
+  cursor:pointer; transition:all .12s; background:#FAF5F7;
 }
-.fin-modal-cat.selected{ border-color:var(--pink); background:var(--pink-light); }
+.fin-modal-cat.selected{ border-color:#E84C72; background:#FFF0F3; }
 .fin-modal-cat .mcat-icon{ font-size:22px; }
-.fin-modal-cat .mcat-name{ font-size:10px; color:var(--text2); }
+.fin-modal-cat .mcat-name{ font-size:10px; color:var(--text2); font-weight:500; }
 .fin-modal-note{ margin-bottom:14px; }
 .fin-modal-note input{
-  width:100%; padding:10px 14px; border:1px solid var(--border);
-  border-radius:10px; font-size:13px; outline:none; font-family:var(--font);
-  background:var(--pink-bg);
+  width:100%; padding:11px 14px; border:1.5px solid var(--border);
+  border-radius:12px; font-size:13px; outline:none; font-family:var(--font);
+  background:#FAF5F7;
 }
-.fin-modal-note input:focus{ border-color:var(--pink); }
-.fin-modal-date{ margin-bottom:16px; }
+.fin-modal-note input:focus{ border-color:#E84C72; }
+.fin-modal-date{ margin-bottom:18px; }
 .fin-modal-date input{
-  width:100%; padding:10px 14px; border:1px solid var(--border);
-  border-radius:10px; font-size:13px; outline:none; font-family:var(--font);
-  background:var(--pink-bg);
+  width:100%; padding:11px 14px; border:1.5px solid var(--border);
+  border-radius:12px; font-size:13px; outline:none; font-family:var(--font);
+  background:#FAF5F7;
 }
 .fin-modal-actions{ display:flex; gap:10px; }
 .fin-modal-btn-cancel{
-  flex:1; padding:12px; border:1.5px solid var(--border); border-radius:12px;
+  flex:1; padding:13px; border:2px solid var(--border); border-radius:14px;
   font-size:14px; background:#FFF; color:var(--text2); cursor:pointer;
-  font-family:var(--font); font-weight:600;
+  font-family:var(--font); font-weight:700;
 }
 .fin-modal-btn-save{
-  flex:1; padding:12px; border:none; border-radius:12px;
-  font-size:14px; font-weight:600; cursor:pointer; font-family:var(--font);
-  background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:#FFF;
+  flex:1; padding:13px; border:none; border-radius:14px;
+  font-size:14px; font-weight:700; cursor:pointer; font-family:var(--font);
+  background:linear-gradient(135deg,#E84C72,#D63D62); color:#FFF;
 }
 .fin-modal-btn-save:active{ opacity:.85; }
-.fin-bill-list{ display:flex; flex-direction:column; gap:6px; }
+/* 账单列表 */
+.fin-bill-list{ display:flex; flex-direction:column; gap:0; }
 .fin-bill-item{
-  display:flex; align-items:center; gap:10px; padding:10px 12px;
-  background:rgba(255,255,255,.7); border-radius:var(--radius-sm);
-  border:1px solid rgba(240,128,160,.06);
+  display:flex; align-items:center; gap:12px; padding:13px 14px;
+  background:#FFF; border-bottom:1px solid #F5EEF3;
+  transition:background .12s;
 }
-.fin-bill-icon{ font-size:22px; flex-shrink:0; }
-.fin-bill-info{ flex:1; min-width:0; }
-.fin-bill-cat{ font-size:12px; font-weight:600; color:var(--text); }
-.fin-bill-note{ font-size:11px; color:var(--text3); overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-.fin-bill-amount{ font-size:14px; font-weight:700; flex-shrink:0; }
-.fin-bill-amount.expense{ color:var(--danger); }
-.fin-bill-amount.income{ color:#37B24D; }
-.fin-bill-date{ font-size:10px; color:var(--text3); flex-shrink:0; }
-.fin-filter-bar{ display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
-.fin-filter-btn{
-  padding:5px 12px; border:1.5px solid var(--border); border-radius:14px;
-  font-size:12px; cursor:pointer; background:rgba(255,255,255,.8);
-  color:var(--text2); font-family:var(--font); transition:all .15s;
+.fin-bill-item:active{ background:#FAF5F7; }
+.bill-icon-circle{
+  width:42px; height:42px; border-radius:50%; display:flex;
+  align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
 }
-.fin-filter-btn.active{ background:var(--pink); color:#FFF; border-color:var(--pink); font-weight:600; }
-.fin-year-month{ display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:10px; }
-.fin-ym-btn{ padding:5px 12px; border:1px solid var(--border); border-radius:10px; background:rgba(255,255,255,.8); font-size:13px; cursor:pointer; color:var(--text2); font-family:var(--font); }
-.fin-ym-label{ font-size:15px; font-weight:700; color:var(--text); min-width:120px; text-align:center; }
+.bill-info{ flex:1; min-width:0; }
+.bill-title{ font-size:14px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.bill-meta{ font-size:11px; color:var(--text3); }
+.bill-amount{ font-size:15px; font-weight:800; flex-shrink:0; min-width:80px; text-align:right; }
+.bill-amount.expense{ color:#E84C72; }
+.bill-amount.income{ color:#37B24D; }
+.bill-del{
+  width:24px; height:24px; border-radius:50%; border:none;
+  background:none; color:var(--text3); font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.bill-del:active{ background:#FFEBEE; }
+
+/* 筛选栏 */
+.fin-bills-header{
+  display:flex; align-items:center; gap:8px;
+  padding:10px 16px 12px; position:relative;
+}
+.fin-bills-title{ font-size:17px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:6px; }
+.fin-bills-count{ font-size:12px; color:var(--text3); font-weight:500; }
+.fin-bills-pig{ font-size:28px; margin-left:auto; }
+.fin-filter-row{ display:flex; gap:8px; padding:0 16px 10px; }
+.fin-type-select{
+  flex:1; padding:9px 12px; border:1.5px solid var(--border);
+  border-radius:11px; font-size:13px; outline:none;
+  font-family:var(--font); background:#FFF; color:var(--text);
+  appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center;
+}
+.fin-month-select{
+  padding:9px 12px; border:1.5px solid var(--border);
+  border-radius:11px; font-size:13px; outline:none;
+  font-family:var(--font); background:#FFF; color:var(--text);
+  appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;
+}
+
+/* 统计图表 */
 .fin-chart-card{
-  background:rgba(255,255,255,.8); backdrop-filter:blur(8px);
-  border-radius:var(--radius-sm); padding:14px; margin-bottom:12px;
-  border:1px solid rgba(240,128,160,.08);
+  background:#FFF; border-radius:14px; padding:16px; margin:0 16px 12px;
+  box-shadow:0 2px 10px rgba(180,140,170,.08);
 }
-.fin-chart-title{ font-size:13px; font-weight:600; color:var(--text); margin-bottom:10px; }
-.fin-period-tabs{ display:flex; gap:6px; margin-bottom:12px; }
-.fin-period-tab{
-  padding:5px 14px; border:1.5px solid var(--border); border-radius:14px;
-  font-size:12px; cursor:pointer; background:rgba(255,255,255,.8);
-  color:var(--text2); font-family:var(--font); transition:all .15s;
+.fin-chart-title{ font-size:14px; font-weight:700; color:var(--text); margin-bottom:12px; display:flex; align-items:center; gap:4px; }
+.chart-title-pig{ margin-left:auto; font-size:20px; }
+/* 统计标签栏 */
+.fin-stats-tabs{
+  display:flex; gap:8px; padding:12px 16px 0;
 }
-.fin-period-tab.active{ background:var(--pink); color:#FFF; border-color:var(--pink); font-weight:600; }
-.fin-ranking-list{ display:flex; flex-direction:column; gap:6px; }
-.fin-ranking-item{
-  display:flex; align-items:center; gap:8px; padding:8px 10px;
-  background:rgba(255,255,255,.6); border-radius:8px;
+.st-tab{
+  flex:1; padding:9px; border:2px solid transparent; border-radius:12px;
+  font-size:13px; cursor:pointer; font-family:var(--font); font-weight:700;
+  transition:all .15s; background:#F5EEF3; color:var(--text2);
 }
-.fin-rank-num{ font-size:12px; font-weight:700; color:var(--text3); width:18px; text-align:center; }
-.fin-rank-icon{ font-size:18px; }
-.fin-rank-name{ flex:1; font-size:12px; color:var(--text2); }
-.fin-rank-bar-wrap{ flex:1; height:6px; background:var(--pink-light); border-radius:3px; overflow:hidden; min-width:40px; }
-.fin-rank-bar{ height:100%; border-radius:3px; background:linear-gradient(90deg,var(--pink),var(--pink-dark)); }
-.fin-rank-amount{ font-size:12px; font-weight:700; color:var(--text); flex-shrink:0; }
-.fin-settings-list{ display:flex; flex-direction:column; gap:6px; }
-.fin-set-item{
-  display:flex; align-items:center; gap:10px; padding:12px 14px;
-  background:rgba(255,255,255,.7); border-radius:var(--radius-sm);
-  cursor:pointer; border:1px solid rgba(240,128,160,.06);
-  transition:background .15s;
+.st-tab.active{ background:#5D4363; color:#FFF; box-shadow:0 3px 12px rgba(93,67,99,.35); }
+.st-tab:active{ transform:scale(.97); }
+/* 饼图 */
+.fin-pie-wrap{ display:flex; align-items:center; gap:16px; }
+.fin-pie-svg{ width:130px; height:130px; flex-shrink:0; }
+.fin-pie-legend{ flex:1; display:flex; flex-direction:column; gap:5px; }
+.leg-item{ display:flex; align-items:center; gap:7px; font-size:12px; }
+.leg-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.leg-name{ color:var(--text2); flex:1; }
+.leg-val{ font-weight:700; color:var(--text); }
+/* 柱状图 */
+.fin-bar-wrap{ display:flex; align-items:flex-end; justify-content:space-between; height:120px; padding-top:30px; }
+.fin-bar-item{ display:flex; flex-direction:column; align-items:center; flex:1; gap:4px; }
+.bar-val{ font-size:10px; color:var(--text3); font-weight:600; height:18px; }
+.bar-col{ width:22px; border-radius:6px 6px 2px 2px; background:#F0DEE6; min-height:4px; transition:height .3s; }
+.bar-col.active{ background:linear-gradient(180deg,#F08CA8,#E84C72); }
+.bar-day{ font-size:11px; color:var(--text3); font-weight:500; }
+/* 排行榜 */
+.fin-rank-list{ display:flex; flex-direction:column; gap:8px; }
+.fin-rank-item{
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  background:#FAF5F7; border-radius:12px;
 }
-.fin-set-item:active{ background:var(--pink-light); }
-.fin-set-icon{ font-size:20px; }
-.fin-set-name{ flex:1; font-size:13px; font-weight:500; color:var(--text); }
-.fin-set-arrow{ color:var(--text3); font-size:14px; }
+.rank-num{ font-size:14px; font-weight:800; color:var(--text3); width:22px; text-align:center; }
+.rank-num.top3{ color:#E84C72; }
+.rank-icon{ font-size:22px; }
+.rank-name{ flex:1; font-size:13px; font-weight:600; color:var(--text); }
+.rank-bar-wrap{ width:60px; height:6px; background:#F0DEE6; border-radius:3px; overflow:hidden; }
+.rank-bar-fill{ height:100%; border-radius:3px; background:linear-gradient(90deg,#E84C72,#F08CA8); }
+.rank-amount{ font-size:14px; font-weight:800; color:var(--text); flex-shrink:0; min-width:56px; text-align:right; }
+
+/* 我的页面 */
+.fin-settings{ padding:0 16px; }
+.fin-profile{
+  display:flex; flex-direction:column; align-items:center;
+  padding:30px 0 24px; position:relative;
+}
+.fin-profile-pig{
+  width:76px; height:76px; border-radius:50%;
+  background:linear-gradient(135deg,#FFE0E9,#FFD1DE);
+  display:flex; align-items:center; justify-content:center;
+  font-size:40px; box-shadow:0 4px 16px rgba(240,128,160,.25);
+  margin-bottom:12px;
+}
+.fin-profile-name{ font-size:19px; font-weight:800; color:var(--text); letter-spacing:1px; }
+.fin-profile-days{ font-size:13px; color:var(--text3); margin-top:4px; }
+.fin-profile-deco-pig{
+  position:absolute; right:0; top:24px; font-size:34px; opacity:.6;
+}
+.fin-setting-group{ display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+.fin-setting-item{
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+  background:#FFF; border-radius:14px; cursor:pointer;
+  box-shadow:0 1px 6px rgba(180,140,170,.06);
+  transition:all .12s; border:none; width:100%; text-align:left;
+  font-family:var(--font);
+}
+.fin-setting-item:active{ transform:scale(.98); background:#FAF5F7; }
+.fin-setting-item.danger .set-name{ color:#E84C72; }
+.set-icon{ font-size:20px; flex-shrink:0; }
+.set-name{ flex:1; font-size:14px; font-weight:600; color:var(--text); }
+.set-arrow{ color:var(--text3); font-size:16px; }
+.fin-version-info{
+  text-align:center; padding:20px 0 8px; font-size:12px;
+  color:var(--text3); line-height:1.6;
+}
 
 /* ============================================================
    模块7: 每日运动记录 — 粉色适配
@@ -1789,6 +1919,34 @@ function getFinRecords(period){
   }
 }
 
+// 小猪记账辅助函数
+function getFinGreeting(){
+  const h = new Date().getHours();
+  if(h<6) return '夜深了 🌙';
+  if(h<9) return '早上好 ☀️';
+  if(h<12) return '上午好 🌤';
+  if(h<14) return '中午好 🌞';
+  if(h<18) return '下午好 ⛅';
+  if(h<22) return '晚上好 🌙';
+  return '夜深了 🌙';
+}
+function catBgClass(cat){
+  const m = {'餐饮':'cat-bg-meal','交通':'cat-bg-transit','购物':'cat-bg-shop','娱乐':'cat-bg-fun',
+             '居住':'cat-bg-home','医疗':'cat-bg-medical','学习':'cat-bg-study'};
+  return m[cat] || 'cat-bg-other';
+}
+function getFinStreakDays(){
+  if(!financeRecords.length) return 0;
+  const dates = [...new Set(financeRecords.map(r=>r.date))].sort().reverse();
+  if(!dates.length) return 0;
+  let streak=0; let d=new Date(); d.setHours(0,0,0,0);
+  for(let i=0;i<365;i++){
+    if(dates.includes(dateStr(d))){ streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+
 function renderFinance() {
   const tab = window._finTab || 'home';
   let pageHTML = '';
@@ -1820,45 +1978,51 @@ function renderFinHome(){
   const budgetUsed = totalExpense;
   const budgetRemain = budget - budgetUsed;
   const budgetPct = budget>0 ? Math.min(budgetUsed/budget*100,100) : 0;
-  const budgetColor = budgetPct>=90 ? '#D94A4A' : budgetPct>=70 ? '#F0833A' : '#4A7C3F';
 
   const cats = financeCats.expense || DEFAULT_EXPENSE_CATS;
-  const catGrid = cats.map(c=>`
-    <div class="fin-cat-item" data-cat="${escHtml(c)}" data-type="expense">
-      <span class="cat-icon">${finCatIcon(c)}</span>
-      <span class="cat-name">${escHtml(c)}</span>
-      ${!DEFAULT_EXPENSE_CATS.includes(c) ? '<button class="cat-del" data-delcat="'+escHtml(c)+'" data-deltype="expense">×</button>' : ''}
-    </div>
-  `).join('') + `<div class="fin-cat-add" data-addcat="expense"><span style="font-size:24px">＋</span><span>添加</span></div>`;
+  const catGrid = cats.map(c=>{
+    const bg = catBgClass(c);
+    return `<div class="fin-cat-item" data-cat="${escHtml(c)}" data-type="expense">
+      <div class="fin-cat-icon-wrap ${bg}">${finCatIcon(c)}</div>
+      <span class="fin-cat-name">${escHtml(c)}</span>
+    </div>`;
+  }).join('') + `<div class="fin-cat-item" data-addcat="expense"><div class="fin-cat-icon-wrap cat-bg-other">＋</div><span class="fin-cat-name">添加</span></div>`;
 
   return `
     <div class="fin-home">
+      <div class="fin-greeting">
+        <div class="fin-greeting-left">
+          <div class="fin-greeting-text">${getFinGreeting()}</div>
+          <div class="fin-greeting-title">小猪记账</div>
+        </div>
+        <div class="fin-greeting-pig">🐷</div>
+      </div>
       <div class="fin-balance-card">
-        <div class="fin-balance-label">本月结余 (¥)</div>
-        <div class="fin-balance-num">${balance>=0?'+':''}${balance.toFixed(2)}</div>
+        <div class="fin-balance-pig">🐷</div>
+        <div class="fin-balance-label">本月结余</div>
+        <div class="fin-balance-num">¥${balance.toFixed(2)}</div>
         <div class="fin-balance-row">
-          <div><div class="lbl">本月收入</div><div class="num income-num">¥${totalIncome.toFixed(0)}</div></div>
-          <div><div class="lbl">本月支出</div><div class="num expense-num">¥${totalExpense.toFixed(0)}</div></div>
+          <div class="fin-blk"><div class="lbl">收入</div><div class="num income-c">¥${totalIncome.toFixed(2)}</div></div>
+          <div class="fin-blk"><div class="lbl">支出</div><div class="num expense-c">¥${totalExpense.toFixed(2)}</div></div>
         </div>
       </div>
       ${budget>0 ? `
       <div class="fin-budget-card">
         <div class="fin-budget-header">
-          <span class="fin-budget-title">💳 月度预算</span>
-          <span class="fin-budget-remain" style="color:${budgetColor}">剩余 ¥${budgetRemain>0?budgetRemain.toFixed(0):0}</span>
+          <span class="fin-budget-title">🐷 本月预算</span>
+          <span class="fin-budget-remain">剩余 ¥${budgetRemain>0?budgetRemain.toFixed(0):0}</span>
         </div>
-        <div class="fin-budget-bar"><div class="fin-budget-bar-fill" style="width:${budgetPct}%;background:${budgetColor}"></div></div>
+        <div class="fin-budget-bar"><div class="fin-budget-bar-fill" style="width:${Math.min(budgetPct,100)}%"></div></div>
         <div class="fin-budget-info">
-          <span>已花 ¥${budgetUsed.toFixed(0)}</span>
-          <span>预算 ¥${budget.toFixed(0)}</span>
-          <span>${Math.round(budgetPct)}%</span>
+          <span>已用 ¥${budgetUsed.toFixed(0)}</span>
+          <span>总额 ¥${budget.toFixed(0)}</span>
         </div>
       </div>` : ''}
       <div class="fin-quick-actions">
-        <button class="fin-quick-btn expense" data-quick="expense">💸 记支出</button>
-        <button class="fin-quick-btn income" data-quick="income">💰 记收入</button>
+        <button class="fin-quick-btn expense" data-quick="expense">－ 记支出</button>
+        <button class="fin-quick-btn income" data-quick="income">＋ 记收入</button>
       </div>
-      <div class="fin-section-title">收支分类</div>
+      <div class="fin-section-title">📂 快捷分类</div>
       <div class="fin-cat-grid">${catGrid}</div>
     </div>
   `;
@@ -1876,27 +2040,32 @@ function renderFinBills(){
   const nowY=new Date().getFullYear();
   const yearOpts=[]; for(let y=nowY-3;y<=nowY+1;y++) yearOpts.push(`<option value="${y}" ${y===yr?'selected':''}>${y}年</option>`);
   const monthOpts = months.map((m,i)=>`<option value="${i}" ${i===mo?'selected':''}>${m}</option>`).join('');
+  const typeOpts = `<option value="all" ${filter==='all'?'selected':''}>全部类型</option><option value="income" ${filter==='income'?'selected':''}>收入</option><option value="expense" ${filter==='expense'?'selected':''}>支出</option>`;
 
-  const listHTML = recs.length ? recs.map(r=>`
+  const listHTML = recs.length ? recs.map(r=>{
+    const bg = catBgClass(r.category);
+    return `
     <div class="fin-bill-item" data-fid="${r.id}">
-      <div class="bill-icon ${r.type}">${finCatIcon(r.category)}</div>
+      <div class="bill-icon-circle ${bg}">${finCatIcon(r.category)}</div>
       <div class="bill-info">
-        <div class="bill-title">${escHtml(r.category||'其他')}${r.note?' · '+escHtml(r.note):''}</div>
-        <div class="bill-meta">${r.date} · ${r.type==='income'?'收入':'支出'}</div>
+        <div class="bill-title">${escHtml(r.category||'其他')}</div>
+        <div class="bill-meta">${r.date}${r.note?' · '+escHtml(r.note):''}</div>
       </div>
       <div class="bill-amount ${r.type}">${r.type==='income'?'+':'-'}¥${Number(r.amount).toFixed(2)}</div>
       <button class="bill-del" title="删除">×</button>
-    </div>
-  `).join('') : '<div class="expr-empty">📭 该月份暂无账单记录</div>';
+    </div>`;
+  }).join('') : '<div style="text-align:center;padding:40px 16px;color:var(--text3);font-size:13px;">📭 该月份暂无账单记录</div>';
 
   return `
     <div class="fin-bills">
       <div class="fin-bills-header">
-        <select id="finBillYear">${yearOpts.join('')}</select>
-        <select id="finBillMonth">${monthOpts}</select>
-        <button class="fin-filter-btn ${filter==='all'?'active':''}" data-filter="all">全部</button>
-        <button class="fin-filter-btn ${filter==='income'?'active':''}" data-filter="income">收入</button>
-        <button class="fin-filter-btn ${filter==='expense'?'active':''}" data-filter="expense">支出</button>
+        <span class="fin-bills-title">📁 全部账单</span>
+        <span class="fin-bills-count">${recs.length} 笔</span>
+        <span class="fin-bills-pig">🐷</span>
+      </div>
+      <div class="fin-filter-row">
+        <select class="fin-type-select" id="finBillTypeFilter">${typeOpts}</select>
+        <select class="fin-month-select" id="finBillMonthSel">${yearOpts.join('')}年${monthOpts}</select>
       </div>
       <div class="fin-bill-list">${listHTML}</div>
     </div>
@@ -1908,115 +2077,74 @@ function renderFinStats(){
   const recs = getFinRecords(period);
   const expenseRecs = recs.filter(r=>r.type==='expense');
 
-  // 饼图数据
   const catMap={};
-  expenseRecs.forEach(r=>{ const c=r.category||'其他'; catMap[c]=(catMap[c]||0)+Number(r.amount); });
+  expenseRecs.forEach(r=>{ const c=r.category||'\u5176\u4ed6'; catMap[c]=(catMap[c]||0)+Number(r.amount); });
   const catEntries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
   const totalExp = catEntries.reduce((s,[,v])=>s+v,0);
 
-  // SVG饼图
   let pieSVG='';
   if(catEntries.length){
-    let acc=0; const R=55, cx=65, cy=65;
+    let acc=0; const R=50, cx=56, cy=56, innerR=28;
     const arcs = catEntries.map(([cat,amt],i)=>{
       const pct = totalExp>0 ? amt/totalExp : 0;
+      if(pct<0.002) return '';
       const startAngle = acc*2*Math.PI - Math.PI/2;
       acc += pct;
       const endAngle = acc*2*Math.PI - Math.PI/2;
       const x1=cx+R*Math.cos(startAngle), y1=cy+R*Math.sin(startAngle);
       const x2=cx+R*Math.cos(endAngle), y2=cy+R*Math.sin(endAngle);
+      const ix1=cx+innerR*Math.cos(startAngle), iy1=cy+innerR*Math.sin(startAngle);
+      const ix2=cx+innerR*Math.cos(endAngle), iy2=cy+innerR*Math.sin(endAngle);
       const largeArc = pct>0.5?1:0;
       const color = FINANCE_COLORS[i%FINANCE_COLORS.length];
-      if(pct>=0.999) return `<circle cx="${cx}" cy="${cy}" r="${R}" fill="${color}"/>`;
-      return `<path d="M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${R} ${R} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z" fill="${color}"/>`;
+      if(pct>=0.999) return '<path d="M'+(cx+R)+' '+cy+' A'+R+' '+R+' 1 1 0 '+(cx-R)+' '+cy+' A'+R+' '+R+' 1 1 0 '+(cx+R)+' '+cy+' M'+(cx-innerR)+' '+cy+' A'+innerR+' '+innerR+' 1 1 1 '+(cx+innerR)+' '+cy+' A'+innerR+' '+innerR+' 1 1 1 '+(cx-innerR)+' '+cy+'" fill="'+color+'"/>';
+      return '<path d="M'+x1.toFixed(1)+' '+y1.toFixed(1)+' A'+R+' '+R+' 0 '+largeArc+' 1 '+x2.toFixed(1)+' '+y2.toFixed(1)+' L'+ix2.toFixed(1)+' '+iy2.toFixed(1)+' A'+innerR+' '+innerR+' 0 '+largeArc+' 0 '+ix1.toFixed(1)+' '+iy1.toFixed(1)+' Z" fill="'+color+'"/>';
     }).join('');
-    pieSVG = `<svg class="fin-pie-svg" viewBox="0 0 130 130"><circle cx="65" cy="65" r="55" fill="#F5F7F0"/>${arcs}<circle cx="65" cy="65" r="30" fill="#FFF"/><text x="65" y="62" text-anchor="middle" font-size="10" fill="#999">总支出</text><text x="65" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#333">¥${totalExp.toFixed(0)}</text></svg>`;
+    pieSVG = '<svg class="fin-pie-svg" viewBox="0 0 112 112"><circle cx="56" cy="56" r="50" fill="#F5F0F3"/><circle cx="56" cy="56" r="28" fill="#FFF"/>'+arcs+'<text x="56" y="53" text-anchor="middle" font-size="9" fill="#999">\u603b\u652f\u51fa</text><text x="56" y="67" text-anchor="middle" font-size="13" font-weight="800" fill="#333">\u00a5'+totalExp.toFixed(0)+'</text></svg>';
   } else {
-    pieSVG = `<svg class="fin-pie-svg" viewBox="0 0 130 130"><circle cx="65" cy="65" r="55" fill="#F5F7F0"/><text x="65" y="70" text-anchor="middle" font-size="12" fill="#999">暂无数据</text></svg>`;
+    pieSVG = '<svg class="fin-pie-svg" viewBox="0 0 112 112"><circle cx="56" cy="56" r="50" fill="#F5F0F3"/><circle cx="56" cy="56" r="28" fill="#FFF"/><text x="56" y="60" text-anchor="middle" font-size="11" fill="#999">\u6682\u65e0\u6570\u636e</text></svg>';
   }
-  const legendHTML = catEntries.length ? catEntries.slice(0,8).map(([cat,amt],i)=>`
-    <div class="leg-item">
-      <span class="leg-dot" style="background:${FINANCE_COLORS[i%FINANCE_COLORS.length]}"></span>
-      <span class="leg-name">${escHtml(cat)}</span>
-      <span class="leg-val">¥${amt.toFixed(0)}</span>
-    </div>
-  `).join('') : '<div style="font-size:12px;color:#999;padding:10px 0">暂无支出数据</div>';
 
-  // 柱状图 — 近7天
+  const legendHTML = catEntries.length ? catEntries.slice(0,8).map(([cat,amt],i)=>{
+    const pct = totalExp>0 ? (amt/totalExp*100) : 0;
+    return '<div class="leg-item"><span class="leg-dot" style="background:'+FINANCE_COLORS[i%FINANCE_COLORS.length]+'"></span><span class="leg-name">'+escHtml(cat)+'</span><span class="leg-val">'+pct.toFixed(0)+'%</span></div>';
+  }).join('') : '<div style="font-size:12px;color:var(--text3);padding:16px;text-align:center;">\u6682\u65e0\u652f\u51fa\u6570\u636e</div>';
+
   const now=new Date();
   const days=[];
   for(let i=6;i>=0;i--){
     const d=new Date(now); d.setDate(d.getDate()-i);
     const ds=dateStr(d);
     const dayExp = expenseRecs.filter(r=>r.date===ds).reduce((s,r)=>s+Number(r.amount),0);
-    days.push({ date:ds, exp:dayExp, label:(d.getMonth()+1)+'/'+d.getDate(), isToday:i===0 });
+    days.push({ date:ds, exp:dayExp, label:['\u65e5','\u4e00','\u4e8c','\u4e09','\u56db','\u4e94','\u516d'][d.getDay()], isToday:i===0 });
   }
   const maxDayExp = Math.max(...days.map(d=>d.exp),1);
-  const barHTML = days.map(d=>`
-    <div class="fin-bar-item">
-      <span class="bar-val">${d.exp>0?'¥'+d.exp.toFixed(0):''}</span>
-      <div class="bar-col ${d.isToday?'active':''}" style="height:${Math.max(d.exp/maxDayExp*90,4)}px"></div>
-      <span class="bar-day">${d.label}</span>
+  const barHTML = days.map(d => '<div class="fin-bar-item"><span class="bar-val">'+(d.exp>0?'\u00a5'+d.exp.toFixed(0):'')+'</span><div class="bar-col '+(d.isToday?'active':'')+'" style="height:'+Math.max(d.exp/maxDayExp*80,4)+'px"></div><span class="bar-day">'+d.label+'</span></div>').join('');
+
+  const rankHTML = catEntries.length ? catEntries.map(([cat,amt],i) => '<div class="fin-rank-item"><span class="rank-num '+(i<3?'top3':'')+'">'+(i+1)+'</span><div class="rank-icon">'+finCatIcon(cat)+'</div><div class="rank-name">'+escHtml(cat)+'</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:'+(catEntries[0][1]>0?amt/catEntries[0][1]*100:0)+'%"></div></div><span class="rank-amount">\u00a5'+amt.toFixed(0)+'</span></div>').join('') : '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px;">\ud83c\udfc6 \u6682\u65e0\u6392\u884c\u6570\u636e</div>';
+
+  return '<div class="fin-stats"><div style="padding:14px 16px 4px;display:flex;align-items:center;gap:6px;"><span style="font-size:17px;font-weight:800;color:var(--text)">\ud83d\udcca \u7edf\u8ba1\u5206\u6790</span></div><div class="fin-stats-tabs"><button class="st-tab '+(period==='month'?'active':'')+'" data-period="month">\u672c\u6708</button><button class="st-tab '+(period==='week'?'active':'')+'" data-period="week">\u672c\u5468</button><button class="st-tab '+(period==='year'?'active':'')+'" data-period="year">\u672c\u5e74</button></div><div class="fin-chart-card"><div class="chart-title">\ud83d\dcc2 \u652f\u51fa\u5206\u7c7b\u5360\u6bd4<span class="chart-title-pig">\ud83d\udc37</span></div><div class="fin-pie-wrap">'+pieSVG+'<div class="fin-pie-legend">'+legendHTML+'</div></div></div><div class="fin-chart-card"><div class="chart-title">\ud83d\dcc5 \u8fd17\u5929\u652f\u51fa\u8d8b\u52bf</div><div class="fin-bar-wrap">'+barHTML+'</div></div><div class="fin-chart-card"><div class="chart-title">\ud83c\udfc6 \u652f\u51fa\u6392\u884c\u699c</div><div class="fin-rank-list">'+rankHTML+'</div></div></div>';
+}function renderFinSettings(){
+  const streakDays = getFinStreakDays();
+  return `<div class="fin-settings">
+    <div class="fin-profile">
+      <div class="fin-profile-pig">\ud83d\udc37</div>
+      <div class="fin-profile-name">\u5c0f\u732a\u8bb1\u8d26</div>
+      <div class="fin-profile-days">\u5df2\u575a\u6301\u8bb1\u8d26 ${streakDays} \u5929 \ud83d\udc37</div>
+      <div class="fin-profile-deco-pig">\ud83d\udc37</div>
     </div>
-  `).join('');
-
-  // 排行榜
-  const rankHTML = catEntries.length ? catEntries.map(([cat,amt],i)=>`
-    <div class="fin-rank-item">
-      <span class="rank-num">${i+1}</span>
-      <div class="rank-info">
-        <div class="rank-name">${finCatIcon(cat)} ${escHtml(cat)}</div>
-        <div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:${catEntries[0][1]>0?amt/catEntries[0][1]*100:0}%"></div></div>
-      </div>
-      <span class="rank-amount">¥${amt.toFixed(0)}</span>
+    <div class="fin-setting-group">
+      <button class="fin-setting-item" data-set="backup"><span class="set-icon">\u2601\ufe0f</span><span class="set-name">\u6570\u636e\u5907\u4efd</span><span class="set-arrow">\u203a</span></button>
+      <button class="fin-setting-item" data-set="export"><span class="set-icon">\ud83d\udce4</span><span class="set-name">\u5bfc\u51fa\u8d26\u5355</span><span class="set-arrow">\u203a</span></button>
+      <button class="fin-setting-item" data-set="budget"><span class="set-icon">\ud83c\udfaf</span><span class="set-name">\u9884\u7b97\u8bbe\u7f6e</span><span class="set-arrow">\u203a</span></button>
+      <button class="fin-setting-item" data-set="catmgmt"><span class="set-icon">\ud83d\udcc2</span><span class="set-name">\u5206\u7c7b\u7ba1\u7406</span><span class="set-arrow">\u203a</span></button>
     </div>
-  `).join('') : '<div class="expr-empty">暂无排行数据</div>';
-
-  const periodLabel = period==='month'?'本月':period==='week'?'本周':'本年';
-
-  return `
-    <div class="fin-stats">
-      <div class="fin-stats-tabs">
-        <button class="st-tab ${period==='month'?'active':''}" data-period="month">本月</button>
-        <button class="st-tab ${period==='week'?'active':''}" data-period="week">本周</button>
-        <button class="st-tab ${period==='year'?'active':''}" data-period="year">本年</button>
-      </div>
-      <div class="fin-chart-card">
-        <div class="chart-title">🥧 ${periodLabel}支出分类</div>
-        <div class="fin-pie-wrap">${pieSVG}<div class="fin-pie-legend">${legendHTML}</div></div>
-      </div>
-      <div class="fin-chart-card">
-        <div class="chart-title">📈 近7天支出趋势</div>
-        <div class="fin-bar-wrap">${barHTML}</div>
-      </div>
-      <div class="fin-chart-card">
-        <div class="chart-title">🏆 ${periodLabel}支出排行榜</div>
-        <div class="fin-rank-list">${rankHTML}</div>
-      </div>
+    <div class="fin-setting-group">
+      <button class="fin-setting-item danger" data-set="clear"><span class="set-icon">\ud83d\uddd1\ufe0f</span><span class="set-name">\u6e05\u9664\u6570\u636e</span><span class="set-arrow">\u203a</span></button>
     </div>
-  `;
-}
-
-function renderFinSettings(){
-  return `
-    <div class="fin-settings">
-      <div class="fin-setting-group">
-        <button class="fin-setting-item" data-set="export"><span class="set-icon">📤</span><span class="set-name">账单导出</span><span class="set-arrow">›</span></button>
-        <button class="fin-setting-item" data-set="backup"><span class="set-icon">💾</span><span class="set-name">数据备份</span><span class="set-arrow">›</span></button>
-        <button class="fin-setting-item" data-set="budget"><span class="set-icon">🎯</span><span class="set-name">预算设置</span><span class="set-arrow">›</span></button>
-        <button class="fin-setting-item" data-set="catmgmt"><span class="set-icon">🏷️</span><span class="set-name">分类管理</span><span class="set-arrow">›</span></button>
-      </div>
-      <div class="fin-setting-group">
-        <button class="fin-setting-item danger" data-set="clear"><span class="set-icon">🗑️</span><span class="set-name">清除所有数据</span><span class="set-arrow">›</span></button>
-      </div>
-      <div style="text-align:center;padding:16px;font-size:12px;color:var(--text3)">
-        老莫工作台 · 记账模块 V2<br/>共 ${financeRecords.length} 条记录
-      </div>
-    </div>
-  `;
-}
-
-function finOpenModal(type, presetCat){
+    <div class="fin-version-info">\u2139\ufe0f \u7248\u672c 2.0 &middot; \u5c0f\u732a\u8bb1\u8d26<br/>\u5171 ${financeRecords.length} \u6761\u8bb0\u5f55</div>
+  </div>`;
+}function finOpenModal(type, presetCat){
   const cats = type==='income' ? (financeCats.income||DEFAULT_INCOME_CATS) : (financeCats.expense||DEFAULT_EXPENSE_CATS);
   const catPicker = cats.map(c=>`<div class="picker-item ${c===presetCat?'active':''}" data-pickcat="${escHtml(c)}"><span class="pi-icon">${finCatIcon(c)}</span><span>${escHtml(c)}</span></div>`).join('');
   const overlay = document.createElement('div');
@@ -2207,36 +2335,28 @@ function bindFinance(el) {
   // 首页 — 分类点击快速记账
   el.querySelectorAll('.fin-cat-item').forEach(item=>{
     item.addEventListener('click',e=>{
-      if(e.target.classList.contains('cat-del')) return;
+      if(item.dataset.addcat){ finOpenCatMgmtModal(); return; }
       finOpenModal(item.dataset.type, item.dataset.cat);
     });
   });
-  // 首页 — 删除自定义分类
-  el.querySelectorAll('.cat-del').forEach(btn=>{
-    btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      const cat=btn.dataset.delcat, type=btn.dataset.deltype;
-      financeCats[type]=financeCats[type].filter(c=>c!==cat);
-      save(LS_FIN_CATS, financeCats);
-      renderModule('finance');
-      showToast('已删除分类');
-    });
-  });
-  // 首页 — 添加分类
-  el.querySelectorAll('[data-addcat]').forEach(btn=>{
-    btn.addEventListener('click',()=> finOpenCatMgmtModal());
-  });
 
-  // 账单页 — 筛选
-  el.querySelectorAll('[data-filter]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      window._finBillFilter=btn.dataset.filter;
-      renderModule('finance');
-    });
+  // 账单页 — 类型筛选下拉
+  el.querySelector('#finBillTypeFilter')?.addEventListener('change',e=>{
+    window._finBillFilter = e.target.value;
+    renderModule('finance');
   });
-  // 账单页 — 年月切换
-  el.querySelector('#finBillYear')?.addEventListener('change',e=>{ window._finBillYear=parseInt(e.target.value); renderModule('finance'); });
-  el.querySelector('#finBillMonth')?.addEventListener('change',e=>{ window._finBillMonth=parseInt(e.target.value); renderModule('finance'); });
+  // 账单页 — 年月切换（合并选择器，解析年份和月份）
+  el.querySelector('#finBillMonthSel')?.addEventListener('change',e=>{
+    const val = e.target.value;
+    if(val.includes('\u5e74')){
+      const ym = val.split('\u5e74');
+      window._finBillYear = parseInt(ym[0]);
+      const mStr = ym[1] || '';
+      const moMap={'1\u6708':0,'2\u6708':1,'3\u6708':2,'4\u6708':3,'5\u6708':4,'6\u6708':5,'7\u6708':6,'8\u6708':7,'9\u6708':8,'10\u6708':9,'11\u6708':10,'12\u6708':11};
+      window._finBillMonth = moMap[mStr.trim()] || 0;
+    }
+    renderModule('finance');
+  });
   // 账单页 — 删除
   el.querySelectorAll('.bill-del').forEach(btn=>{
     btn.addEventListener('click',()=>{
