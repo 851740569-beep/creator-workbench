@@ -617,7 +617,7 @@ body{
 /* ============================================================
    模块6: 日常记账 V2 — 粉色适配
    ============================================================ */
-/* ========== 小猪记账 V2 样式 ========== */
+/* ========== 老莫记账 V2 样式 ========== */
 .fin-v2{ position:relative; padding-bottom:60px; min-height:calc(100vh - 56px); }
 
 /* 首页问候区 */
@@ -746,7 +746,7 @@ body{
   background:rgba(50,25,40,.35); z-index:300; display:none;
   align-items:flex-end; justify-content:center;
 }
-.fin-modal-overlay.show{ display:flex; }
+.fin-modal-overlay.open{ display:flex; }
 .fin-modal{
   background:#FFF; border-radius:22px 22px 0 0;
   width:100%; max-width:430px; padding:22px 18px 34px;
@@ -1919,7 +1919,7 @@ function getFinRecords(period){
   }
 }
 
-// 小猪记账辅助函数
+// 老莫记账辅助函数
 function getFinGreeting(){
   const h = new Date().getHours();
   if(h<6) return '夜深了 🌙';
@@ -1993,7 +1993,7 @@ function renderFinHome(){
       <div class="fin-greeting">
         <div class="fin-greeting-left">
           <div class="fin-greeting-text">${getFinGreeting()}</div>
-          <div class="fin-greeting-title">小猪记账</div>
+          <div class="fin-greeting-title">老莫记账</div>
         </div>
         <div class="fin-greeting-pig">🐷</div>
       </div>
@@ -2130,7 +2130,7 @@ function renderFinStats(){
   return `<div class="fin-settings">
     <div class="fin-profile">
       <div class="fin-profile-pig">\ud83d\udc37</div>
-      <div class="fin-profile-name">\u5c0f\u732a\u8bb1\u8d26</div>
+      <div class="fin-profile-name">\u8001\u83ab\u8bb0\u8d26</div>
       <div class="fin-profile-days">\u5df2\u575a\u6301\u8bb1\u8d26 ${streakDays} \u5929 \ud83d\udc37</div>
       <div class="fin-profile-deco-pig">\ud83d\udc37</div>
     </div>
@@ -2143,7 +2143,7 @@ function renderFinStats(){
     <div class="fin-setting-group">
       <button class="fin-setting-item danger" data-set="clear"><span class="set-icon">\ud83d\uddd1\ufe0f</span><span class="set-name">\u6e05\u9664\u6570\u636e</span><span class="set-arrow">\u203a</span></button>
     </div>
-    <div class="fin-version-info">\u2139\ufe0f \u7248\u672c 2.0 &middot; \u5c0f\u732a\u8bb1\u8d26<br/>\u5171 ${financeRecords.length} \u6761\u8bb0\u5f55</div>
+    <div class="fin-version-info">\u2139\ufe0f \u7248\u672c 2.0 &middot; \u8001\u83ab\u8bb0\u8d26<br/>\u5171 ${financeRecords.length} \u6761\u8bb0\u5f55</div>
   </div>`;
 }function finOpenModal(type, presetCat){
   const cats = type==='income' ? (financeCats.income||DEFAULT_INCOME_CATS) : (financeCats.expense||DEFAULT_EXPENSE_CATS);
