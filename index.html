@@ -803,6 +803,71 @@ body{
   background:linear-gradient(135deg,#E84C72,#D63D62); color:#FFF;
 }
 .fin-modal-btn-save:active{ opacity:.85; }
+/* 首页收支汇总 */
+.fin-balance-budget{ font-size:12px; opacity:.75; margin-top:8px; }
+.fin-summary-row{ display:flex; gap:12px; margin:0 16px 14px; }
+.fin-sum-card{
+  flex:1; display:flex; align-items:center; gap:10px;
+  background:#FFF; border-radius:16px; padding:13px 14px;
+  box-shadow:0 2px 12px rgba(180,140,170,.1);
+}
+.fin-sum-icon{
+  width:40px; height:40px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+}
+.fin-sum-card.income .fin-sum-icon{ background:#E8F8EF; }
+.fin-sum-card.expense .fin-sum-icon{ background:#FFE8ED; }
+.fin-sum-info{ min-width:0; }
+.fin-sum-label{ font-size:12px; color:var(--text3); margin-bottom:2px; }
+.fin-sum-val{ font-size:17px; font-weight:800; }
+.fin-sum-val.income-c{ color:#37B24D; }
+.fin-sum-val.expense-c{ color:#E84C72; }
+/* 弹窗头部与美化 */
+.fin-form-row{ margin-bottom:16px; }
+.fin-form-row:last-child{ margin-bottom:0; }
+.fin-modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.fin-modal-head .fin-modal-title{ text-align:left; margin-bottom:0; }
+.fin-modal-close{ border:none; background:none; font-size:26px; line-height:1; color:var(--text3); cursor:pointer; padding:0 4px; }
+.fin-modal-close:active{ opacity:.6; }
+.fin-amt-symbol{ font-size:30px; font-weight:900; color:var(--text); }
+.fin-modal-amount{ display:flex; align-items:baseline; justify-content:center; gap:2px; }
+.fin-modal-section-label{ font-size:13px; font-weight:700; color:var(--text2); margin:4px 0 10px; }
+.fin-modal-date label, .fin-modal-note label{ display:block; font-size:12px; color:var(--text3); margin-bottom:6px; }
+/* 分类管理 - 拖拽排序 */
+.fin-cat-row{
+  display:flex; align-items:center; gap:10px; padding:11px 12px;
+  background:#FAF5F7; border-radius:12px; margin-bottom:8px;
+  border:1px solid #F3E7ED;
+}
+.fin-cat-drag{
+  cursor:grab; color:var(--text3); font-size:18px; flex-shrink:0;
+  width:20px; text-align:center; touch-action:none; user-select:none; -webkit-user-select:none;
+}
+.fin-cat-drag:active{ cursor:grabbing; }
+.fin-cat-emoji{ font-size:20px; flex-shrink:0; }
+.fin-cat-label{ flex:1; font-size:14px; font-weight:600; color:var(--text); }
+.fin-cat-default{ font-size:11px; color:var(--text3); background:#F0E8EC; padding:3px 9px; border-radius:8px; flex-shrink:0; }
+.fin-cat-del-btn{
+  border:none; background:transparent; color:var(--danger); font-size:18px;
+  cursor:pointer; flex-shrink:0; width:30px; height:30px; border-radius:50%;
+}
+.fin-cat-del-btn:active{ background:#FFEBEE; }
+.fin-cat-dragging{ opacity:.35; }
+.fin-cat-drag-ghost{
+  position:fixed; z-index:400; pointer-events:none; opacity:.92;
+  box-shadow:0 8px 24px rgba(93,67,99,.3); background:#FFF;
+}
+.fin-cat-mgmt-add{ display:flex; gap:8px; margin-top:10px; }
+.fin-cat-mgmt-add input{
+  flex:1; padding:10px 12px; border:1.5px solid var(--border);
+  border-radius:12px; font-size:13px; outline:none; font-family:var(--font); background:#FAF5F7;
+}
+.fin-cat-mgmt-add input:focus{ border-color:#E84C72; }
+.fin-cat-mgmt-add button{
+  padding:10px 18px; border:none; border-radius:12px; font-size:13px;
+  font-weight:700; cursor:pointer; font-family:var(--font);
+  background:linear-gradient(135deg,#E84C72,#D63D62); color:#FFF;
+}
 /* 账单列表 */
 .fin-bill-list{ display:flex; flex-direction:column; gap:0; }
 .fin-bill-item{
@@ -2001,9 +2066,22 @@ function renderFinHome(){
         <div class="fin-balance-pig">🐷</div>
         <div class="fin-balance-label">本月结余</div>
         <div class="fin-balance-num">¥${balance.toFixed(2)}</div>
-        <div class="fin-balance-row">
-          <div class="fin-blk"><div class="lbl">收入</div><div class="num income-c">¥${totalIncome.toFixed(2)}</div></div>
-          <div class="fin-blk"><div class="lbl">支出</div><div class="num expense-c">¥${totalExpense.toFixed(2)}</div></div>
+        ${budget>0 ? `<div class="fin-balance-budget">预算剩余 ¥${budgetRemain>0?budgetRemain.toFixed(2):'0.00'}</div>`:''}
+      </div>
+      <div class="fin-summary-row">
+        <div class="fin-sum-card income">
+          <div class="fin-sum-icon">📈</div>
+          <div class="fin-sum-info">
+            <div class="fin-sum-label">总收入</div>
+            <div class="fin-sum-val income-c">¥${totalIncome.toFixed(2)}</div>
+          </div>
+        </div>
+        <div class="fin-sum-card expense">
+          <div class="fin-sum-icon">📉</div>
+          <div class="fin-sum-info">
+            <div class="fin-sum-label">总支出</div>
+            <div class="fin-sum-val expense-c">¥${totalExpense.toFixed(2)}</div>
+          </div>
         </div>
       </div>
       ${budget>0 ? `
@@ -2147,28 +2225,36 @@ function renderFinStats(){
   </div>`;
 }function finOpenModal(type, presetCat){
   const cats = type==='income' ? (financeCats.income||DEFAULT_INCOME_CATS) : (financeCats.expense||DEFAULT_EXPENSE_CATS);
-  const catPicker = cats.map(c=>`<div class="picker-item ${c===presetCat?'active':''}" data-pickcat="${escHtml(c)}"><span class="pi-icon">${finCatIcon(c)}</span><span>${escHtml(c)}</span></div>`).join('');
+  const catHTML = cats.map(c=>`<div class="fin-modal-cat ${c===presetCat?'selected':''}" data-pickcat="${escHtml(c)}">
+    <span class="mcat-icon">${finCatIcon(c)}</span>
+    <span class="mcat-name">${escHtml(c)}</span>
+  </div>`).join('');
   const overlay = document.createElement('div');
   overlay.className='fin-modal-overlay';
   overlay.innerHTML=`
     <div class="fin-modal">
-      <h4>${type==='income'?'💰 记收入':'💸 记支出'}<button class="fin-modal-close">×</button></h4>
-      <div class="fin-form-row">
-        <input type="number" class="fin-amount-big" id="finModalAmount" placeholder="0.00" step="0.01" min="0" inputmode="decimal" autofocus/>
+      <div class="fin-modal-head">
+        <div class="fin-modal-title">${type==='income'?'💰 记收入':'💸 记支出'}</div>
+        <button class="fin-modal-close" aria-label="关闭">×</button>
       </div>
-      <div class="fin-form-row">
-        <label>选择分类</label>
-        <div class="fin-cat-picker" id="finModalCatPicker">${catPicker}</div>
+      <div class="fin-modal-amount">
+        <span class="fin-amt-symbol">¥</span>
+        <input type="number" id="finModalAmount" placeholder="0.00" step="0.01" min="0" inputmode="decimal" autofocus/>
       </div>
-      <div class="fin-form-row">
+      <div class="fin-modal-section-label">选择分类</div>
+      <div class="fin-modal-cats" id="finModalCatPicker">${catHTML}</div>
+      <div class="fin-modal-date">
         <label>日期</label>
         <input type="date" id="finModalDate" value="${todayStr()}"/>
       </div>
-      <div class="fin-form-row">
+      <div class="fin-modal-note">
         <label>备注（可选）</label>
-        <input type="text" id="finModalNote" placeholder="写点什么..."/>
+        <input type="text" id="finModalNote" placeholder="写点什么…"/>
       </div>
-      <button class="btn-save" id="finModalSave">✅ 保存</button>
+      <div class="fin-modal-actions">
+        <button class="fin-modal-btn-cancel" id="finModalCancel">取消</button>
+        <button class="fin-modal-btn-save" id="finModalSave">${type==='income'?'✅ 保存收入':'✅ 保存支出'}</button>
+      </div>
     </div>
   `;
   document.body.appendChild(overlay);
@@ -2176,13 +2262,14 @@ function renderFinStats(){
   let selectedCat = presetCat || cats[0];
 
   overlay.querySelector('.fin-modal-close').addEventListener('click',()=>finCloseModal(overlay));
+  overlay.querySelector('#finModalCancel').addEventListener('click',()=>finCloseModal(overlay));
   overlay.addEventListener('click',e=>{ if(e.target===overlay) finCloseModal(overlay); });
 
-  overlay.querySelectorAll('.picker-item').forEach(pi=>{
-    pi.addEventListener('click',()=>{
-      overlay.querySelectorAll('.picker-item').forEach(x=>x.classList.remove('active'));
-      pi.classList.add('active');
-      selectedCat = pi.dataset.pickcat;
+  overlay.querySelectorAll('.fin-modal-cat').forEach(ci=>{
+    ci.addEventListener('click',()=>{
+      overlay.querySelectorAll('.fin-modal-cat').forEach(x=>x.classList.remove('selected'));
+      ci.classList.add('selected');
+      selectedCat = ci.dataset.pickcat;
     });
   });
 
@@ -2231,39 +2318,91 @@ function finOpenBudgetModal(){
 function finOpenCatMgmtModal(){
   const overlay=document.createElement('div');
   overlay.className='fin-modal-overlay';
+  const isDefault=(c)=>DEFAULT_EXPENSE_CATS.includes(c)||DEFAULT_INCOME_CATS.includes(c);
   const renderCatList=(type)=>{
     const cats = type==='income'?(financeCats.income||DEFAULT_INCOME_CATS):(financeCats.expense||DEFAULT_EXPENSE_CATS);
     return cats.map(c=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f5f5">
-        <span style="font-size:18px">${finCatIcon(c)}</span>
-        <span style="flex:1;font-size:14px">${escHtml(c)}</span>
-        ${!DEFAULT_EXPENSE_CATS.includes(c)&&!DEFAULT_INCOME_CATS.includes(c)?`<button class="fin-cat-del-btn" data-delcat="${escHtml(c)}" data-deltype="${type}" style="border:none;background:transparent;color:var(--danger);cursor:pointer;font-size:16px">×</button>`:'<span style="font-size:11px;color:var(--text3)">默认</span>'}
-      </div>
-    `).join('');
+      <div class="fin-cat-row" data-cat="${escHtml(c)}" data-type="${type}">
+        <span class="fin-cat-drag" title="拖动排序">⠿</span>
+        <span class="fin-cat-emoji">${finCatIcon(c)}</span>
+        <span class="fin-cat-label">${escHtml(c)}</span>
+        ${isDefault(c)?'<span class="fin-cat-default">默认</span>':`<button class="fin-cat-del-btn" data-delcat="${escHtml(c)}" data-deltype="${type}" aria-label="删除">×</button>`}
+      </div>`).join('');
   };
   overlay.innerHTML=`
     <div class="fin-modal">
-      <h4>🏷️ 分类管理<button class="fin-modal-close">×</button></h4>
+      <div class="fin-modal-head">
+        <div class="fin-modal-title">🏷️ 分类管理</div>
+        <button class="fin-modal-close" aria-label="关闭">×</button>
+      </div>
       <div class="fin-form-row">
-        <label>支出分类</label>
+        <div class="fin-modal-section-label">支出分类（拖动 ⠿ 可调整顺序）</div>
         <div id="finCatListExpense">${renderCatList('expense')}</div>
-        <div style="display:flex;gap:6px;margin-top:8px">
-          <input type="text" id="finNewCatExpense" placeholder="新分类名称" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px"/>
-          <button id="finAddCatExpense" style="padding:8px 14px;background:var(--olive);color:#FFF;border:none;border-radius:var(--radius-sm);font-size:13px;cursor:pointer">添加</button>
+        <div class="fin-cat-mgmt-add">
+          <input type="text" id="finNewCatExpense" placeholder="新增支出分类…"/>
+          <button id="finAddCatExpense">添加</button>
         </div>
       </div>
       <div class="fin-form-row">
-        <label>收入分类</label>
+        <div class="fin-modal-section-label">收入分类（拖动 ⠿ 可调整顺序）</div>
         <div id="finCatListIncome">${renderCatList('income')}</div>
-        <div style="display:flex;gap:6px;margin-top:8px">
-          <input type="text" id="finNewCatIncome" placeholder="新分类名称" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px"/>
-          <button id="finAddCatIncome" style="padding:8px 14px;background:var(--olive);color:#FFF;border:none;border-radius:var(--radius-sm);font-size:13px;cursor:pointer">添加</button>
+        <div class="fin-cat-mgmt-add">
+          <input type="text" id="finNewCatIncome" placeholder="新增收入分类…"/>
+          <button id="finAddCatIncome">添加</button>
         </div>
       </div>
     </div>`;
   document.body.appendChild(overlay);
   setTimeout(()=>overlay.classList.add('open'),10);
-  const refresh=()=>{ overlay.querySelector('#finCatListExpense').innerHTML=renderCatList('expense'); overlay.querySelector('#finCatListIncome').innerHTML=renderCatList('income'); bindDels(); };
+
+  const enableCatDrag=(listEl, type)=>{
+    let dragEl=null, ghost=null;
+    const rows=()=>[...listEl.querySelectorAll('.fin-cat-row')];
+    listEl.querySelectorAll('.fin-cat-drag').forEach(h=>h.addEventListener('pointerdown', e=>{
+      dragEl = e.target.closest('.fin-cat-row');
+      if(!dragEl) return;
+      e.preventDefault();
+      const rect = dragEl.getBoundingClientRect();
+      ghost = dragEl.cloneNode(true);
+      ghost.classList.add('fin-cat-drag-ghost');
+      ghost.style.width = rect.width+'px';
+      ghost.style.left = rect.left+'px';
+      ghost.style.top = rect.top+'px';
+      document.body.appendChild(ghost);
+      dragEl.classList.add('fin-cat-dragging');
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    }));
+    const onMove=(e)=>{
+      if(!dragEl) return;
+      ghost.style.top = (e.clientY - 22)+'px';
+      const siblings = rows().filter(r=>r!==dragEl);
+      let inserted=false;
+      for(const sib of siblings){
+        const rb = sib.getBoundingClientRect();
+        if(e.clientY < rb.top + rb.height/2){ listEl.insertBefore(dragEl, sib); inserted=true; break; }
+      }
+      if(!inserted) listEl.appendChild(dragEl);
+    };
+    const onUp=()=>{
+      if(!dragEl) return;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      if(ghost){ ghost.remove(); ghost=null; }
+      dragEl.classList.remove('fin-cat-dragging');
+      financeCats[type] = rows().map(r=>r.dataset.cat);
+      save(LS_FIN_CATS, financeCats);
+      dragEl=null;
+    };
+  };
+
+  const refresh=()=>{
+    overlay.querySelector('#finCatListExpense').innerHTML=renderCatList('expense');
+    overlay.querySelector('#finCatListIncome').innerHTML=renderCatList('income');
+    enableCatDrag(overlay.querySelector('#finCatListExpense'),'expense');
+    enableCatDrag(overlay.querySelector('#finCatListIncome'),'income');
+    bindDels();
+  };
   const bindDels=()=>{
     overlay.querySelectorAll('.fin-cat-del-btn').forEach(b=>{
       b.onclick=()=>{
@@ -2273,7 +2412,7 @@ function finOpenCatMgmtModal(){
       };
     });
   };
-  bindDels();
+  refresh();
   overlay.querySelector('.fin-modal-close').addEventListener('click',()=>finCloseModal(overlay));
   overlay.addEventListener('click',e=>{ if(e.target===overlay) finCloseModal(overlay); });
   overlay.querySelector('#finAddCatExpense').addEventListener('click',()=>{
