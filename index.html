@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
 <title>老莫工作台</title>
 <style>
 /* ============================================================
@@ -1964,6 +1967,10 @@ const LS_FIN_CATS   = 'cw_fin_cats_v2';
 
 let financeBudget = load(LS_FIN_BUDGET, 0) || 0;
 let financeCats = load(LS_FIN_CATS, null) || { expense: [...DEFAULT_EXPENSE_CATS], income: [...DEFAULT_INCOME_CATS] };
+if(!financeCats || typeof financeCats!=='object' || Array.isArray(financeCats) || !Array.isArray(financeCats.expense) || !Array.isArray(financeCats.income)){
+  financeCats = { expense: [...DEFAULT_EXPENSE_CATS], income: [...DEFAULT_INCOME_CATS] };
+  save(LS_FIN_CATS, financeCats);
+}
 window._finTab = window._finTab || 'home';
 window._finBillFilter = window._finBillFilter || 'all';
 window._finBillYear = window._finBillYear || new Date().getFullYear();
@@ -2024,10 +2031,10 @@ function renderFinance() {
     <div class="fin-v2">
       <div class="fin-page active">${pageHTML}</div>
       <nav class="fin-bottom-nav">
-        <button class="fin-nav-item ${tab==='home'?'active':''}" data-fintab="home"><span class="nav-icon">🏠</span>首页</button>
-        <button class="fin-nav-item ${tab==='bills'?'active':''}" data-fintab="bills"><span class="nav-icon">📋</span>账单</button>
-        <button class="fin-nav-item ${tab==='stats'?'active':''}" data-fintab="stats"><span class="nav-icon">📊</span>统计</button>
-        <button class="fin-nav-item ${tab==='settings'?'active':''}" data-fintab="settings"><span class="nav-icon">👤</span>我的</button>
+        <button class="fin-nav-item ${tab==='home'?'active':''}" data-fintab="home"><span class="nav-icon">🏠</span><span class="nav-label">首页</span></button>
+        <button class="fin-nav-item ${tab==='bills'?'active':''}" data-fintab="bills"><span class="nav-icon">📋</span><span class="nav-label">账单</span></button>
+        <button class="fin-nav-item ${tab==='stats'?'active':''}" data-fintab="stats"><span class="nav-icon">📊</span><span class="nav-label">统计</span></button>
+        <button class="fin-nav-item ${tab==='settings'?'active':''}" data-fintab="settings"><span class="nav-icon">👤</span><span class="nav-label">我的</span></button>
       </nav>
     </div>
   `;
@@ -2202,7 +2209,7 @@ function renderFinStats(){
 
   const rankHTML = catEntries.length ? catEntries.map(([cat,amt],i) => '<div class="fin-rank-item"><span class="rank-num '+(i<3?'top3':'')+'">'+(i+1)+'</span><div class="rank-icon">'+finCatIcon(cat)+'</div><div class="rank-name">'+escHtml(cat)+'</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:'+(catEntries[0][1]>0?amt/catEntries[0][1]*100:0)+'%"></div></div><span class="rank-amount">\u00a5'+amt.toFixed(0)+'</span></div>').join('') : '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px;">\ud83c\udfc6 \u6682\u65e0\u6392\u884c\u6570\u636e</div>';
 
-  return '<div class="fin-stats"><div style="padding:14px 16px 4px;display:flex;align-items:center;gap:6px;"><span style="font-size:17px;font-weight:800;color:var(--text)">\ud83d\udcca \u7edf\u8ba1\u5206\u6790</span></div><div class="fin-stats-tabs"><button class="st-tab '+(period==='month'?'active':'')+'" data-period="month">\u672c\u6708</button><button class="st-tab '+(period==='week'?'active':'')+'" data-period="week">\u672c\u5468</button><button class="st-tab '+(period==='year'?'active':'')+'" data-period="year">\u672c\u5e74</button></div><div class="fin-chart-card"><div class="chart-title">\ud83d\dcc2 \u652f\u51fa\u5206\u7c7b\u5360\u6bd4<span class="chart-title-pig">\ud83d\udc37</span></div><div class="fin-pie-wrap">'+pieSVG+'<div class="fin-pie-legend">'+legendHTML+'</div></div></div><div class="fin-chart-card"><div class="chart-title">\ud83d\dcc5 \u8fd17\u5929\u652f\u51fa\u8d8b\u52bf</div><div class="fin-bar-wrap">'+barHTML+'</div></div><div class="fin-chart-card"><div class="chart-title">\ud83c\udfc6 \u652f\u51fa\u6392\u884c\u699c</div><div class="fin-rank-list">'+rankHTML+'</div></div></div>';
+  return '<div class="fin-stats"><div style="padding:14px 16px 4px;display:flex;align-items:center;gap:6px;"><span style="font-size:17px;font-weight:800;color:var(--text)">\ud83d\udcca \u7edf\u8ba1\u5206\u6790</span></div><div class="fin-stats-tabs"><button class="st-tab '+(period==='month'?'active':'')+'" data-period="month">\u672c\u6708</button><button class="st-tab '+(period==='week'?'active':'')+'" data-period="week">\u672c\u5468</button><button class="st-tab '+(period==='year'?'active':'')+'" data-period="year">\u672c\u5e74</button></div><div class="fin-chart-card"><div class="chart-title">\ud83d\udcc2 \u652f\u51fa\u5206\u7c7b\u5360\u6bd4<span class="chart-title-pig">\ud83d\udc37</span></div><div class="fin-pie-wrap">'+pieSVG+'<div class="fin-pie-legend">'+legendHTML+'</div></div></div><div class="fin-chart-card"><div class="chart-title">\ud83d\udcc5 \u8fd17\u5929\u652f\u51fa\u8d8b\u52bf</div><div class="fin-bar-wrap">'+barHTML+'</div></div><div class="fin-chart-card"><div class="chart-title">\ud83c\udfc6 \u652f\u51fa\u6392\u884c\u699c</div><div class="fin-rank-list">'+rankHTML+'</div></div></div>';
 }function renderFinSettings(){
   const streakDays = getFinStreakDays();
   return `<div class="fin-settings">
@@ -2293,17 +2300,25 @@ function finOpenBudgetModal(){
   overlay.className='fin-modal-overlay';
   overlay.innerHTML=`
     <div class="fin-modal">
-      <h4>🎯 设置月度预算<button class="fin-modal-close">×</button></h4>
-      <div class="fin-form-row">
-        <label>每月预算金额（元）</label>
+      <div class="fin-modal-head">
+        <div class="fin-modal-title">🎯 设置月度预算</div>
+        <button class="fin-modal-close" aria-label="关闭">×</button>
+      </div>
+      <div class="fin-modal-amount">
+        <span class="fin-amt-symbol">¥</span>
         <input type="number" id="finBudgetInput" value="${financeBudget||''}" placeholder="0" step="0.01" min="0" inputmode="decimal"/>
       </div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:10px">设置后，首页将显示预算使用进度条</div>
-      <button class="btn-save" id="finBudgetSave">✅ 保存</button>
+      <div class="fin-modal-section-label">每月预算金额（元）</div>
+      <div style="font-size:12px;color:var(--text3);margin:8px 0 14px;line-height:1.5">设置后，首页将显示预算使用进度条，帮你控制每月支出 🐷</div>
+      <div class="fin-modal-actions">
+        <button class="fin-modal-btn-cancel" id="finBudgetCancel">取消</button>
+        <button class="fin-modal-btn-save" id="finBudgetSave">✅ 保存</button>
+      </div>
     </div>`;
   document.body.appendChild(overlay);
   setTimeout(()=>overlay.classList.add('open'),10);
   overlay.querySelector('.fin-modal-close').addEventListener('click',()=>finCloseModal(overlay));
+  overlay.querySelector('#finBudgetCancel').addEventListener('click',()=>finCloseModal(overlay));
   overlay.addEventListener('click',e=>{ if(e.target===overlay) finCloseModal(overlay); });
   overlay.querySelector('#finBudgetSave').addEventListener('click',()=>{
     const v=parseFloat(overlay.querySelector('#finBudgetInput').value);
@@ -2459,6 +2474,7 @@ function finBackup(){
 }
 
 function bindFinance(el) {
+  if(!el){ console.warn('bindFinance: el is null'); return; }
   // 底部导航切换
   el.querySelectorAll('.fin-nav-item').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -3464,7 +3480,7 @@ function renderModule(mid) {
     case 'hot-remix':   bindHotRemix(card); break;
     case 'review':      bindReview(card); break;
     case 'memo':        bindMemo(card); break;
-    case 'finance':     bindFinance(card); break;
+    case 'finance':     try{ bindFinance(card); }catch(e){ console.error('bindFinance error:',e); } break;
     case 'exercise':    bindExercise(card); break;
     case 'expression':  bindExpression(card); break;
     default:            bindCustomModule(card, mod); break;
