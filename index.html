@@ -121,6 +121,15 @@ body{
   box-shadow:0 3px 12px rgba(240,128,160,.3);
   border-color:transparent;
 }
+.drawer-drag{
+  font-size:14px; color:var(--text3); cursor:grab; padding:4px; margin-left:-6px;
+  user-select:none; -webkit-user-select:none; touch-action:none;
+}
+.drawer-item.dragging{
+  opacity:.85; background:var(--pink-light);
+  box-shadow:0 4px 16px rgba(240,128,160,.25);
+  z-index:10;
+}
 .drawer-item.active .icon{ filter:brightness(1.2); }
 .drawer-item .icon{ font-size:20px; line-height:1; flex-shrink:0; }
 
@@ -322,6 +331,19 @@ body{
 .func-item .func-icon{ font-size:28px; margin-bottom:6px; }
 .func-item .func-name{ font-size:12px; font-weight:600; color:var(--text); }
 .func-item .func-sub{ font-size:10px; color:var(--text3); margin-top:2px; }
+
+/* 首页今日计划（来自每日计划模块） */
+.home-plan-section{ margin-top:14px; padding-top:14px; border-top:1px dashed rgba(240,128,160,.2); }
+.home-plan-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.home-plan-title{ font-size:13px; font-weight:700; color:var(--pink-dark); }
+.home-plan-count{ font-size:11px; color:var(--text3); background:rgba(240,128,160,.1); padding:2px 8px; border-radius:10px; }
+.home-plan-list{ display:flex; flex-direction:column; gap:6px; }
+.home-plan-item{ display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.7); border-radius:var(--radius-sm); padding:8px 10px; cursor:pointer; transition:all .2s; border:1px solid rgba(240,128,160,.08); }
+.home-plan-item:active{ transform:scale(.98); background:var(--pink-light); }
+.home-plan-item.done .home-plan-text{ text-decoration:line-through; color:var(--text3); }
+.home-plan-check{ font-size:14px; flex-shrink:0; }
+.home-plan-text{ font-size:13px; color:var(--text); flex:1; }
+.home-plan-empty{ font-size:12px; color:var(--text3); text-align:center; padding:10px; background:rgba(255,255,255,.5); border-radius:var(--radius-sm); }
 
 /* 记录模式切换 */
 .home-mode-switch{
@@ -1200,6 +1222,42 @@ body{
   0%,100%{ box-shadow:0 0 0 0 rgba(232,92,107,.4); }
   50%{ box-shadow:0 0 0 10px rgba(232,92,107,0); }
 }
+
+/* 作答方式切换 */
+.expr-answer-switch{
+  display:flex; gap:8px; margin:14px 0; background:rgba(240,128,160,.08); padding:4px; border-radius:var(--radius-sm);
+}
+.expr-mode-btn{
+  flex:1; padding:8px; border:none; border-radius:calc(var(--radius-sm) - 2px);
+  font-size:13px; font-weight:600; cursor:pointer; background:transparent;
+  color:var(--text2); transition:all .2s; font-family:var(--font);
+}
+.expr-mode-btn.active{
+  background:#FFF; color:var(--pink-dark);
+  box-shadow:0 1px 4px rgba(240,128,160,.15);
+}
+.expr-draft-count{
+  text-align:right; font-size:11px; color:var(--text3); margin-top:4px; padding-right:4px;
+}
+
+/* AI点评维度 */
+.expr-review-dims{
+  display:flex; gap:8px; margin:10px 0; flex-wrap:wrap;
+}
+.expr-dim{
+  flex:1; min-width:80px; background:rgba(240,128,160,.06); border-radius:var(--radius-sm);
+  padding:8px; text-align:center; border:1px solid rgba(240,128,160,.1);
+}
+.expr-dim .dim-label{ display:block; font-size:11px; color:var(--text3); margin-bottom:4px; }
+.expr-dim .dim-val{ font-size:13px; font-weight:700; }
+.expr-dim .dim-val.dim-good{ color:#27ae60; }
+.expr-dim .dim-val.dim-ok{ color:#f39c12; }
+.expr-dim .dim-val.dim-bad{ color:var(--danger); }
+.expr-suggestion{
+  margin-top:12px; padding:10px; background:rgba(240,128,160,.06); border-radius:var(--radius-sm);
+  border-left:3px solid var(--pink); font-size:13px; color:var(--text2); line-height:1.6;
+}
+.expr-suggestion strong{ color:var(--pink-dark); display:block; margin-bottom:4px; }
 .expr-rec-status{
   display:flex; align-items:center; justify-content:center; gap:8px;
   margin-top:8px; font-size:13px;
@@ -1258,6 +1316,113 @@ body{
   border-radius:8px;
 }
 .expr-rec-tip .lock-icon{ margin-right:2px; }
+
+/* ========== 碎碎日常 ========== */
+.db-page{ padding-bottom:20px; }
+.db-header{ font-size:18px; font-weight:700; color:var(--text); margin-bottom:14px; text-align:center; }
+.db-header .db-sub{ display:block; font-size:12px; font-weight:400; color:var(--text3); margin-top:2px; }
+.db-card{ background:rgba(255,255,255,.85); backdrop-filter:blur(8px); border-radius:var(--radius); padding:14px; margin-bottom:14px; border:1px solid rgba(240,128,160,.08); box-shadow:0 2px 10px rgba(240,128,160,.06); }
+.db-card-title{ font-size:14px; font-weight:700; color:var(--pink-dark); margin-bottom:12px; }
+
+/* 今日心情 */
+.db-mood-grid{ display:flex; justify-content:space-around; gap:6px; }
+.db-mood-item{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 4px; border-radius:var(--radius-sm); cursor:pointer; transition:all .2s; border:2px solid transparent; flex:1; }
+.db-mood-item:active{ transform:scale(.95); }
+.db-mood-item.active{ background:rgba(240,128,160,.1); border-color:var(--pink); }
+.db-mood-icon{ font-size:28px; }
+.db-mood-label{ font-size:11px; color:var(--text2); }
+
+/* 幸福小事 */
+.db-things-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+.db-thing-row{ display:flex; align-items:center; gap:8px; }
+.db-thing-num{ width:22px; height:22px; display:flex; align-items:center; justify-content:center; background:var(--pink-light); color:var(--pink-dark); border-radius:50%; font-size:11px; font-weight:700; flex-shrink:0; }
+.db-thing-input{ flex:1; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13px; font-family:var(--font); outline:none; background:#FFF; }
+.db-thing-input:focus{ border-color:var(--pink); }
+.db-thing-del{ width:28px; height:28px; border:none; background:transparent; color:var(--danger); font-size:16px; cursor:pointer; border-radius:4px; display:flex; align-items:center; justify-content:center; }
+.db-add-thing{ width:100%; padding:10px; border:1px dashed var(--pink); border-radius:var(--radius-sm); background:transparent; color:var(--pink-dark); font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font); margin-bottom:12px; }
+.db-add-thing:active{ background:rgba(240,128,160,.08); }
+
+/* 附件 */
+.db-attach-section{ margin-top:8px; }
+.db-attach-label{ font-size:12px; color:var(--text3); display:block; margin-bottom:6px; }
+.db-attach-btn{ padding:8px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:#FFF; color:var(--text2); font-size:12px; cursor:pointer; font-family:var(--font); }
+.db-img-preview{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.db-img-thumb{ position:relative; width:60px; height:60px; border-radius:var(--radius-xs); overflow:hidden; border:1px solid var(--border); }
+.db-img-thumb img{ width:100%; height:100%; object-fit:cover; }
+.db-img-del{ position:absolute; top:2px; right:2px; width:18px; height:18px; border:none; background:rgba(0,0,0,.5); color:#FFF; font-size:10px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+/* 保存按钮 */
+.db-save-btn{ width:100%; padding:12px; border:none; border-radius:var(--radius-sm); background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:#FFF; font-size:14px; font-weight:700; cursor:pointer; font-family:var(--font); margin-top:10px; box-shadow:0 2px 8px rgba(240,128,160,.25); }
+.db-save-btn:active{ opacity:.9; transform:scale(.98); }
+
+/* 本周情绪 */
+.db-week-row{ display:flex; justify-content:space-around; gap:4px; }
+.db-week-day{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; border-radius:var(--radius-xs); cursor:pointer; flex:1; }
+.db-week-day.active{ background:rgba(240,128,160,.1); }
+.db-week-icon{ font-size:18px; height:24px; display:flex; align-items:center; }
+.db-week-label{ font-size:10px; color:var(--text3); }
+
+/* 日历 */
+.db-cal-header{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; margin-bottom:4px; }
+.db-cal-header span{ font-size:10px; color:var(--text3); font-weight:600; }
+.db-cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.db-cal-day{ aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:var(--radius-xs); font-size:12px; color:var(--text2); cursor:pointer; position:relative; }
+.db-cal-day.empty{ cursor:default; }
+.db-cal-day.today{ background:var(--pink-light); color:var(--pink-dark); font-weight:700; }
+.db-cal-day.has-data{ font-weight:700; color:var(--pink-dark); }
+.db-cal-day .db-cal-dot{ width:4px; height:4px; background:var(--pink); border-radius:50%; position:absolute; bottom:3px; }
+
+/* 历史记录 */
+.db-hist-mood{ font-size:13px; color:var(--text2); margin-bottom:8px; }
+.db-hist-thing{ display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13px; color:var(--text); border-bottom:1px solid rgba(240,128,160,.08); }
+.db-hist-num{ width:18px; height:18px; display:flex; align-items:center; justify-content:center; background:var(--pink-light); color:var(--pink-dark); border-radius:50%; font-size:10px; font-weight:700; flex-shrink:0; }
+.db-hist-images{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.db-hist-img{ width:80px; height:80px; object-fit:cover; border-radius:var(--radius-xs); border:1px solid var(--border); }
+
+/* 导出 */
+.db-export-btns{ display:flex; gap:8px; }
+.db-export-btn{ flex:1; padding:10px; border:none; border-radius:var(--radius-sm); background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:#FFF; font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font); }
+.db-export-btn.secondary{ background:var(--pink-light); color:var(--pink-dark); }
+.db-export-btn:active{ opacity:.9; }
+
+/* ========== 英语口语学习 ========== */
+.eng-page{ padding-bottom:20px; }
+.eng-diff-bar{ display:flex; gap:6px; margin-bottom:6px; background:rgba(240,128,160,.08); padding:4px; border-radius:var(--radius-sm); }
+.eng-diff-btn{ flex:1; padding:8px; border:none; border-radius:calc(var(--radius-sm) - 2px); font-size:12px; font-weight:600; cursor:pointer; background:transparent; color:var(--text2); transition:all .2s; font-family:var(--font); }
+.eng-diff-btn.active{ background:#FFF; color:var(--pink-dark); box-shadow:0 1px 4px rgba(240,128,160,.15); }
+.eng-diff-desc{ font-size:11px; color:var(--text3); text-align:center; margin-bottom:12px; }
+
+.eng-scene-tabs{ display:flex; gap:8px; margin-bottom:14px; }
+.eng-tab{ flex:1; padding:8px; border:1px solid var(--border); border-radius:var(--radius-sm); background:#FFF; font-size:12px; font-weight:600; cursor:pointer; color:var(--text2); font-family:var(--font); }
+.eng-tab.active{ background:var(--pink-light); color:var(--pink-dark); border-color:var(--pink); }
+
+.eng-scene-card{ background:rgba(255,255,255,.85); border-radius:var(--radius); padding:14px; margin-bottom:14px; border:1px solid rgba(240,128,160,.1); box-shadow:0 2px 10px rgba(240,128,160,.06); }
+.eng-scene-tag{ font-size:11px; color:var(--pink-dark); background:var(--pink-light); padding:3px 10px; border-radius:10px; display:inline-block; margin-bottom:8px; font-weight:600; }
+.eng-scene-title{ font-size:15px; font-weight:700; color:var(--text); margin-bottom:10px; }
+.eng-scene-en{ font-size:14px; color:var(--text); line-height:1.7; margin-bottom:8px; padding:10px; background:rgba(240,128,160,.05); border-radius:var(--radius-sm); border-left:3px solid var(--pink); }
+.eng-scene-cn{ font-size:13px; color:var(--text2); line-height:1.6; margin-bottom:8px; }
+.eng-scene-tips{ font-size:12px; color:var(--text3); background:var(--pink-bg); padding:8px 10px; border-radius:var(--radius-sm); margin-bottom:12px; }
+.eng-scene-actions{ display:flex; gap:8px; }
+.eng-speak-btn, .eng-done-btn{ flex:1; padding:10px; border:none; border-radius:var(--radius-sm); font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font); }
+.eng-speak-btn{ background:var(--pink-light); color:var(--pink-dark); }
+.eng-done-btn{ background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:#FFF; box-shadow:0 2px 8px rgba(240,128,160,.25); }
+
+.eng-progress-card{ background:rgba(255,255,255,.85); border-radius:var(--radius); padding:14px; margin-bottom:14px; border:1px solid rgba(240,128,160,.08); }
+.eng-prog-title{ font-size:14px; font-weight:700; color:var(--pink-dark); margin-bottom:10px; }
+.eng-prog-stats{ display:flex; gap:10px; }
+.eng-prog-item{ flex:1; text-align:center; background:rgba(240,128,160,.06); border-radius:var(--radius-sm); padding:10px; }
+.eng-prog-num{ font-size:20px; font-weight:700; color:var(--pink-dark); }
+.eng-prog-label{ font-size:11px; color:var(--text3); margin-top:2px; }
+
+.eng-word-card{ background:rgba(255,255,255,.85); border-radius:var(--radius-sm); padding:12px; margin-bottom:10px; border:1px solid rgba(240,128,160,.08); }
+.eng-word-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.eng-word-text{ font-size:15px; font-weight:700; color:var(--text); margin-right:6px; }
+.eng-word-phonetic{ font-size:12px; color:var(--text3); margin-right:6px; }
+.eng-word-level{ font-size:10px; color:var(--pink-dark); background:var(--pink-light); padding:2px 6px; border-radius:4px; }
+.eng-word-speak{ width:32px; height:32px; border:none; background:var(--pink-light); border-radius:50%; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
+.eng-word-meaning{ font-size:13px; color:var(--text2); margin-bottom:4px; }
+.eng-word-example{ font-size:12px; color:var(--text3); font-style:italic; }
+.eng-speak-all{ width:100%; padding:12px; border:none; border-radius:var(--radius-sm); background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:#FFF; font-size:14px; font-weight:700; cursor:pointer; font-family:var(--font); margin-top:10px; box-shadow:0 2px 8px rgba(240,128,160,.25); }
 
 /* ============================================================
    Toast 提示 — 粉色适配
@@ -1412,11 +1577,12 @@ const DEFAULT_MODULES = [
   { id:'daily-plan',   icon:'📋', name:'每日计划',   builtin:true },
   { id:'inspiration',  icon:'💡', name:'选题每日灵感', builtin:true },
   { id:'hot-remix',    icon:'🔥', name:'爆款热点视频二创', builtin:true },
-  { id:'review',       icon:'📊', name:'内容复盘',   builtin:true },
+  { id:'review',       icon:'☁️', name:'碎碎日常',   builtin:true },
   { id:'memo',         icon:'📝', name:'备忘录',     builtin:true },
   { id:'finance',      icon:'💰', name:'日常记账',   builtin:true },
   { id:'exercise',     icon:'🏃', name:'每日运动记录', builtin:true },
-  { id:'expression',  icon:'🎤', name:'表达能力训练', builtin:true },
+  { id:'expression',   icon:'🎤', name:'表达能力训练', builtin:true },
+  { id:'english',      icon:'🔤', name:'英语口语学习', builtin:true },
 ];
 
 // ---------- localStorage keys ----------
@@ -1434,6 +1600,9 @@ const LS_CHECKIN='cw_checkin_v2';      // 打卡数据
 const LS_CHECKIN_STREAK='cw_checkin_streak_v2'; // 打卡连续天数
 const LS_HOME_MODE='cw_home_mode_v2';  // 记录模式(daily/cumulative)
 const LS_QUOTE_IDX='cw_quote_idx_v2';  // 当日语录索引
+const LS_DAILY_BITS='cw_daily_bits_v2'; // 碎碎日常数据
+const LS_ENGLISH='cw_english_v2';      // 英语学习数据
+const LS_ENGLISH_PROG='cw_english_prog_v2'; // 英语学习进度
 
 // ---------- 首页打卡系统 ----------
 const DEFAULT_CHECKIN_ITEMS = [
@@ -1494,9 +1663,21 @@ function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
 // ---------- 模块 ----------
 let modules = load(LS_MODULES, null) || JSON.parse(JSON.stringify(DEFAULT_MODULES));
+// 兼容更新：旧模块列表中的"内容复盘"更新为"碎碎日常"
+modules.forEach(m=>{ if(m.id==='review'){ m.name='碎碎日常'; m.icon='☁️'; } });
+// 补全新增模块
+DEFAULT_MODULES.forEach(dm=>{
+  if(!modules.find(m=>m.id===dm.id)) modules.push(JSON.parse(JSON.stringify(dm)));
+});
 let activeModuleId = modules.length ? modules[0].id : '';
 
-// ---------- 日期工具 ----------
+// ---------- 碎碎日常数据 ----------
+let dailyBits = load(LS_DAILY_BITS, null) || {};
+
+// ---------- 英语口语学习数据 ----------
+let englishData = load(LS_ENGLISH, null) || null;
+let englishProgress = load(LS_ENGLISH_PROG, null) || { completed:0, streakDays:0, lastDate:'', difficulty:'beginner' };
+let englishDifficulty = englishProgress.difficulty || 'beginner';
 function dateStr(d) { const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
 function todayStr() { return dateStr(new Date()); }
 
@@ -1528,11 +1709,6 @@ let memos = load(LS_MEMOS, null) || [
 ];
 
 // ---------- 内容复盘 ----------
-let review = load(LS_REVIEW, null) || {
-  plays:0, likes:0, comments:0, shares:0,
-  highlight:'', problem:'', improve:''
-};
-
 // ---------- 选题灵感 (Gist 数据) ----------
 let inspireData = load(LS_INSPIRE, null) || [];
 let remixData   = load(LS_REMIX, null)   || [];
@@ -1566,17 +1742,73 @@ const $$= (s) => document.querySelectorAll(s);
 // 抽屉
 function renderDrawer() {
   const nav = $('#drawerNav');
-  nav.innerHTML = modules.map(m => `
-    <div class="drawer-item${m.id===activeModuleId?' active':''}" data-mid="${m.id}">
+  nav.innerHTML = modules.map((m, idx) => `
+    <div class="drawer-item${m.id===activeModuleId?' active':''}" data-mid="${m.id}" data-idx="${idx}">
+      <span class="drawer-drag" data-draghandle title="按住拖动排序">⋮⋮</span>
       <span class="icon">${m.icon}</span><span>${m.name}</span>
     </div>
   `).join('');
   // 点击切换
   nav.querySelectorAll('.drawer-item').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', (e) => {
+      if(e.target.closest('[data-draghandle]')) return;
       activeModuleId = el.dataset.mid;
       renderAll();
       closeDrawer();
+    });
+  });
+  // 拖拽排序绑定
+  bindDrawerSort(nav);
+}
+
+function bindDrawerSort(nav){
+  let draggingEl=null, dragIdx=null, placeholder=null;
+  nav.querySelectorAll('[data-draghandle]').forEach(handle=>{
+    handle.addEventListener('pointerdown', e=>{
+      e.preventDefault();
+      const item = handle.closest('.drawer-item');
+      if(!item) return;
+      draggingEl = item;
+      dragIdx = +item.dataset.idx;
+      item.classList.add('dragging');
+      item.setPointerCapture(e.pointerId);
+    });
+    handle.addEventListener('pointermove', e=>{
+      if(!draggingEl) return;
+      e.preventDefault();
+      const items = [...nav.querySelectorAll('.drawer-item')];
+      const clientY = e.clientY;
+      let targetIdx = dragIdx;
+      for(let i=0;i<items.length;i++){
+        const rect = items[i].getBoundingClientRect();
+        const mid = rect.top + rect.height/2;
+        if(clientY < mid){ targetIdx = i; break; }
+        if(i===items.length-1) targetIdx = items.length-1;
+      }
+      if(targetIdx !== dragIdx && items[targetIdx] !== draggingEl){
+        const dir = targetIdx > dragIdx ? 1 : -1;
+        const insertBefore = dir===1 ? items[targetIdx].nextSibling : items[targetIdx];
+        nav.insertBefore(draggingEl, insertBefore);
+        dragIdx = targetIdx;
+      }
+    });
+    handle.addEventListener('pointerup', e=>{
+      if(!draggingEl) return;
+      draggingEl.classList.remove('dragging');
+      draggingEl.releasePointerCapture(e.pointerId);
+      // 保存新顺序
+      const newOrder = [...nav.querySelectorAll('.drawer-item')].map(el=>el.dataset.mid);
+      const newModules = [];
+      newOrder.forEach(mid=>{
+        const m = modules.find(x=>x.id===mid);
+        if(m) newModules.push(m);
+      });
+      modules = newModules;
+      save(LS_MODULES, modules);
+      // 刷新索引
+      nav.querySelectorAll('.drawer-item').forEach((el,i)=>el.dataset.idx=i);
+      draggingEl=null; dragIdx=null;
+      showToast('✅ 菜单顺序已保存');
     });
   });
 }
@@ -1865,44 +2097,296 @@ function bindHotRemix(el) {
 
 // ---------- 模块4: 内容复盘 ----------
 function renderReview() {
+  const today = todayStr();
+  const todayData = dailyBits[today] || { mood:'', things:['','',''], images:[] };
+  const moods = [
+    { key:'happy', icon:'😄', label:'开心' },
+    { key:'good', icon:'🙂', label:'不错' },
+    { key:'normal', icon:'😐', label:'一般' },
+    { key:'low', icon:'😔', label:'低落' },
+    { key:'annoyed', icon:'😤', label:'烦躁' }
+  ];
+
+  // 本周情绪概览
+  const weekDays = [];
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    weekDays.push({ date:dateStr(d), label:['日','一','二','三','四','五','六'][d.getDay()] });
+  }
+  const weekHTML = weekDays.map(wd=>{
+    const d = dailyBits[wd.date];
+    const m = d?.mood;
+    const icon = m==='happy'?'😄':m==='good'?'🙂':m==='normal'?'😐':m==='low'?'😔':m==='annoyed'?'😤':'—';
+    const active = wd.date===today?'active':'';
+    return `<div class="db-week-day ${active}" data-wdate="${wd.date}"><div class="db-week-icon">${icon}</div><div class="db-week-label">${wd.label}</div></div>`;
+  }).join('');
+
+  // 幸福小事
+  const things = todayData.things && todayData.things.length ? todayData.things : ['','',''];
+  const thingsHTML = things.map((t,i)=>`
+    <div class="db-thing-row">
+      <span class="db-thing-num">${i+1}</span>
+      <input type="text" class="db-thing-input" data-idx="${i}" placeholder="第${i+1}件小事..." value="${escHtml(t)}"/>
+      ${things.length>1?`<button class="db-thing-del" data-idx="${i}" title="删除">×</button>`:''}
+    </div>
+  `).join('');
+
+  // 已上传图片预览
+  const imagesHTML = (todayData.images||[]).map((img,i)=>`
+    <div class="db-img-thumb"><img src="${img}" alt=""/><button class="db-img-del" data-iidx="${i}">×</button></div>
+  `).join('');
+
+  // 日历视图（简化：显示当月，有数据的日期高亮）
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMo = new Date(year, month+1, 0).getDate();
+  let calHTML = '';
+  for(let i=0;i<firstDay;i++) calHTML += '<div class="db-cal-day empty"></div>';
+  for(let d=1;d<=daysInMo;d++){
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasData = !!dailyBits[ds];
+    const isToday = ds===today;
+    calHTML += `<div class="db-cal-day ${isToday?'today':''} ${hasData?'has-data':''}" data-cdate="${ds}"><span>${d}</span>${hasData?'<span class="db-cal-dot"></span>':''}</div>`;
+  }
+
   return `
-    <div class="review-stats">
-      <div class="stat-box"><div class="stat-num">${review.plays||0}</div><div class="stat-label">播放</div></div>
-      <div class="stat-box"><div class="stat-num">${review.likes||0}</div><div class="stat-label">点赞</div></div>
-      <div class="stat-box"><div class="stat-num">${review.comments||0}</div><div class="stat-label">评论</div></div>
-      <div class="stat-box"><div class="stat-num">${review.shares||0}</div><div class="stat-label">转发</div></div>
+    <div class="db-page">
+      <div class="db-header">☁️ 碎碎日常 <span class="db-sub">思绪万千，归于此处</span></div>
+
+      <!-- 今日心情 -->
+      <div class="db-card">
+        <div class="db-card-title">😊 今日心情</div>
+        <div class="db-mood-grid">
+          ${moods.map(m=>`
+            <div class="db-mood-item ${todayData.mood===m.key?'active':''}" data-mood="${m.key}">
+              <div class="db-mood-icon">${m.icon}</div>
+              <div class="db-mood-label">${m.label}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- 幸福小事 -->
+      <div class="db-card">
+        <div class="db-card-title">✨ 今日幸福小事</div>
+        <div class="db-things-list" id="dbThingsList">${thingsHTML}</div>
+        <button class="db-add-thing" id="dbAddThing">+ 添加一条</button>
+        <!-- 附件 -->
+        <div class="db-attach-section">
+          <label class="db-attach-label">📎 添加图片/附件</label>
+          <input type="file" id="dbAttachInput" accept="image/*" multiple style="display:none"/>
+          <button class="db-attach-btn" id="dbAttachBtn">📷 选择图片</button>
+          <div class="db-img-preview">${imagesHTML}</div>
+        </div>
+        <button class="db-save-btn" id="dbSaveBtn">💾 保存今日碎碎日常</button>
+      </div>
+
+      <!-- 本周情绪 -->
+      <div class="db-card">
+        <div class="db-card-title">📊 本周情绪</div>
+        <div class="db-week-row">${weekHTML}</div>
+      </div>
+
+      <!-- 日历视图 -->
+      <div class="db-card">
+        <div class="db-card-title">📅 ${year}年${month+1}月</div>
+        <div class="db-cal-header"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+        <div class="db-cal-grid">${calHTML}</div>
+      </div>
+
+      <!-- 历史查看区 -->
+      <div class="db-card" id="dbHistoryCard" style="display:none">
+        <div class="db-card-title">📖 历史记录 <span id="dbHistoryDate"></span></div>
+        <div id="dbHistoryContent"></div>
+      </div>
+
+      <!-- 导出 -->
+      <div class="db-card">
+        <div class="db-card-title">📤 数据导出</div>
+        <div class="db-export-btns">
+          <button class="db-export-btn" id="dbExportAll">导出全部记录</button>
+          <button class="db-export-btn secondary" id="dbExportMonth">导出本月记录</button>
+        </div>
+      </div>
     </div>
-    <div class="review-section">
-      <label>✅ 亮点</label>
-      <textarea class="review-highlight" placeholder="今天内容做得好的地方…">${escHtml(review.highlight)}</textarea>
-    </div>
-    <div class="review-section">
-      <label>⚠️ 问题</label>
-      <textarea class="review-problem" placeholder="遇到的问题和不足…">${escHtml(review.problem)}</textarea>
-    </div>
-    <div class="review-section">
-      <label>💡 优化方向</label>
-      <textarea class="review-improve" placeholder="明天怎么改进…">${escHtml(review.improve)}</textarea>
-    </div>
-    <button class="task-add btn" style="width:100%;text-align:center;justify-content:center;display:flex;margin-top:8px;" id="reviewSaveBtn">💾 保存复盘</button>
   `;
 }
 
 function bindReview(el) {
-  const saveBtn = el.querySelector('#reviewSaveBtn');
-  if(!saveBtn) return;
-  saveBtn.addEventListener('click', () => {
-    review.highlight = el.querySelector('.review-highlight')?.value || '';
-    review.problem   = el.querySelector('.review-problem')?.value || '';
-    review.improve   = el.querySelector('.review-improve')?.value || '';
-    // 数字改为手动输入
-    ['plays','likes','comments','shares'].forEach(key => {
-      const v = prompt(`请输入 ${key==='plays'?'播放':key==='likes'?'点赞':key==='comments'?'评论':'转发'} 数：`, review[key]||0);
-      if(v !== null && !isNaN(+v)) review[key] = +v;
+  const today = todayStr();
+  let currentData = dailyBits[today] || { mood:'', things:['','',''], images:[] };
+
+  // 心情选择
+  el.querySelectorAll('.db-mood-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const mood = item.dataset.mood;
+      currentData.mood = currentData.mood===mood?'':mood;
+      el.querySelectorAll('.db-mood-item').forEach(m=>m.classList.toggle('active', m.dataset.mood===currentData.mood));
     });
-    save(LS_REVIEW, review);
+  });
+
+  // 幸福小事增删
+  function refreshThings(){
+    const list = el.querySelector('#dbThingsList');
+    if(!list) return;
+    list.innerHTML = currentData.things.map((t,i)=>`
+      <div class="db-thing-row">
+        <span class="db-thing-num">${i+1}</span>
+        <input type="text" class="db-thing-input" data-idx="${i}" placeholder="第${i+1}件小事..." value="${escHtml(t)}"/>
+        ${currentData.things.length>1?`<button class="db-thing-del" data-idx="${i}" title="删除">×</button>`:''}
+      </div>
+    `).join('');
+    bindThingInputs();
+  }
+  function bindThingInputs(){
+    el.querySelectorAll('.db-thing-input').forEach(inp=>{
+      inp.addEventListener('input',()=>{
+        const idx = +inp.dataset.idx;
+        currentData.things[idx] = inp.value;
+      });
+    });
+    el.querySelectorAll('.db-thing-del').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const idx = +btn.dataset.idx;
+        currentData.things.splice(idx,1);
+        refreshThings();
+      });
+    });
+  }
+  bindThingInputs();
+
+  el.querySelector('#dbAddThing')?.addEventListener('click',()=>{
+    currentData.things.push('');
+    refreshThings();
+  });
+
+  // 附件上传
+  const attachInput = el.querySelector('#dbAttachInput');
+  const attachBtn = el.querySelector('#dbAttachBtn');
+  if(attachBtn && attachInput){
+    attachBtn.addEventListener('click',()=>attachInput.click());
+    attachInput.addEventListener('change',()=>{
+      const files = Array.from(attachInput.files||[]);
+      files.forEach(file=>{
+        if(!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = e=>{
+          currentData.images = currentData.images||[];
+          if(currentData.images.length >= 5){ showToast('最多上传5张图片'); return; }
+          currentData.images.push(e.target.result);
+          refreshImages();
+        };
+        reader.readAsDataURL(file);
+      });
+      attachInput.value = '';
+    });
+  }
+  function refreshImages(){
+    const preview = el.querySelector('.db-img-preview');
+    if(!preview) return;
+    preview.innerHTML = (currentData.images||[]).map((img,i)=>`
+      <div class="db-img-thumb"><img src="${img}" alt=""/><button class="db-img-del" data-iidx="${i}">×</button></div>
+    `).join('');
+    el.querySelectorAll('.db-img-del').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const idx = +btn.dataset.iidx;
+        currentData.images.splice(idx,1);
+        refreshImages();
+      });
+    });
+  }
+  refreshImages();
+
+  // 保存
+  el.querySelector('#dbSaveBtn')?.addEventListener('click',()=>{
+    currentData.things = currentData.things.map(t=>t.trim()).filter(t=>t);
+    if(currentData.things.length===0) currentData.things=[''];
+    currentData.savedAt = new Date().toISOString();
+    dailyBits[today] = currentData;
+    save(LS_DAILY_BITS, dailyBits);
     renderModule('review');
-    showToast('✅ 复盘已保存');
+    showToast('✅ 碎碎日常已保存');
+  });
+
+  // 日历日期点击查看历史
+  el.querySelectorAll('.db-cal-day[data-cdate]').forEach(day=>{
+    day.addEventListener('click',()=>{
+      const date = day.dataset.cdate;
+      const data = dailyBits[date];
+      const histCard = el.querySelector('#dbHistoryCard');
+      const histDate = el.querySelector('#dbHistoryDate');
+      const histContent = el.querySelector('#dbHistoryContent');
+      if(!data || !histCard || !histContent){
+        if(histCard) histCard.style.display='none';
+        return;
+      }
+      histCard.style.display='block';
+      if(histDate) histDate.textContent = date;
+      const moodMap = {happy:'😄 开心',good:'🙂 不错',normal:'😐 一般',low:'😔 低落',annoyed:'😤 烦躁'};
+      histContent.innerHTML = `
+        <div class="db-hist-mood">心情：${moodMap[data.mood]||'未记录'}</div>
+        <div class="db-hist-things">
+          ${(data.things||[]).map((t,i)=>`<div class="db-hist-thing"><span class="db-hist-num">${i+1}</span>${escHtml(t)}</div>`).join('')}
+        </div>
+        ${(data.images||[]).length?`<div class="db-hist-images">${data.images.map(img=>`<img src="${img}" class="db-hist-img"/>`).join('')}</div>`:''}
+      `;
+      histCard.scrollIntoView({behavior:'smooth'});
+    });
+  });
+
+  // 本周情绪天点击
+  el.querySelectorAll('.db-week-day[data-wdate]').forEach(day=>{
+    day.addEventListener('click',()=>{
+      const date = day.dataset.wdate;
+      const data = dailyBits[date];
+      if(!data) return;
+      const histCard = el.querySelector('#dbHistoryCard');
+      const histDate = el.querySelector('#dbHistoryDate');
+      const histContent = el.querySelector('#dbHistoryContent');
+      if(histCard) histCard.style.display='block';
+      if(histDate) histDate.textContent = date;
+      const moodMap = {happy:'😄 开心',good:'🙂 不错',normal:'😐 一般',low:'😔 低落',annoyed:'😤 烦躁'};
+      if(histContent){
+        histContent.innerHTML = `
+          <div class="db-hist-mood">心情：${moodMap[data.mood]||'未记录'}</div>
+          <div class="db-hist-things">
+            ${(data.things||[]).map((t,i)=>`<div class="db-hist-thing"><span class="db-hist-num">${i+1}</span>${escHtml(t)}</div>`).join('')}
+          </div>
+          ${(data.images||[]).length?`<div class="db-hist-images">${data.images.map(img=>`<img src="${img}" class="db-hist-img"/>`).join('')}</div>`:''}
+        `;
+      }
+    });
+  });
+
+  // 导出全部
+  el.querySelector('#dbExportAll')?.addEventListener('click',()=>{
+    const dataStr = JSON.stringify(dailyBits, null, 2);
+    const blob = new Blob([dataStr], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `碎碎日常_全部记录_${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ 全部记录已导出');
+  });
+
+  // 导出本月
+  el.querySelector('#dbExportMonth')?.addEventListener('click',()=>{
+    const now = new Date();
+    const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const filtered = {};
+    Object.keys(dailyBits).forEach(k=>{ if(k.startsWith(ym)) filtered[k] = dailyBits[k]; });
+    const dataStr = JSON.stringify(filtered, null, 2);
+    const blob = new Blob([dataStr], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `碎碎日常_${ym}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ 本月记录已导出');
   });
 }
 
@@ -2718,11 +3202,154 @@ const EXPR_QUESTIONS = {
 };
 
 const EXPR_REFERENCE = {
-  impromptu: '参考框架：① 开头引入话题（10秒）→ ② 核心观点/故事（2分钟）→ ③ 总结感受/收获（30秒）。建议用一个具体故事或细节来支撑，避免空泛。',
-  logic: '参考框架：① 总论点（一句话亮明观点）→ ② 分点论证（2-3个理由，每个配例子）→ ③ 总结呼应。可用"首先/其次/最后"或"一方面/另一方面"连接。',
-  scenario: '参考框架：① 先共情/认可对方 → ② 表达自己的立场或方案 → ③ 给出替代方案或下一步行动。注意语气得体，先肯定再建议。',
-  retell: '参考框架：① 抓住核心人物和事件 → ② 按时间或逻辑顺序复述 → ③ 提炼关键结论。复述不是背诵，重在用自己的话概括。'
+  impromptu: `📌 参考思路：① 开头引入（10-20秒）：用一个钩子引入话题，可以是故事、疑问或感受\n② 核心展开（1-2分钟）：围绕1-2个核心观点展开，每个观点配一个具体例子\n③ 结尾收束（10-20秒）：总结感受或给出一个金句/思考\n\n💡 示例（以"最喜欢的一本书"为例）：\n"最近重读了《活着》，每次读都有新感受。印象最深的是福贵面对亲人相继离世时的平静——不是麻木，而是一种对生活本身的接纳。这本书让我明白，活着本身就是一种力量，不需要附加太多意义。"`,
+  logic: `📌 参考思路：① 总论点（1句话亮明观点）\n② 分论点1 + 论据/例子\n③ 分论点2 + 论据/例子\n④ 总结呼应\n\n💡 示例（以"为什么要多读书"为例）：\n"我认为多读书能提升认知深度、拓宽视野、增强表达能力。\n第一，读书能接触前人智慧，站在巨人肩膀上看问题。\n第二，不同领域的书能打破思维定式，产生跨界创新。\n第三，长期阅读会潜移默化提升语言组织和逻辑表达能力。\n总之，读书是最低成本的个人成长方式。"`,
+  scenario: `📌 参考思路：① 先共情/认可对方 → ② 表达自己的立场或给出方案 → ③ 给出替代方案或下一步行动\n\n💡 示例（以"礼貌拒绝朋友帮忙"为例）：\n"我知道这件事对你挺重要的（共情），但我这周手头项目deadline确实太紧了，加班到很晚（说明原因）。\n你看这样行不行——我把XX推了帮你，或者我帮你找个更合适的人？（替代方案）\n下周我空了一定第一时间找你。（下一步）"`,
+  retell: `📌 参考思路：① 抓住核心人物和事件 → ② 按时间/逻辑顺序复述 → ③ 提炼关键结论\n\n💡 示例（以"睡眠不足研究"为例）：\n"核心观点：睡眠不足危害大，改善睡眠有方法。\n首先，长期缺觉会导致注意力下降、免疫力降低、情绪波动。\n其次，成年人需要7-8小时睡眠，睡前玩手机会影响褪黑素分泌。\n最后，规律作息和安静环境有助于提高睡眠质量。\n结论：良好睡眠是健康生活基础。"`
 };
+
+/* ========== 英语口语学习素材 ========== */
+const ENGLISH_SCENES = {
+  daily: {
+    beginner: [
+      { title:'早晨问候', en:'Good morning! Did you sleep well last night?', cn:'早上好！你昨晚睡得好吗？', tips:'注意"sleep well"连读，well尾音轻读' },
+      { title:'点餐', en:'I\'d like a cup of coffee, please. No sugar, just a little milk.', cn:'请给我一杯咖啡。不加糖，只要一点牛奶。', tips:'"I\'d like"比"I want"更礼貌' },
+      { title:'问路', en:'Excuse me, could you tell me how to get to the subway station?', cn:'打扰一下，你能告诉我怎么去地铁站吗？', tips:'用"Could you"比"Can you"更客气' },
+      { title:'天气', en:'It\'s a beautiful day today, isn\'t it?', cn:'今天天气真好，不是吗？', tips:'反义疑问句语调上扬' },
+      { title:'购物', en:'How much is this T-shirt? Do you have it in a smaller size?', cn:'这件T恤多少钱？有小一号的吗？', tips:'"How much"用于问价格' }
+    ],
+    intermediate: [
+      { title:'预约医生', en:'I\'d like to make an appointment with Dr. Smith for next Tuesday morning.', cn:'我想预约史密斯医生下周二上午的号。', tips:'make an appointment 是固定搭配' },
+      { title:'租房咨询', en:'Is the apartment furnished? And does the rent include utilities?', cn:'这套公寓带家具吗？租金包含水电费吗？', tips:'furnished 表示"带家具的"' },
+      { title:'银行开户', en:'I\'d like to open a savings account. What documents do I need?', cn:'我想开一个储蓄账户。需要什么证件？', tips:'savings account 储蓄账户' },
+      { title:'机场值机', en:'I\'d like to check in for flight CA1234. I only have carry-on luggage.', cn:'我要办理CA1234航班的值机。我只有随身行李。', tips:'carry-on luggage 随身行李' },
+      { title:'健身房', en:'I\'m thinking about getting a membership. What are your peak hours?', cn:'我在考虑办会员。你们的高峰期是什么时候？', tips:'peak hours 高峰期/高峰时段' }
+    ],
+    advanced: [
+      { title:'商务宴请', en:'Thank you for hosting this dinner. I\'ve been looking forward to discussing our collaboration in person.', cn:'感谢您举办这次晚宴。我一直期待着当面讨论我们的合作。', tips:'hosting 做东；in person 当面' },
+      { title:'学术会议', en:'Your presentation raised some intriguing questions about the methodology. I\'d love to explore this further.', cn:'您的报告提出了一些关于研究方法的有趣问题。我很想进一步探讨。', tips:'intriguing 引人入胜的；methodology 方法论' },
+      { title:'谈判', en:'I understand your position, but from our perspective, the terms need to be more flexible to ensure a win-win outcome.', cn:'我理解您的立场，但从我们的角度来看，条款需要更灵活一些，以确保双赢的结果。', tips:'win-win outcome 双赢结果' },
+      { title:'面试', en:'I\'m particularly drawn to this role because it combines my technical expertise with my passion for mentoring junior team members.', cn:'我特别被这个职位吸引，因为它将我的技术专长与指导初级团队成员的热情结合在了一起。', tips:'drawn to 被...吸引；mentoring 指导' },
+      { title:'TED演讲式', en:'What if I told you that the way we think about productivity is fundamentally flawed? Let me share a story that changed my mind.', cn:'如果我告诉你，我们对生产力的看法从根本上就是有缺陷的呢？让我分享一个改变我想法的故事。', tips:'What if I told you... 经典演讲开场' }
+    ]
+  },
+  ecommerce: {
+    beginner: [
+      { title:'询盘', en:'Hi, I\'m interested in your product. Could you send me the price list?', cn:'您好，我对你们的产品感兴趣。能发给我价目表吗？', tips:'price list 价目表/报价单' },
+      { title:'介绍产品', en:'This item is our best seller. It comes in three colors and two sizes.', cn:'这款是我们的畅销品。有三种颜色和两个尺寸。', tips:'best seller 畅销品；come in 有（某种颜色/尺寸）' },
+      { title:'物流', en:'How long does shipping take to the United States?', cn:'寄到美国需要多长时间？', tips:'shipping 物流/运输' },
+      { title:'付款', en:'We accept payment by T/T and PayPal. A 30% deposit is required.', cn:'我们接受电汇和PayPal付款。需要30%定金。', tips:'T/T (Telegraphic Transfer) 电汇；deposit 定金' },
+      { title:'售后', en:'If you receive a damaged item, please contact us within 7 days.', cn:'如果您收到损坏的商品，请在7天内联系我们。', tips:'damaged item 损坏的商品' }
+    ],
+    intermediate: [
+      { title:'砍价', en:'Your price is competitive, but if you can offer a 5% discount for bulk orders, we\'d be willing to place a larger order.', cn:'您的价格有竞争力，但如果批量订单能给5%折扣，我们愿意下更大的单。', tips:'bulk order 批量订单；place an order 下订单' },
+      { title:'质检', en:'We require a pre-shipment inspection by a third-party agency. The cost will be shared equally.', cn:'我们要求由第三方机构进行装船前检验。费用由双方均摊。', tips:'pre-shipment inspection 装船前检验' },
+      { title:'定制', en:'Can you customize the packaging with our logo? We need a minimum order of 500 units.', cn:'你们能按我们的logo定制包装吗？最少订500件。', tips:'minimum order (MOQ) 最小起订量' },
+      { title:'退货', en:'We\'d like to return the defective batch and request a full refund or replacement.', cn:'我们想退回这批有缺陷的货，要求全额退款或换货。', tips:'defective 有缺陷的；batch 批次' },
+      { title:'合同', en:'Before signing the contract, we need to clarify the liability clause regarding delayed delivery.', cn:'签合同前，我们需要明确关于延迟交货的责任条款。', tips:'liability clause 责任条款；delayed delivery 延迟交货' }
+    ],
+    advanced: [
+      { title:'供应链谈判', en:'Given the current volatility in raw material costs, I propose we adopt a floating pricing model with quarterly reviews.', cn:'鉴于原材料成本目前的波动性，我建议我们采用浮动定价模式，每季度复核一次。', tips:'volatility 波动性；floating pricing 浮动定价' },
+      { title:'跨境直播', en:'Welcome to our live stream! Today we\'re showcasing our latest collection. The first 50 orders will get an exclusive gift.', cn:'欢迎来到我们的直播间！今天我们要展示最新系列。前50单会获得独家礼品。', tips:'live stream 直播；showcase 展示' },
+      { title:'品牌合作', en:'We\'re looking for a long-term partnership where we can co-develop products tailored to the Southeast Asian market.', cn:'我们在寻找一种长期合作关系，可以共同开发针对东南亚市场的产品。', tips:'co-develop 共同开发；tailored to 针对...定制' },
+      { title:'知识产权', en:'To proceed, we\'ll need you to sign an NDA and confirm that your products don\'t infringe on any existing patents.', cn:'要继续推进，我们需要您签署保密协议，并确认您的产品不侵犯任何现有专利。', tips:'NDA (Non-Disclosure Agreement) 保密协议；infringe on 侵犯' },
+      { title:'国际仲裁', en:'In the event of a dispute, both parties agree to resolve the matter through arbitration under the ICC rules in Singapore.', cn:'如发生争议，双方同意根据国际商会规则在新加坡通过仲裁解决。', tips:'arbitration 仲裁；ICC (International Chamber of Commerce)' }
+    ]
+  },
+  ielts: {
+    beginner: [
+      { title:'自我介绍', en:'I\'m a university student majoring in Business Administration. In my free time, I enjoy reading and playing basketball.', cn:'我是一名大学生，主修工商管理。空闲时间我喜欢读书和打篮球。', tips:'major in 主修；enjoy + doing' },
+      { title:'描述家乡', en:'My hometown is a small coastal city famous for its seafood and beautiful beaches.', cn:'我的家乡是一座海滨小城，以海鲜和美丽的海滩闻名。', tips:'coastal 海滨的；be famous for 以...闻名' },
+      { title:' hobbies', en:'I\'m really into photography because it allows me to capture special moments and see the world from different angles.', cn:'我非常喜欢摄影，因为它让我能够捕捉特别的瞬间，从不同角度看待世界。', tips:'be into 喜欢；capture moments 捕捉瞬间' },
+      { title:'描述家人', en:'My father is an engineer. He\'s very hardworking and always encourages me to pursue my dreams.', cn:'我父亲是一名工程师。他非常勤奋，总是鼓励我追求梦想。', tips:'hardworking 勤奋的；pursue dreams 追求梦想' },
+      { title:'未来计划', en:'In the next five years, I hope to complete my master\'s degree and gain some practical experience in my field.', cn:'未来五年，我希望完成硕士学位并在自己的领域积累一些实践经验。', tips:'master\'s degree 硕士学位；practical experience 实践经验' }
+    ],
+    intermediate: [
+      { title:'环境问题', en:'Climate change is one of the most pressing issues of our time. Governments and individuals must take immediate action to reduce carbon emissions.', cn:'气候变化是我们这个时代最紧迫的问题之一。政府和个人都必须立即采取行动减少碳排放。', tips:'pressing issue 紧迫问题；carbon emissions 碳排放' },
+      { title:'科技影响', en:'While technology has undoubtedly improved our efficiency, it has also led to a decline in face-to-face communication skills.', cn:'虽然科技无疑提高了我们的效率，但也导致了面对面沟通能力的下降。', tips:'undoubtedly 无疑地；decline in ...的下降' },
+      { title:'教育话题', en:'I believe that a well-rounded education should balance academic knowledge with practical skills and character development.', cn:'我认为全面的教育应该平衡学术知识、实践技能和品格培养。', tips:'well-rounded 全面的；character development 品格培养' },
+      { title:'文化差异', en:'Cultural differences can be challenging at first, but they also offer valuable opportunities for personal growth and mutual understanding.', cn:'文化差异起初可能具有挑战性，但它们也为个人成长和相互理解提供了宝贵机会。', tips:'mutual understanding 相互理解' },
+      { title:'工作压力', en:'Maintaining a healthy work-life balance is crucial. Burnout not only affects productivity but also takes a toll on mental health.', cn:'保持健康的工作与生活平衡至关重要。倦怠不仅影响生产力，还会损害心理健康。', tips:'work-life balance 工作与生活平衡；burnout 倦怠' }
+    ],
+    advanced: [
+      { title:'全球化', en:'Globalization has created an unprecedented level of interconnectedness, but it has also exacerbated economic inequalities between developed and developing nations.', cn:'全球化创造了前所未有的相互联系水平，但也加剧了发达国家和发展中国家之间的经济不平等。', tips:'unprecedented 前所未有的；exacerbate 加剧' },
+      { title:'人工智能伦理', en:'As AI systems become more autonomous, we must grapple with profound ethical questions regarding accountability, bias, and the future of human labor.', cn:'随着人工智能系统变得更加自主，我们必须努力应对关于问责制、偏见和人类劳动未来的深刻伦理问题。', tips:'grapple with 努力应对；accountability 问责制' },
+      { title:'城市规划', en:'Sustainable urban planning requires a holistic approach that integrates green infrastructure, public transportation, and affordable housing.', cn:'可持续城市规划需要一种整体方法，整合绿色基础设施、公共交通和经济适用房。', tips:'holistic approach 整体方法；affordable housing 经济适用房' },
+      { title:'心理健康', en:'The stigma surrounding mental health issues often prevents people from seeking help, which is why public awareness campaigns are so vital.', cn:'围绕心理健康问题的污名常常阻止人们寻求帮助，这就是为什么公众意识宣传活动如此重要。', tips:'stigma 污名；vital 至关重要的' },
+      { title:'领导力', en:'True leadership is not about authority; it\'s about empowering others to reach their full potential while navigating uncertainty with clarity and compassion.', cn:'真正的领导力不在于权威；而在于赋能他人发挥全部潜能，同时以清晰和同理心驾驭不确定性。', tips:'empower 赋能；navigate uncertainty 驾驭不确定性' }
+    ]
+  }
+};
+
+const ENGLISH_WORDS = {
+  beginner: [
+    { word:'convenient', phonetic:'/kənˈviːniənt/', level:'CET-4', meaning:'adj. 方便的，便利的', example:'Online shopping is very convenient for busy people.' },
+    { word:'delicious', phonetic:'/dɪˈlɪʃəs/', level:'CET-4', meaning:'adj. 美味的，可口的', example:'The cake smells delicious.' },
+    { word:'schedule', phonetic:'/ˈʃedjuːl/', level:'CET-4', meaning:'n./v. 日程表；安排', example:'Let me check my schedule.' },
+    { word:'recommend', phonetic:'/ˌrekəˈmend/', level:'CET-4', meaning:'v. 推荐，建议', example:'Can you recommend a good restaurant?' },
+    { word:'apologize', phonetic:'/əˈpɒlədʒaɪz/', level:'CET-4', meaning:'v. 道歉', example:'I want to apologize for being late.' }
+  ],
+  intermediate: [
+    { word:'substantial', phonetic:'/səbˈstænʃl/', level:'CET-6', meaning:'adj. 大量的，实质的', example:'The company has made substantial progress.' },
+    { word:'comprehensive', phonetic:'/ˌkɒmprɪˈhensɪv/', level:'CET-6', meaning:'adj. 全面的，综合的', example:'The report provides a comprehensive overview.' },
+    { word:'perspective', phonetic:'/pəˈspektɪv/', level:'CET-6', meaning:'n. 观点，视角', example:'She offered a different perspective on the issue.' },
+    { word:'implement', phonetic:'/ˈɪmplɪment/', level:'CET-6', meaning:'v. 实施，执行', example:'We need to implement the new policy immediately.' },
+    { word:'negotiate', phonetic:'/nɪˈɡəʊʃieɪt/', level:'CET-6', meaning:'v. 谈判，协商', example:'We are negotiating a better deal.' }
+  ],
+  advanced: [
+    { word:'paradigm', phonetic:'/ˈpærədaɪm/', level:'TEM-8', meaning:'n. 范例，模式', example:'This discovery represents a paradigm shift in science.' },
+    { word:'ambiguity', phonetic:'/ˌæmbɪˈɡjuːɪti/', level:'TEM-8', meaning:'n. 歧义，模棱两可', example:'There is some ambiguity in the contract.' },
+    { word:'pragmatic', phonetic:'/præɡˈmætɪk/', level:'GRE', meaning:'adj. 务实的，实用的', example:'We need a pragmatic approach to solve this.' },
+    { word:'mitigate', phonetic:'/ˈmɪtɪɡeɪt/', level:'GRE', meaning:'v. 减轻，缓和', example:'Measures were taken to mitigate the risks.' },
+    { word:'resilience', phonetic:'/rɪˈzɪliəns/', level:'TEM-8', meaning:'n. 韧性，恢复力', example:'Her resilience in adversity is inspiring.' }
+  ]
+};
+
+function englishGetDailyData(){
+  const today = todayStr();
+  if(englishData && englishData.date === today && englishData.difficulty === englishDifficulty) return englishData;
+  // 生成每日数据
+  const scenes = ENGLISH_SCENES;
+  const words = ENGLISH_WORDS[englishDifficulty] || ENGLISH_WORDS.beginner;
+  // 用日期做种子选择推荐
+  const daySeed = parseInt(today.replace(/-/g,''));
+  const sceneKeys = Object.keys(scenes);
+  const recSceneKey = sceneKeys[daySeed % sceneKeys.length];
+  const recScenePool = scenes[recSceneKey][englishDifficulty] || scenes[recSceneKey].beginner;
+  const recScene = recScenePool[daySeed % recScenePool.length];
+  // 选3个单词
+  const wordIndices = [(daySeed)%words.length, (daySeed+1)%words.length, (daySeed+2)%words.length];
+  const dailyWords = wordIndices.map(i=>words[i]);
+  englishData = { date:today, difficulty:englishDifficulty, recSceneKey, recScene, dailyWords };
+  save(LS_ENGLISH, englishData);
+  return englishData;
+}
+
+function englishSpeak(text){
+  if(!window.speechSynthesis){ showToast('当前浏览器不支持语音播放'); return; }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  utter.rate = 0.9;
+  window.speechSynthesis.speak(utter);
+}
+
+function englishUpdateProgress(){
+  const today = todayStr();
+  if(englishProgress.lastDate !== today){
+    englishProgress.completed += 1;
+    if(englishProgress.lastDate){
+      const yest = new Date(); yest.setDate(yest.getDate()-1);
+      if(englishProgress.lastDate === dateStr(yest)) englishProgress.streakDays += 1;
+      else englishProgress.streakDays = 1;
+    } else {
+      englishProgress.streakDays = 1;
+    }
+    englishProgress.lastDate = today;
+    englishProgress.difficulty = englishDifficulty;
+    save(LS_ENGLISH_PROG, englishProgress);
+  }
+}
 
 function exprUpdateStreak(){
   const today=todayStr();
@@ -2747,68 +3374,134 @@ function exprGetQuestion(type){
 
 function exprAIReview(type, difficulty, question, answer){
   if(!answer||answer.trim().length<10){
-    return { score:'需展开', tips:[
+    return { score:'需展开', logic:'-', fluency:'-', vocabulary:'-', tips:[
       '⚠️ 回答篇幅过短，建议至少展开100字以上。',
       '表达训练的核心是"说清楚"，尝试多展开一些细节。',
       '可以先列提纲，再逐点展开。'
-    ]};
+    ], suggestion:''};
   }
-  const len=answer.length;
-  const tips=[];
-  let scoreNum=60;
+  const text = answer.trim();
+  const len = text.length;
+  const sentences = text.split(/[。！？.!?]/).filter(s=>s.trim().length>0);
+  const words = text.split(/\s+/).filter(w=>w.length>0);
 
-  // 结构化检测
-  const structWords=['首先','其次','最后','第一','第二','第三','一方面','另一方面','总之','综上','因此'];
-  const hasStruct = structWords.some(w=>answer.includes(w));
-  if(hasStruct){ scoreNum+=15; tips.push('✅ 使用了结构化表达词（首先/其次等），逻辑层次清晰。'); }
-  else tips.push('💡 建议使用"首先、其次、最后"等结构词，让表达更有层次。');
+  // === 1. 逻辑框架评分 ===
+  let logicScore = 0;
+  const structWords=['首先','其次','最后','第一','第二','第三','一方面','另一方面','总之','综上','因此','所以','但是','然而'];
+  const hasStruct = structWords.some(w=>text.includes(w));
+  if(hasStruct) logicScore += 25;
+  else logicScore += 10;
+  if(sentences.length >= 3) logicScore += 15;
+  else logicScore += 5;
+  if(len > 120) logicScore += 10;
+  logicScore = Math.min(50, logicScore);
 
-  // 篇幅评分
-  if(len>200) scoreNum+=15;
-  else if(len>100) scoreNum+=10;
-  else tips.push('💡 回答可以再展开一些，加入具体例子或细节会让表达更有说服力。');
+  // === 2. 语言流畅度评分 ===
+  let fluencyScore = 0;
+  const avgLen = sentences.length > 0 ? len / sentences.length : 0;
+  if(avgLen >= 15 && avgLen <= 80) fluencyScore += 25;
+  else fluencyScore += 10;
+  const connectors=['然后','接着','所以','因为','不过','但是','而且','另外','此外','同时'];
+  const connCount = connectors.reduce((c,w)=>c+(text.includes(w)?1:0),0);
+  if(connCount >= 2) fluencyScore += 15;
+  else if(connCount >= 1) fluencyScore += 8;
+  // 检查重复词（简单指标）
+  const wordFreq = {};
+  words.forEach(w=>{ wordFreq[w]=(wordFreq[w]||0)+1; });
+  const repeats = Object.values(wordFreq).filter(c=>c>2).length;
+  if(repeats <= 2) fluencyScore += 10;
+  else fluencyScore += 3;
+  fluencyScore = Math.min(50, fluencyScore);
 
-  // 举例检测
-  const exampleWords=['例如','比如','举个例子','记得','有一次','上次'];
-  const hasExample = exampleWords.some(w=>answer.includes(w));
-  if(hasExample){ scoreNum+=10; tips.push('✅ 用了具体例子来支撑观点，很好！'); }
-  else tips.push('💡 可以加入一个具体例子（"比如…"），让抽象观点变生动。');
+  // === 3. 用词优缺点 ===
+  const goodWords = [];
+  const advWords = ['深刻','关键','核心','本质','系统','全面','深入','独特','创新','高效'];
+  const emoWords = ['感动','温暖','震撼','共鸣','启发','激励'];
+  advWords.forEach(w=>{ if(text.includes(w)) goodWords.push(w); });
+  emoWords.forEach(w=>{ if(text.includes(w)) goodWords.push(w); });
+
+  const weakWords = [];
+  const vague = ['那个','这个','东西','随便','可能大概'];
+  const fillers = ['嗯','啊','哦','那个','就是'];
+  vague.forEach(w=>{ if(text.includes(w)) weakWords.push(w); });
+  fillers.forEach(w=>{ if(text.includes(w)) weakWords.push(w); });
+
+  // === 综合评分 ===
+  let total = logicScore + fluencyScore;
+  // 举例加分
+  const exampleWords=['例如','比如','举个例子','记得','有一次','上次','以','为例'];
+  const hasExample = exampleWords.some(w=>text.includes(w));
+  if(hasExample) total += 5;
+  // 词汇丰富度
+  const uniqueWords = new Set(words.map(w=>w.toLowerCase()));
+  const richness = words.length > 0 ? uniqueWords.size / words.length : 0;
+  if(richness > 0.6) total += 5;
+
+  total = Math.min(95, total);
+  let score;
+  if(total>=85) score='优秀';
+  else if(total>=70) score='良好';
+  else if(total>=55) score='合格';
+  else score='需提升';
+
+  // === 生成点评文案 ===
+  const tips = [];
+
+  // 逻辑框架点评
+  if(logicScore >= 40) tips.push('✅ 【逻辑框架】观点层次分明，结构清晰，使用了有效的连接词和分段论述。');
+  else if(logicScore >= 25) tips.push('💡 【逻辑框架】整体有结构，但段落/观点之间的过渡可以更清晰。建议明确使用"首先/其次/最后"等引导词。');
+  else tips.push('⚠️ 【逻辑框架】回答略显零散，建议先确定核心观点，再用2-3个论据支撑，最后总结升华。');
+
+  // 流畅度点评
+  if(fluencyScore >= 40) tips.push('✅ 【语言流畅度】表达连贯，句子长短搭配得当，阅读体验顺畅。');
+  else if(fluencyScore >= 25) tips.push('💡 【语言流畅度】基本通顺，但部分句子过长或过短，建议适当调整句式节奏。');
+  else tips.push('⚠️ 【语言流畅度】句子衔接不够自然，建议多使用连接词，避免过多的短句堆砌。');
+
+  // 用词点评
+  if(goodWords.length > 0) tips.push(`✅ 【用词亮点】使用了精准/生动的词汇：${goodWords.slice(0,3).join('、')}。`);
+  if(weakWords.length > 0) tips.push(`💡 【用词建议】发现模糊/口头禅词汇：${weakWords.slice(0,3).join('、')}，建议替换为更具体的表达。`);
 
   // 题型特定建议
   if(type==='impromptu'){
-    if(len<150) tips.push('🎤 即兴口述建议练习时多说一些，模拟真实场景的连贯表达。');
-    else tips.push('✅ 篇幅适中，即兴表达有完整度。');
+    if(len<100) tips.push('🎤 【即兴专项】即兴口述建议控制在1-2分钟，内容要有开头引入、中间展开、结尾收束。');
+    else tips.push('✅ 【即兴专项】即兴表达有完整度，继续保持"引入→展开→收束"的节奏感。');
   } else if(type==='logic'){
-    if(!hasStruct) tips.push('🧠 逻辑简答重在结构化，建议用"总-分-总"框架组织回答。');
-    else tips.push('✅ 逻辑框架完整，观点清晰。');
+    if(!hasStruct) tips.push('🧠 【逻辑专项】逻辑简答重在结构化，建议用"总-分-总"框架：先亮观点，再分点论证，最后总结。');
+    else tips.push('✅ 【逻辑专项】逻辑框架完整，论证过程有层次感。');
   } else if(type==='scenario'){
-    const empathyWords=['理解','明白','体谅','辛苦','感谢','不好意思'];
-    const hasEmpathy = empathyWords.some(w=>answer.includes(w));
-    if(hasEmpathy){ scoreNum+=10; tips.push('✅ 体现了共情意识，沟通语气得体。'); }
-    else tips.push('💡 情景沟通建议先共情/认可对方，再表达自己的立场。');
+    const empathyWords=['理解','明白','体谅','辛苦','感谢','不好意思','抱歉'];
+    const hasEmpathy = empathyWords.some(w=>text.includes(w));
+    if(hasEmpathy) tips.push('✅ 【情景专项】体现了共情意识，沟通语气得体，这是情景沟通的关键。');
+    else tips.push('💡 【情景专项】情景沟通建议先共情/认可对方（"我理解你的..."），再表达自己的立场或给出方案。');
   } else if(type==='retell'){
-    if(len>80) tips.push('✅ 复述内容完整，有概括能力。');
-    else tips.push('📖 复述练习重在抓住核心要点，尝试更完整地概括。');
+    if(len>60) tips.push('✅ 【复述专项】复述内容较完整，抓住了核心要点。');
+    else tips.push('📖 【复述专项】复述练习重在抓住核心要点，尝试用自己的话更完整地概括原文。');
   }
 
-  // 连贯性
-  const connectors=['然后','接着','所以','因为','不过','但是','而且','另外'];
-  const hasConn = connectors.some(w=>answer.includes(w));
-  if(hasConn) scoreNum+=5;
-  else tips.push('💡 多用连接词（然后、所以、不过），让表达更连贯。');
-
-  if(difficulty==='advanced' && len<150){
-    tips.push('⚡ 进阶模式要求更高，建议深入展开，字数至少200字。');
+  if(difficulty==='advanced' && len<120){
+    tips.push('⚡ 【进阶提示】进阶模式要求更深入展开，建议字数至少150字以上，加入更多细节和论据。');
   }
 
-  scoreNum=Math.min(scoreNum,95);
-  let score;
-  if(scoreNum>=85) score='优秀';
-  else if(scoreNum>=70) score='良好';
-  else if(scoreNum>=60) score='合格';
-  else score='需提升';
+  // 优化建议（综合）
+  let suggestion = '';
+  if(total >= 85){
+    suggestion = '🌟 你的表达水平很不错！建议尝试更高难度的题目，或在表述中加入更具说服力的数据/案例，让观点更有分量。';
+  } else if(total >= 70){
+    suggestion = '📈 整体表达良好，继续保持！重点提升方向：' + (logicScore<fluencyScore?'加强逻辑框架的层次感，多用引导词串联观点。':'提升语言流畅度，注意句子衔接和节奏变化。');
+  } else if(total >= 55){
+    suggestion = '💪 表达有基础，但需要系统提升。建议：① 答题前先写3-5个关键词提纲 ② 每个观点配一个具体例子 ③ 回答完自己朗读一遍，检查是否通顺。';
+  } else {
+    suggestion = '🎯 建议从简易模式开始，每天坚持练习1-2题。每次回答后对照参考思路，学习它的结构和用词，逐步积累表达模板。';
+  }
 
-  return { score, tips };
+  return {
+    score,
+    logic: logicScore >= 40 ? '优秀' : logicScore >= 25 ? '良好' : '需提升',
+    fluency: fluencyScore >= 40 ? '优秀' : fluencyScore >= 25 ? '良好' : '需提升',
+    vocabulary: goodWords.length >= 2 ? '丰富' : goodWords.length >= 1 ? '尚可' : '可丰富',
+    tips,
+    suggestion
+  };
 }
 
 function renderExpression(){
@@ -2854,6 +3547,38 @@ function renderExprPractice(){
   const typeName=EXPR_TYPES.find(t=>t.id===p.type)?.name||'';
   const isRetell=p.type==='retell';
   const qText=isRetell ? p.question.split('\n').filter(l=>l.trim()).map((l,i)=> i===0?`<strong>${escHtml(l)}</strong>`:escHtml(l)).join('<br/>') : escHtml(p.question);
+  const answerMode = p.answerMode || 'text'; // text | voice
+
+  const textSection = answerMode==='text' ? `
+    <div class="fin-section-title">✏️ 你的回答</div>
+    <div class="expr-draft">
+      <textarea id="exprDraft" placeholder="在这里写下你的完整回答...">${escHtml(p.draft||'')}</textarea>
+      <div class="expr-draft-count">${(p.draft||'').length} 字</div>
+    </div>
+  ` : '';
+
+  const voiceSection = answerMode==='voice' ? `
+    <div class="fin-section-title">🎙️ 语音口述作答</div>
+    <div class="expr-record-section">
+      <div class="rec-hint">点击下方按钮开始录音，模拟真实对话场景进行口述表达</div>
+      <button class="expr-rec-btn rec-start" id="exprRecBtn">🎙️ 开始录音</button>
+      <div class="expr-audio-bars" id="exprAudioBars">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      </div>
+      <div class="expr-rec-status" id="exprRecStatus" style="display:none">
+        <span class="rec-dot"></span>
+        <span class="rec-time" id="exprRecTime">00:00</span>
+        <span class="rec-label">正在录音...</span>
+      </div>
+      <div class="expr-playback-row ${p._audioBlob?'show':''}" id="exprPlayback">
+        <audio id="exprAudioPlayer" controls></audio>
+        <button class="pb-del" id="exprDelAudio">🗑 删除</button>
+      </div>
+      <div class="expr-rec-tip">
+        <span class="lock-icon">🔒</span> 录音仅保存在本地浏览器，不会上传到任何服务器
+      </div>
+    </div>
+  ` : '';
 
   return `
     <div class="expr-page">
@@ -2871,30 +3596,16 @@ function renderExprPractice(){
         <button class="timer-btn" id="exprTimerStart">▶ 开始</button>
         <button class="timer-btn reset" id="exprTimerReset">↻ 重置</button>
       </div>
-      <div class="fin-section-title">✏️ 思路草稿 / 你的回答</div>
-      <div class="expr-draft">
-        <textarea id="exprDraft" placeholder="在这里写下你的表达提纲或完整回答...">${escHtml(p.draft||'')}</textarea>
+
+      <!-- 作答方式切换 -->
+      <div class="expr-answer-switch">
+        <button class="expr-mode-btn ${answerMode==='text'?'active':''}" data-answermode="text">✏️ 文字作答</button>
+        <button class="expr-mode-btn ${answerMode==='voice'?'active':''}" data-answermode="voice">🎙️ 录音作答</button>
       </div>
-      <div class="fin-section-title">🎙️ 语音口述练习</div>
-      <div class="expr-record-section">
-        <div class="rec-hint">点击下方按钮开始录音，模拟真实对话场景进行口述表达</div>
-        <button class="expr-rec-btn rec-start" id="exprRecBtn">🎙️ 开始录音</button>
-        <div class="expr-audio-bars" id="exprAudioBars">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        </div>
-        <div class="expr-rec-status" id="exprRecStatus" style="display:none">
-          <span class="rec-dot"></span>
-          <span class="rec-time" id="exprRecTime">00:00</span>
-          <span class="rec-label">正在录音...</span>
-        </div>
-        <div class="expr-playback-row" id="exprPlayback">
-          <audio id="exprAudioPlayer" controls></audio>
-          <button class="pb-del" id="exprDelAudio">🗑 删除</button>
-        </div>
-        <div class="expr-rec-tip">
-          <span class="lock-icon">🔒</span> 录音仅保存在本地浏览器，不会上传到任何服务器，保障隐私安全
-        </div>
-      </div>
+
+      ${textSection}
+      ${voiceSection}
+
       <div class="expr-actions">
         <button class="expr-btn secondary" id="exprShowRef">💡 参考思路</button>
         <button class="expr-btn primary" id="exprReview">🤖 AI点评</button>
@@ -3023,11 +3734,25 @@ function bindExpression(el){
     });
   });
 
+  // 作答方式切换
+  el.querySelectorAll('[data-answermode]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const p=window._exprPractice;
+      if(p){
+        p.answerMode=btn.dataset.answermode;
+        renderModule('expression');
+      }
+    });
+  });
+
   // 草稿输入
   const draftTA=el.querySelector('#exprDraft');
   if(draftTA){
     draftTA.addEventListener('input',()=>{
       if(window._exprPractice) window._exprPractice.draft=draftTA.value;
+      // 更新字数统计
+      const countEl=el.querySelector('.expr-draft-count');
+      if(countEl) countEl.textContent=draftTA.value.length+' 字';
     });
   }
 
@@ -3071,7 +3796,14 @@ function bindExpression(el){
         <div class="expr-review">
           <div class="review-title">🤖 AI点评结果</div>
           <div class="review-score">${result.score}</div>
-          <div class="review-content">${result.tips.map(t=>`<p>${escHtml(t)}</p>`).join('')}${oralTips}</div>
+          <div class="expr-review-dims">
+            <div class="expr-dim"><span class="dim-label">逻辑框架</span><span class="dim-val dim-${result.logic==='优秀'?'good':result.logic==='良好'?'ok':'bad'}">${result.logic}</span></div>
+            <div class="expr-dim"><span class="dim-label">语言流畅度</span><span class="dim-val dim-${result.fluency==='优秀'?'good':result.fluency==='良好'?'ok':'bad'}">${result.fluency}</span></div>
+            <div class="expr-dim"><span class="dim-label">用词水平</span><span class="dim-val dim-${result.vocabulary==='丰富'?'good':result.vocabulary==='尚可'?'ok':'bad'}">${result.vocabulary}</span></div>
+          </div>
+          <div class="review-content">${result.tips.map(t=>`<p>${escHtml(t)}</p>`).join('')}</div>
+          ${result.suggestion?`<div class="expr-suggestion"><strong>🎯 优化建议</strong><p>${escHtml(result.suggestion)}</p></div>`:''}
+          ${oralTips}
         </div>`;
     }
     if(window._exprPractice) window._exprPractice.review=result.score;
@@ -3083,7 +3815,9 @@ function bindExpression(el){
     if(!p) return;
     const answer=draftTA?.value?.trim()||'';
     const hasAudio=!!p._audioBlob;
-    if(answer.length<10 && !hasAudio){ showToast('请先写下你的回答或完成录音再打卡'); return; }
+    const mode = p.answerMode || 'text';
+    if(mode==='text' && answer.length<10){ showToast('文字作答请至少写10字再打卡'); return; }
+    if(mode==='voice' && !hasAudio){ showToast('录音作答请先完成录音再打卡'); return; }
     exprUpdateStreak();
     exprIdCounter++;
     expressionRecords.push({
@@ -3096,7 +3830,8 @@ function bindExpression(el){
       review:p.review||'',
       duration:p.duration,
       hasAudio:hasAudio,
-      audioDuration:hasAudio ? _recSeconds : 0
+      audioDuration:hasAudio ? _recSeconds : 0,
+      answerMode:mode
     });
     save(LS_EXPRESSION, expressionRecords);
     if(_recTimer){ clearInterval(_recTimer); _recTimer=null; }
@@ -3237,6 +3972,149 @@ function bindExpression(el){
   }
 }
 
+// ---------- 英语口语学习模块 ----------
+function renderEnglish(){
+  const data = englishGetDailyData();
+  const sceneLabels = { daily:'🏠 日常生活', ecommerce:'🛒 跨境电商', ielts:'🎓 雅思TED' };
+  const diffLabels = { beginner:'🌱 入门', intermediate:'📈 中级', advanced:'🔥 高阶' };
+  const diffDesc = { beginner:'基础实用句型，适合初学者', intermediate:'进阶场景对话，提升 fluency', advanced:'高阶表达与思辨，接近母语水平' };
+
+  // 今日推荐场景
+  const rec = data.recScene;
+  const sceneHTML = `
+    <div class="eng-scene-card">
+      <div class="eng-scene-tag">${sceneLabels[data.recSceneKey]||''} · 今日推荐</div>
+      <div class="eng-scene-title">${escHtml(rec.title)}</div>
+      <div class="eng-scene-en">${escHtml(rec.en)}</div>
+      <div class="eng-scene-cn">${escHtml(rec.cn)}</div>
+      <div class="eng-scene-tips">💡 ${escHtml(rec.tips)}</div>
+      <div class="eng-scene-actions">
+        <button class="eng-speak-btn" data-speak="${escAttr(rec.en)}">🔊 播放语音</button>
+        <button class="eng-done-btn" id="engSceneDone">✅ 完成练习</button>
+      </div>
+    </div>
+  `;
+
+  // 今日词汇
+  const wordsHTML = data.dailyWords.map((w,i)=>`
+    <div class="eng-word-card">
+      <div class="eng-word-header">
+        <div>
+          <span class="eng-word-text">${escHtml(w.word)}</span>
+          <span class="eng-word-phonetic">${escHtml(w.phonetic)}</span>
+          <span class="eng-word-level">${escHtml(w.level)}</span>
+        </div>
+        <button class="eng-word-speak" data-speak="${escAttr(w.word)}">🔊</button>
+      </div>
+      <div class="eng-word-meaning">${escHtml(w.meaning)}</div>
+      <div class="eng-word-example">${escHtml(w.example)}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="eng-page">
+      <!-- 难度选择 -->
+      <div class="eng-diff-bar">
+        <button class="eng-diff-btn ${englishDifficulty==='beginner'?'active':''}" data-ediff="beginner">🌱 入门简单</button>
+        <button class="eng-diff-btn ${englishDifficulty==='intermediate'?'active':''}" data-ediff="intermediate">📈 中级</button>
+        <button class="eng-diff-btn ${englishDifficulty==='advanced'?'active':''}" data-ediff="advanced">🔥 高阶</button>
+      </div>
+      <div class="eng-diff-desc">${diffDesc[englishDifficulty]}</div>
+
+      <!-- 场景分类 -->
+      <div class="eng-scene-tabs">
+        <button class="eng-tab ${data.recSceneKey==='daily'?'active':''}" data-tab="daily">🏠 日常</button>
+        <button class="eng-tab ${data.recSceneKey==='ecommerce'?'active':''}" data-tab="ecommerce">🛒 跨境</button>
+        <button class="eng-tab ${data.recSceneKey==='ielts'?'active':''}" data-tab="ielts">🎓 雅思</button>
+      </div>
+
+      <!-- 今日推荐 -->
+      <div class="fin-section-title">💬 今日推荐练习</div>
+      ${sceneHTML}
+
+      <!-- 学习进度 -->
+      <div class="eng-progress-card">
+        <div class="eng-prog-title">📊 学习进度</div>
+        <div class="eng-prog-stats">
+          <div class="eng-prog-item"><div class="eng-prog-num">${englishProgress.completed||0}</div><div class="eng-prog-label">已完成场景</div></div>
+          <div class="eng-prog-item"><div class="eng-prog-num">${englishProgress.streakDays||0}</div><div class="eng-prog-label">连续天数</div></div>
+        </div>
+      </div>
+
+      <!-- 今日词汇 -->
+      <div class="fin-section-title">📖 今日词汇 (${data.dailyWords.length}词)</div>
+      <div class="eng-words-list">${wordsHTML}</div>
+
+      <!-- 全部朗读 -->
+      <button class="eng-speak-all" id="engSpeakAll">🔊 朗读全部今日内容</button>
+    </div>
+  `;
+}
+
+function bindEnglish(el){
+  // 难度切换
+  el.querySelectorAll('[data-ediff]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      englishDifficulty = btn.dataset.ediff;
+      englishProgress.difficulty = englishDifficulty;
+      save(LS_ENGLISH_PROG, englishProgress);
+      // 清除缓存，强制重新生成
+      englishData = null;
+      renderModule('english');
+    });
+  });
+
+  // 场景标签切换（仅展示对应场景推荐）
+  el.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const tab = btn.dataset.tab;
+      const pool = ENGLISH_SCENES[tab][englishDifficulty] || ENGLISH_SCENES[tab].beginner;
+      const idx = Math.floor(Math.random()*pool.length);
+      const scene = pool[idx];
+      const sceneLabels = { daily:'🏠 日常生活', ecommerce:'🛒 跨境电商', ielts:'🎓 雅思TED' };
+      const card = el.querySelector('.eng-scene-card');
+      if(card){
+        card.innerHTML = `
+          <div class="eng-scene-tag">${sceneLabels[tab]} · 已切换</div>
+          <div class="eng-scene-title">${escHtml(scene.title)}</div>
+          <div class="eng-scene-en">${escHtml(scene.en)}</div>
+          <div class="eng-scene-cn">${escHtml(scene.cn)}</div>
+          <div class="eng-scene-tips">💡 ${escHtml(scene.tips)}</div>
+          <div class="eng-scene-actions">
+            <button class="eng-speak-btn" data-speak="${escAttr(scene.en)}">🔊 播放语音</button>
+            <button class="eng-done-btn" id="engSceneDone">✅ 完成练习</button>
+          </div>
+        `;
+        bindSceneActions(card);
+      }
+    });
+  });
+
+  function bindSceneActions(container){
+    container.querySelectorAll('[data-speak]').forEach(btn=>{
+      btn.addEventListener('click',()=>englishSpeak(btn.dataset.speak));
+    });
+    container.querySelector('#engSceneDone')?.addEventListener('click',()=>{
+      englishUpdateProgress();
+      showToast('🎉 练习完成！已完成场景 +1');
+      renderModule('english');
+    });
+  }
+  bindSceneActions(el);
+
+  // 单词朗读
+  el.querySelectorAll('.eng-word-speak').forEach(btn=>{
+    btn.addEventListener('click',()=>englishSpeak(btn.dataset.speak));
+  });
+
+  // 全部朗读
+  el.querySelector('#engSpeakAll')?.addEventListener('click',()=>{
+    const data = englishGetDailyData();
+    const texts = [data.recScene.en, ...data.dailyWords.map(w=>w.word)];
+    texts.forEach((t,i)=>setTimeout(()=>englishSpeak(t), i*2500));
+    showToast('🔊 开始朗读全部内容');
+  });
+}
 
 // ---------- 自定义模块（纯笔记型） ----------
 function renderCustomModule(mod) {
@@ -3324,6 +4202,21 @@ function renderHome(){
           <div class="checkin-stat-row"><span>记录模式</span><b>${homeMode==='daily'?'每日重置':'累积记录'}</b></div>
         </div>
       </div>
+      <!-- 今日计划（来自每日计划模块） -->
+      <div class="home-plan-section">
+        <div class="home-plan-header">
+          <span class="home-plan-title">📝 今日计划</span>
+          <span class="home-plan-count">${tasks.filter(t=>t.date===todayStr()).length} 项</span>
+        </div>
+        <div class="home-plan-list">
+          ${tasks.filter(t=>t.date===todayStr()).map(t=>`
+            <div class="home-plan-item ${t.done?'done':''}" data-planid="${t.id}">
+              <span class="home-plan-check">${t.done?'✅':'⭕'}</span>
+              <span class="home-plan-text">${escHtml(t.text)}</span>
+            </div>
+          `).join('') || '<div class="home-plan-empty">暂无今日计划，去「每日计划」添加吧 ✨</div>'}
+        </div>
+      </div>
     </div>
 
     <!-- 励志语录 -->
@@ -3387,7 +4280,24 @@ function bindHome(el){
   el.querySelectorAll('[data-goto]').forEach(item=>{
     item.addEventListener('click',()=>{
       const mid = item.dataset.goto;
-      switchModule(mid);
+      activeModuleId = mid;
+      renderAll();
+    });
+  });
+
+  // 今日计划任务点击（同步到每日计划模块）
+  el.querySelectorAll('.home-plan-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const pid = parseInt(item.dataset.planid);
+      const task = tasks.find(t=>t.id===pid);
+      if(task){
+        task.done = !task.done;
+        item.classList.toggle('done', task.done);
+        const chk = item.querySelector('.home-plan-check');
+        if(chk) chk.textContent = task.done?'✅':'⭕';
+        save(LS_TASKS, tasks);
+        showToast(task.done?'✅ 已完成':'⭕ 已取消');
+      }
     });
   });
 }
@@ -3460,6 +4370,7 @@ function renderModule(mid) {
     case 'finance':     html = renderFinance(); break;
     case 'exercise':    html = renderExercise(); break;
     case 'expression':  html = renderExpression(); break;
+    case 'english':     html = renderEnglish(); break;
     default:            html = renderCustomModule(mod); break;
   }
 
@@ -3483,6 +4394,7 @@ function renderModule(mid) {
     case 'finance':     try{ bindFinance(card); }catch(e){ console.error('bindFinance error:',e); } break;
     case 'exercise':    bindExercise(card); break;
     case 'expression':  bindExpression(card); break;
+    case 'english':     bindEnglish(card); break;
     default:            bindCustomModule(card, mod); break;
   }
 }
