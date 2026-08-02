@@ -1028,39 +1028,104 @@ body{
 }
 
 /* ============================================================
-   模块7: 每日运动记录 — 粉色适配
+   模块7: 每日运动记录 V2 — 粉色适配
    ============================================================ */
 .exercise-page{ padding-bottom:20px; }
-.exercise-form{ display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
-.ex-select, .ex-input{
-  padding:10px 14px; border:1px solid var(--border);
-  border-radius:var(--radius-sm); font-size:14px; outline:none;
-  font-family:var(--font); background:rgba(255,255,255,.8);
+
+/* 运动类型选择网格 */
+.ex-type-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+.ex-type-card{
+  background:rgba(255,255,255,.8); border-radius:var(--radius-sm);
+  padding:14px 8px; text-align:center; cursor:pointer;
+  border:2px solid transparent; transition:all .2s;
+  box-shadow:0 2px 8px rgba(240,128,160,.08);
 }
-.ex-select:focus, .ex-input:focus{ border-color:var(--pink); }
-.ex-btn{
-  padding:12px; border:none; border-radius:var(--radius-sm);
-  background:linear-gradient(135deg,var(--pink),var(--pink-dark));
-  color:#FFF; font-size:14px; font-weight:600;
-  cursor:pointer; font-family:var(--font);
+.ex-type-card:active{ transform:scale(.96); }
+.ex-type-card.selected{
+  border-color:var(--pink); background:rgba(255,240,245,.85);
+  box-shadow:0 3px 12px rgba(240,128,160,.18);
 }
-.ex-btn:active{ opacity:.85; }
-.ex-history-group{ margin-bottom:12px; }
-.ex-group-date{
-  font-size:12px; font-weight:600; color:var(--pink);
-  padding:6px 0 4px; border-bottom:1px solid var(--border);
-  margin-bottom:6px;
+.ex-type-card .et-icon{ font-size:28px; margin-bottom:4px; display:block; }
+.ex-type-card .et-name{ font-size:12px; font-weight:600; color:var(--text); }
+.ex-type-card .et-del{
+  display:none; position:absolute; top:-6px; right:-6px;
+  width:20px; height:20px; border-radius:50%; background:var(--danger);
+  color:#FFF; border:none; font-size:12px; line-height:1; cursor:pointer;
 }
-.ex-record{
-  display:flex; align-items:center; gap:10px; padding:10px 12px;
-  background:rgba(255,255,255,.7); border-radius:var(--radius-sm);
-  border:1px solid rgba(240,128,160,.06); margin-bottom:4px;
+.ex-type-card{ position:relative; }
+.ex-type-card:hover .et-del{ display:flex; align-items:center; justify-content:center; }
+
+.ex-type-add{
+  background:rgba(255,255,255,.5); border:2px dashed var(--border);
+  display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--text3);
 }
-.ex-rec-icon{ font-size:20px; }
-.ex-rec-info{ flex:1; }
-.ex-rec-type{ font-size:13px; font-weight:600; color:var(--text); }
-.ex-rec-detail{ font-size:11px; color:var(--text3); }
-.ex-rec-feel{ font-size:12px; color:var(--text2); font-style:italic; margin-top:2px; }
+.ex-type-add-row{ display:flex; gap:8px; margin-bottom:14px; }
+.ex-type-add-row input{ flex:1; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13px; outline:none; }
+.ex-type-add-row button{ padding:10px 14px; border:none; border-radius:var(--radius-sm); background:var(--pink); color:#FFF; font-size:13px; cursor:pointer; }
+
+/* 计时器 */
+.ex-timer-card{
+  background:rgba(255,255,255,.85); border-radius:var(--radius); padding:18px 14px;
+  text-align:center; margin-bottom:14px; border:1px solid rgba(240,128,160,.1);
+  box-shadow:var(--shadow);
+}
+.ex-timer-display{ font-size:48px; font-weight:800; color:var(--pink); font-variant-numeric:tabular-nums; line-height:1; margin-bottom:6px; }
+.ex-timer-label{ font-size:13px; color:var(--text2); margin-bottom:14px; }
+.ex-timer-btns{ display:flex; gap:10px; justify-content:center; }
+.ex-timer-btn{
+  padding:10px 20px; border:none; border-radius:24px; font-size:14px; font-weight:600;
+  cursor:pointer; font-family:var(--font); transition:all .2s; min-width:80px;
+}
+.ex-timer-btn.start{ background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:#FFF; box-shadow:0 2px 10px rgba(240,128,160,.3); }
+.ex-timer-btn.reset{ background:var(--pink-light); color:var(--pink-dark); border:1.5px solid var(--border); }
+.ex-timer-btn.done{ background:var(--pink-light); color:var(--pink); border:1.5px solid var(--pink); }
+.ex-timer-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+/* 时长设置 */
+.ex-duration-set{ display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:14px; }
+.ex-duration-set label{ font-size:12px; color:var(--text3); }
+.ex-duration-set input{
+  width:70px; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-xs);
+  font-size:14px; text-align:center; outline:none; font-family:var(--font);
+}
+
+/* 运动日历 */
+.ex-cal-card{ background:rgba(255,255,255,.85); border-radius:var(--radius); padding:14px; margin-bottom:14px; border:1px solid rgba(240,128,160,.08); box-shadow:var(--shadow); }
+.ex-cal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.ex-cal-title{ font-size:14px; font-weight:700; color:var(--pink-dark); }
+.ex-cal-nav{ display:flex; gap:6px; }
+.ex-cal-nav button{ width:28px; height:28px; border:none; border-radius:50%; background:var(--pink-light); color:var(--pink); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.ex-cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; }
+.ex-cal-weekday{ font-size:11px; color:var(--text3); font-weight:600; padding:4px 0; }
+.ex-cal-day{
+  aspect-ratio:1; display:flex; align-items:center; justify-content:center; flex-direction:column;
+  border-radius:var(--radius-xs); font-size:12px; font-weight:600; cursor:pointer; position:relative;
+  background:rgba(255,255,255,.6); color:var(--text2); transition:all .15s;
+}
+.ex-cal-day:hover{ background:var(--pink-light); }
+.ex-cal-day.today{ border:1.5px solid var(--pink); color:var(--pink-dark); }
+.ex-cal-day.done{ background:var(--pink); color:#FFF; }
+.ex-cal-day.done::after{ content:'✓'; font-size:9px; position:absolute; bottom:1px; right:2px; }
+.ex-cal-day.other{ color:var(--text3); opacity:.5; }
+
+/* 历史记录 */
+.ex-history-card{ background:rgba(255,255,255,.85); border-radius:var(--radius); padding:14px; border:1px solid rgba(240,128,160,.08); box-shadow:var(--shadow); margin-bottom:14px; }
+.ex-history-title{ font-size:14px; font-weight:700; color:var(--pink-dark); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.ex-history-item{ display:flex; align-items:center; gap:10px; padding:10px; border-radius:var(--radius-sm); background:rgba(255,255,255,.7); border:1px solid rgba(240,128,160,.06); margin-bottom:6px; }
+.ex-history-icon{ font-size:22px; }
+.ex-history-info{ flex:1; }
+.ex-history-type{ font-size:13px; font-weight:600; color:var(--text); }
+.ex-history-meta{ font-size:11px; color:var(--text3); margin-top:2px; }
+.ex-history-del{ width:28px; height:28px; border:none; border-radius:50%; background:var(--danger-light); color:var(--danger); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.ex-empty-state{ text-align:center; padding:24px; color:var(--text3); font-size:13px; }
+.ex-export-btn{
+  width:100%; padding:12px; border:1.5px dashed var(--border); border-radius:var(--radius-sm);
+  background:transparent; font-size:13px; color:var(--text3); cursor:pointer; font-family:var(--font); margin-top:8px;
+}
+.ex-export-btn:active{ background:var(--pink-light); color:var(--pink); }
+.ex-view-toggle{ display:flex; gap:6px; margin-bottom:12px; }
+.ex-view-toggle button{ flex:1; padding:8px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:#FFF; font-size:13px; cursor:pointer; color:var(--text2); font-family:var(--font); }
+.ex-view-toggle button.active{ background:var(--pink); color:#FFF; border-color:var(--pink); font-weight:600; }
 
 /* ============================================================
    模块8: 每日表达能力训练 — 粉色适配
@@ -1424,6 +1489,51 @@ body{
 .eng-word-example{ font-size:12px; color:var(--text3); font-style:italic; }
 .eng-speak-all{ width:100%; padding:12px; border:none; border-radius:var(--radius-sm); background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:#FFF; font-size:14px; font-weight:700; cursor:pointer; font-family:var(--font); margin-top:10px; box-shadow:0 2px 8px rgba(240,128,160,.25); }
 
+/* 跟读练习 */
+.eng-shadow-card{ background:rgba(255,255,255,.85); border-radius:var(--radius); padding:14px; margin-bottom:14px; border:1px solid rgba(240,128,160,.1); box-shadow:var(--shadow); }
+.eng-shadow-title{ font-size:14px; font-weight:700; color:var(--pink-dark); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.eng-shadow-en{ font-size:16px; color:var(--text); line-height:1.7; padding:12px; background:rgba(240,128,160,.06); border-radius:var(--radius-sm); margin-bottom:12px; text-align:center; border-left:3px solid var(--pink); }
+.eng-shadow-info{ font-size:11px; color:var(--text3); margin-bottom:10px; text-align:center; }
+.eng-shadow-btns{ display:flex; gap:8px; margin-bottom:12px; }
+.eng-shadow-btns button{ flex:1; padding:10px; border:none; border-radius:var(--radius-sm); font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font); }
+.eng-shadow-play{ background:var(--pink-light); color:var(--pink-dark); }
+.eng-shadow-record{ background:var(--pink); color:#FFF; }
+.eng-shadow-record.recording{ background:var(--danger); animation:engPulse 1s infinite; }
+@keyframes engPulse{ 0%,100%{opacity:1} 50%{opacity:.6} }
+.eng-shadow-stop{ background:var(--danger-light); color:var(--danger); display:none; }
+.eng-shadow-stop.show{ display:block; }
+.eng-shadow-review{ width:100%; padding:10px; border:none; border-radius:var(--radius-sm); background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:#FFF; font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font); margin-top:4px; }
+.eng-shadow-review:disabled{ opacity:.5; cursor:not-allowed; }
+.eng-shadow-feedback{ padding:10px; background:rgba(240,128,160,.06); border-radius:var(--radius-sm); margin-top:10px; font-size:13px; color:var(--text2); line-height:1.7; display:none; }
+.eng-shadow-feedback.show{ display:block; }
+.eng-shadow-feedback .sf-score{ font-size:16px; font-weight:700; color:var(--pink-dark); margin-bottom:6px; }
+.eng-shadow-feedback .sf-item{ margin-bottom:4px; padding-left:12px; }
+.eng-shadow-feedback .sf-item::before{ content:'•';position:absolute;margin-left:-12px;color:var(--pink); }
+
+/* 设置中心 */
+.set-page{ padding-bottom:20px; }
+.set-section{ background:rgba(255,255,255,.85); border-radius:var(--radius); padding:14px; margin-bottom:12px; border:1px solid rgba(240,128,160,.08); box-shadow:var(--shadow); }
+.set-section-title{ font-size:14px; font-weight:700; color:var(--pink-dark); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.set-mod-list{ display:flex; flex-direction:column; gap:6px; }
+.set-mod-row{ display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--pink-bg); border-radius:var(--radius-sm); font-size:13px; color:var(--text2); }
+.set-mod-row .mod-toggle{ margin-left:auto; width:40px; height:22px; border-radius:11px; background:#DDD; position:relative; cursor:pointer; transition:background .2s; flex-shrink:0; }
+.set-mod-row .mod-toggle.on{ background:var(--pink); }
+.set-mod-row .mod-toggle::after{ content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#FFF; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+.set-mod-row .mod-toggle.on::after{ transform:translateX(18px); }
+.set-data-btns{ display:flex; gap:8px; }
+.set-data-btn{ flex:1; padding:10px; border:none; border-radius:var(--radius-sm); font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font); }
+.set-data-btn.danger{ background:var(--danger-light); color:var(--danger); border:1px solid var(--danger); }
+.set-data-btn.primary{ background:var(--pink-light); color:var(--pink-dark); }
+.set-data-btn:active{ opacity:.85; }
+.set-pref-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:var(--pink-bg); border-radius:var(--radius-sm); margin-bottom:6px; }
+.set-pref-label{ font-size:13px; color:var(--text2); }
+.set-pref-row .mod-toggle{ width:40px; height:22px; border-radius:11px; background:#DDD; position:relative; cursor:pointer; transition:background .2s; flex-shrink:0; }
+.set-pref-row .mod-toggle.on{ background:var(--pink); }
+.set-pref-row .mod-toggle::after{ content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#FFF; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+.set-pref-row .mod-toggle.on::after{ transform:translateX(18px); }
+.set-info{ text-align:center; padding:12px; font-size:11px; color:var(--text3); }
+.set-info strong{ color:var(--pink-dark); }
+
 /* ============================================================
    Toast 提示 — 粉色适配
    ============================================================ */
@@ -1583,6 +1693,7 @@ const DEFAULT_MODULES = [
   { id:'exercise',     icon:'🏃', name:'每日运动记录', builtin:true },
   { id:'expression',   icon:'🎤', name:'表达能力训练', builtin:true },
   { id:'english',      icon:'🔤', name:'英语口语学习', builtin:true },
+  { id:'settings',     icon:'⚙️', name:'设置中心',   builtin:true },
 ];
 
 // ---------- localStorage keys ----------
@@ -1603,6 +1714,16 @@ const LS_QUOTE_IDX='cw_quote_idx_v2';  // 当日语录索引
 const LS_DAILY_BITS='cw_daily_bits_v2'; // 碎碎日常数据
 const LS_ENGLISH='cw_english_v2';      // 英语学习数据
 const LS_ENGLISH_PROG='cw_english_prog_v2'; // 英语学习进度
+const LS_SETTINGS='cw_settings_v2';   // 设置中心数据
+
+// ---------- 设置中心 ----------
+let appSettings = load(LS_SETTINGS, null) || {
+  disabledModules: [],  // 被禁用的模块id列表
+  preferences: {
+    compactView: false,
+    showSeconds: true
+  }
+};
 
 // ---------- 首页打卡系统 ----------
 const DEFAULT_CHECKIN_ITEMS = [
@@ -1742,7 +1863,9 @@ const $$= (s) => document.querySelectorAll(s);
 // 抽屉
 function renderDrawer() {
   const nav = $('#drawerNav');
-  nav.innerHTML = modules.map((m, idx) => `
+  // 过滤禁用模块
+  const visibleModules = modules.filter(m=>m.id==='settings'||!appSettings.disabledModules.includes(m.id));
+  nav.innerHTML = visibleModules.map((m, idx) => `
     <div class="drawer-item${m.id===activeModuleId?' active':''}" data-mid="${m.id}" data-idx="${idx}">
       <span class="drawer-drag" data-draghandle title="按住拖动排序">⋮⋮</span>
       <span class="icon">${m.icon}</span><span>${m.name}</span>
@@ -3035,90 +3158,290 @@ function bindFinance(el) {
   });
 }
 
-
-const EXERCISE_TYPES = [
-  {val:'跑步',icon:'🏃'},{val:'散步',icon:'🚶'},{val:'拉伸',icon:'🧘'},
-  {val:'力量训练',icon:'🏋️'},{val:'瑜伽',icon:'🧘‍♀️'},{val:'骑行',icon:'🚴'},
-  {val:'跳绳',icon:'🪢'},{val:'游泳',icon:'🏊'},{val:'健身操',icon:'💃'},
-  {val:'其他',icon:'🏅'}
-];
-
 // ---------- 模块7: 每日运动记录 ----------
-function renderExercise() {
-  // 按日期分组最近的记录
-  const recent = [...exerciseRecords].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,60);
-  const groups = {};
-  recent.forEach(r=>{
-    if(!groups[r.date]) groups[r.date]=[];
-    groups[r.date].push(r);
-  });
+const LS_EXERCISE_TYPES='cw_exercise_types_v2';
+const DEFAULT_EXERCISE_TYPES = [
+  {val:'肩部训练',icon:'💪'},{val:'臀部训练',icon:'🍑'},{val:'背部训练',icon:'🔙'},
+  {val:'胸部训练',icon:'🏋️'},{val:'核心训练',icon:'🦾'}
+];
+let exerciseTypes = load(LS_EXERCISE_TYPES, null) || JSON.parse(JSON.stringify(DEFAULT_EXERCISE_TYPES));
+let exerciseTimerSec = 0;
+let exerciseTimerRunning = false;
+let exerciseTimerInterval = null;
 
-  const typeIcon = (t) => {
-    const found = EXERCISE_TYPES.find(e=>e.val===t);
-    return found ? found.icon : '🏅';
-  };
+function formatTimer(s){ const m=Math.floor(s/60); const sec=s%60; return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); }
 
-  const recordsHTML = Object.keys(groups).sort().reverse().map(date => {
-    const dayTotal = groups[date].reduce((s,r)=>s+(Number(r.duration)||0),0);
-    return `
-    <div class="ex-date-group">
-      <div class="ex-date-label">📅 ${date}<span class="ex-date-total">共 ${dayTotal} 分钟</span></div>
-      ${groups[date].map(r=>`
-        <div class="ex-item" data-eid="${r.id}">
-          <span class="ex-icon">${typeIcon(r.type)}</span>
-          <div class="ex-info">
-            <div class="ex-type-name">${escHtml(r.type||'运动')}</div>
-            <div class="ex-meta"><span>⏱ ${r.duration||0}分钟</span></div>
-            ${r.feeling ? `<div class="ex-feeling">💬 ${escHtml(r.feeling)}</div>` : ''}
+function getExTypeIcon(t){ const f=exerciseTypes.find(e=>e.val===t); return f?f.icon:'🎯'; }
+
+function getExerciseDoneDates(){
+  const set=new Set();
+  exerciseRecords.forEach(r=>{ set.add(r.date); });
+  return set;
+}
+
+function renderExercise(){
+  const doneDates = getExerciseDoneDates();
+  // 视图切换
+  const viewMode = window._exView||'timer';
+
+  // === 运动类型网格 ===
+  const typeGridHTML = exerciseTypes.map(t=>`
+    <div class="ex-type-card ${window._exSelType===t.val?'selected':''}" data-extype="${escAttr(t.val)}">
+      <span class="et-icon">${t.icon}</span>
+      <span class="et-name">${t.val}</span>
+      ${!DEFAULT_EXERCISE_TYPES.find(d=>d.val===t.val) ? `<button class="et-del" data-extypedel="${escAttr(t.val)}">×</button>`:''}
+    </div>
+  `).join('')+`
+    <div class="ex-type-card ex-type-add" id="exTypeAdder">+</div>
+  `;
+
+  // === 添加类型行 ===
+  const addRowHTML = window._exShowAdd ? `
+    <div class="ex-type-add-row" id="exAddRow">
+      <input id="exNewTypeInput" placeholder="输入运动类型名称" maxlength="10"/>
+      <button id="exAddTypeConfirm">添加</button>
+    </div>` : '';
+
+  // === 计时器 ===
+  const totalSec = parseInt(window._exDurSec) || 0;
+  const timerHTML = `
+    <div class="ex-timer-card">
+      <div class="ex-duration-set">
+        <label>⏱ 目标时长</label>
+        <input type="number" id="exTimerDur" value="${totalSec||''}" placeholder="秒" min="1" inputmode="numeric" style="width:80px;"/>
+        <span style="font-size:12px;color:var(--text3);">秒</span>
+        <button class="ex-timer-btn reset" id="exSetDur" style="min-width:auto;padding:6px 12px;">设定</button>
+      </div>
+      <div class="ex-timer-display" id="exTimerDisplay">${totalSec?formatTimer(totalSec):'00:00'}</div>
+      <div class="ex-timer-label">${exerciseTimerRunning?'🏃 运动中…':'准备开始运动'}</div>
+      <div class="ex-timer-btns">
+        <button class="ex-timer-btn start" id="exTimerStart" ${exerciseTimerRunning?'disabled':''}>▶ 开始</button>
+        <button class="ex-timer-btn reset" id="exTimerReset">🔄 重置</button>
+        <button class="ex-timer-btn done" id="exTimerDone" ${totalSec<=0?'disabled':''}>✅ 完成打卡</button>
+      </div>
+    </div>
+  `;
+
+  // === 运动日历 ===
+  const now = new Date();
+  const year = window._exCalYear||now.getFullYear();
+  const month = window._exCalMonth!==undefined?window._exCalMonth:now.getMonth();
+  const firstDay = new Date(year,month,1).getDay();
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  const today = todayStr();
+  const monthStr = `${year}年${month+1}月`;
+
+  let calGrid = '';
+  const wdLabels = ['日','一','二','三','四','五','六'];
+  wdLabels.forEach(w=>{ calGrid+=`<div class="ex-cal-weekday">${w}</div>`; });
+  for(let i=0;i<firstDay;i++) calGrid+=`<div class="ex-cal-day other"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isDone = doneDates.has(ds);
+    const isToday = ds===today;
+    calGrid+=`<div class="ex-cal-day ${isToday?'today':''} ${isDone?'done':''}" data-excal="${ds}">${d}</div>`;
+  }
+
+  const calHTML = `
+    <div class="ex-cal-card">
+      <div class="ex-cal-header">
+        <span class="ex-cal-title">📅 ${monthStr} 运动打卡</span>
+        <div class="ex-cal-nav">
+          <button id="exCalPrev">◀</button>
+          <button id="exCalNext">▶</button>
+        </div>
+      </div>
+      <div class="ex-cal-grid">${calGrid}</div>
+    </div>
+  `;
+
+  // === 历史记录 ===
+  const recent = [...exerciseRecords].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,30);
+  const historyHTML = `
+    <div class="ex-history-card">
+      <div class="ex-history-title">📋 历史记录</div>
+      ${recent.length===0 ? '<div class="ex-empty-state">还没有运动记录哦～</div>' : recent.map(r=>`
+        <div class="ex-history-item" data-exhid="${r.id}">
+          <span class="ex-history-icon">${getExTypeIcon(r.type)}</span>
+          <div class="ex-history-info">
+            <div class="ex-history-type">${escHtml(r.type||'运动')}</div>
+            <div class="ex-history-meta">📅 ${r.date} · ⏱ ${r.duration||0}秒</div>
           </div>
-          <span class="ex-duration-badge">${r.duration||0}分钟</span>
-          <button class="ex-del" title="删除">×</button>
+          <button class="ex-history-del" data-exhdel="${r.id}">×</button>
         </div>
       `).join('')}
+      <button class="ex-export-btn" id="exExportData">📥 导出运动数据 (JSON)</button>
     </div>
-  `}).join('');
+  `;
 
+  // === 组装 ===
   return `
-    <div class="exercise-form">
-      <div class="ex-row">
-        <select class="ex-type" id="exType">${EXERCISE_TYPES.map(e=>`<option value="${e.val}">${e.icon} ${e.val}</option>`).join('')}</select>
-        <input type="number" class="ex-duration" id="exDuration" placeholder="分钟" min="1" inputmode="numeric"/>
+    <div class="exercise-page">
+      <!-- 视图切换 -->
+      <div class="ex-view-toggle">
+        <button class="${viewMode==='timer'?'active':''}" data-exview="timer">⏱ 计时</button>
+        <button class="${viewMode==='calendar'?'active':''}" data-exview="calendar">📅 日历</button>
+        <button class="${viewMode==='history'?'active':''}" data-exview="history">📋 记录</button>
       </div>
-      <textarea id="exFeeling" placeholder="运动感受（可选）…"></textarea>
-      <button class="btn-primary" id="addExerciseBtn">💪 记录运动</button>
+      <!-- 运动类型网格 -->
+      <div class="ex-type-grid">${typeGridHTML}</div>
+      ${addRowHTML}
+      ${viewMode==='timer' ? timerHTML : ''}
+      ${viewMode==='calendar' ? calHTML : ''}
+      ${viewMode==='history' ? historyHTML : ''}
     </div>
-    <div class="exercise-records">${recordsHTML || '<div class="empty-state" style="padding:20px;">🏃 还没有运动记录，开始记录吧！</div>'}</div>
   `;
 }
 
-function bindExercise(el) {
-  el.querySelector('#addExerciseBtn')?.addEventListener('click', ()=>{
-    const type = el.querySelector('#exType')?.value || '其他';
-    const duration = parseInt(el.querySelector('#exDuration')?.value) || 0;
-    if(duration <= 0) { showToast('请填写运动时长'); return; }
-    const feeling = el.querySelector('#exFeeling')?.value?.trim() || '';
+function bindExercise(el){
+  // 视图切换
+  el.querySelectorAll('[data-exview]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      window._exView = btn.dataset.exview;
+      renderModule('exercise');
+    });
+  });
+
+  // 运动类型选择
+  el.querySelectorAll('[data-extype]').forEach(card=>{
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.et-del')) return;
+      window._exSelType = this.dataset.extype;
+      renderModule('exercise');
+    });
+  });
+
+  // 删除自定义类型
+  el.querySelectorAll('[data-extypedel]').forEach(btn=>{
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      const val = this.dataset.extypedel;
+      exerciseTypes = exerciseTypes.filter(t=>t.val!==val);
+      save(LS_EXERCISE_TYPES, exerciseTypes);
+      if(window._exSelType===val) window._exSelType = exerciseTypes[0]?.val||'';
+      renderModule('exercise');
+    });
+  });
+
+  // 添加类型按钮
+  el.querySelector('#exTypeAdder')?.addEventListener('click',()=>{
+    window._exShowAdd = !window._exShowAdd;
+    renderModule('exercise');
+  });
+
+  // 确认添加类型
+  el.querySelector('#exAddTypeConfirm')?.addEventListener('click',()=>{
+    const inp = el.querySelector('#exNewTypeInput');
+    const name = inp?.value?.trim();
+    if(!name){ showToast('请输入类型名称'); return; }
+    if(exerciseTypes.find(t=>t.val===name)){ showToast('该类型已存在'); return; }
+    exerciseTypes.push({val:name,icon:'🎯'});
+    save(LS_EXERCISE_TYPES, exerciseTypes);
+    window._exShowAdd = false;
+    renderModule('exercise');
+    showToast('✅ 已添加');
+  });
+
+  // === 计时器逻辑 ===
+  // 设定时长
+  el.querySelector('#exSetDur')?.addEventListener('click',()=>{
+    const val = parseInt(el.querySelector('#exTimerDur')?.value)||0;
+    window._exDurSec = val;
+    exerciseTimerSec = val;
+    renderModule('exercise');
+  });
+
+  // 开始
+  el.querySelector('#exTimerStart')?.addEventListener('click',()=>{
+    if(exerciseTimerRunning) return;
+    if(exerciseTimerSec <= 0){ showToast('请先设定目标时长'); return; }
+    exerciseTimerRunning = true;
+    renderModule('exercise');
+    exerciseTimerInterval = setInterval(()=>{
+      exerciseTimerSec--;
+      const display = document.querySelector('#exTimerDisplay');
+      if(display) display.textContent = formatTimer(Math.max(0,exerciseTimerSec));
+      if(exerciseTimerSec <= 0){
+        clearInterval(exerciseTimerInterval);
+        exerciseTimerRunning = false;
+        showToast('⏰ 时间到！');
+        renderModule('exercise');
+      }
+    }, 1000);
+  });
+
+  // 重置
+  el.querySelector('#exTimerReset')?.addEventListener('click',()=>{
+    clearInterval(exerciseTimerInterval);
+    exerciseTimerRunning = false;
+    exerciseTimerSec = parseInt(window._exDurSec)||0;
+    renderModule('exercise');
+  });
+
+  // 完成打卡
+  el.querySelector('#exTimerDone')?.addEventListener('click',()=>{
+    const targetSec = parseInt(window._exDurSec)||0;
+    const actualSec = targetSec - exerciseTimerSec;
+    const type = window._exSelType || exerciseTypes[0]?.val || '运动';
+    if(actualSec <= 0){ showToast('请先开始运动'); return; }
+    clearInterval(exerciseTimerInterval);
+    exerciseTimerRunning = false;
     exerciseIdCounter++;
     exerciseRecords.push({
       id: exerciseIdCounter,
       type: type,
-      duration: duration,
-      feeling: feeling,
+      duration: actualSec,
       date: todayStr()
     });
     save(LS_EXERCISE, exerciseRecords);
-    el.querySelector('#exDuration').value = '';
-    el.querySelector('#exFeeling').value = '';
+    exerciseTimerSec = targetSec;
+    window._exView = 'calendar';
     renderModule('exercise');
-    showToast('✅ 运动已记录');
+    showToast('✅ 打卡完成！');
   });
 
-  el.querySelectorAll('.ex-del').forEach(btn=>{
-    btn.addEventListener('click', function(){
-      const eid = +this.closest('.ex-item').dataset.eid;
-      exerciseRecords = exerciseRecords.filter(r=>r.id!==eid);
+  // === 日历导航 ===
+  el.querySelector('#exCalPrev')?.addEventListener('click',()=>{
+    window._exCalYear = window._exCalYear||(new Date()).getFullYear();
+    window._exCalMonth = (window._exCalMonth!==undefined?window._exCalMonth:(new Date()).getMonth())-1;
+    if(window._exCalMonth < 0){ window._exCalMonth=11; window._exCalYear--; }
+    renderModule('exercise');
+  });
+  el.querySelector('#exCalNext')?.addEventListener('click',()=>{
+    window._exCalYear = window._exCalYear||(new Date()).getFullYear();
+    window._exCalMonth = (window._exCalMonth!==undefined?window._exCalMonth:(new Date()).getMonth())+1;
+    if(window._exCalMonth > 11){ window._exCalMonth=0; window._exCalYear++; }
+    renderModule('exercise');
+  });
+
+  // 日历点击查看当天
+  el.querySelectorAll('[data-excal]').forEach(day=>{
+    day.addEventListener('click',()=>{
+      const ds = day.dataset.excal;
+      const dayRecords = exerciseRecords.filter(r=>r.date===ds);
+      if(dayRecords.length===0){ showToast(`${ds} 无运动记录`); return; }
+      const msg = dayRecords.map(r=>`${getExTypeIcon(r.type)} ${r.type}: ${r.duration}秒`).join('\n');
+      alert(`📅 ${ds} 运动记录\n\n${msg}`);
+    });
+  });
+
+  // 删除历史记录
+  el.querySelectorAll('[data-exhdel]').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      const id = +this.dataset.exhdel;
+      exerciseRecords = exerciseRecords.filter(r=>r.id!==id);
       save(LS_EXERCISE, exerciseRecords);
       renderModule('exercise');
     });
+  });
+
+  // 导出
+  el.querySelector('#exExportData')?.addEventListener('click',()=>{
+    const data = { exportDate:new Date().toISOString(), records:exerciseRecords, types:exerciseTypes };
+    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=`exercise_${todayStr()}.json`; a.click();
+    showToast('📥 导出成功');
   });
 }
 
@@ -4032,6 +4355,29 @@ function renderEnglish(){
       <div class="fin-section-title">💬 今日推荐练习</div>
       ${sceneHTML}
 
+      <!-- 跟读练习 -->
+      <div class="eng-shadow-card" id="engShadowCard">
+        <div class="eng-shadow-title">🎙️ 跟读练习</div>
+        <div class="eng-shadow-en">${escHtml(rec.en)}</div>
+        <div class="eng-shadow-info">先播放原音，再录音跟读，可以获得发音点评</div>
+        <div class="eng-shadow-btns">
+          <button class="eng-shadow-play" id="engShadowPlay">🔊 播放原音</button>
+          <button class="eng-shadow-record" id="engShadowRec">🎙️ 开始录音</button>
+          <button class="eng-shadow-stop" id="engShadowStop">⏹ 停止</button>
+        </div>
+        <div id="engShadowStatus" style="display:none;text-align:center;font-size:12px;color:var(--danger);margin-bottom:8px;">
+          🔴 录音中... <span id="engShadowTime">00:00</span>
+        </div>
+        <div id="engShadowPlayback" style="display:none;margin-bottom:8px;text-align:center;">
+          <audio id="engShadowAudio" controls style="width:100%;max-width:260px;height:32px;"></audio>
+        </div>
+        <button class="eng-shadow-review" id="engShadowReview" disabled>📝 AI 点评跟读发音</button>
+        <div class="eng-shadow-feedback" id="engShadowFeedback">
+          <div class="sf-score" id="engShadowScore"></div>
+          <div id="engShadowTips"></div>
+        </div>
+      </div>
+
       <!-- 学习进度 -->
       <div class="eng-progress-card">
         <div class="eng-prog-title">📊 学习进度</div>
@@ -4114,6 +4460,267 @@ function bindEnglish(el){
     texts.forEach((t,i)=>setTimeout(()=>englishSpeak(t), i*2500));
     showToast('🔊 开始朗读全部内容');
   });
+
+  // === 跟读练习 ===
+  let _shadowRecorder = null;
+  let _shadowChunks = [];
+  let _shadowTimer = null;
+  let _shadowSeconds = 0;
+  let _shadowBlob = null;
+
+  const recBtn = el.querySelector('#engShadowRec');
+  const stopBtn = el.querySelector('#engShadowStop');
+  const playBtn = el.querySelector('#engShadowPlay');
+  const statusEl = el.querySelector('#engShadowStatus');
+  const timeEl = el.querySelector('#engShadowTime');
+  const playbackEl = el.querySelector('#engShadowPlayback');
+  const audioEl = el.querySelector('#engShadowAudio');
+  const reviewBtn = el.querySelector('#engShadowReview');
+  const feedbackEl = el.querySelector('#engShadowFeedback');
+  const scoreEl = el.querySelector('#engShadowScore');
+  const tipsEl = el.querySelector('#engShadowTips');
+
+  playBtn?.addEventListener('click',()=>{
+    const data = englishGetDailyData();
+    englishSpeak(data.recScene.en);
+  });
+
+  recBtn?.addEventListener('click',async ()=>{
+    if(_shadowRecorder && _shadowRecorder.state==='recording'){
+      _shadowRecorder.stop();
+      return;
+    }
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      const mr = new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'});
+      _shadowRecorder = mr;
+      _shadowChunks = [];
+      _shadowSeconds = 0;
+      mr.ondataavailable = e=>{ if(e.data.size>0) _shadowChunks.push(e.data); };
+      mr.onstop = ()=>{
+        stream.getTracks().forEach(t=>t.stop());
+        _shadowBlob = new Blob(_shadowChunks,{type:'audio/webm'});
+        const url = URL.createObjectURL(_shadowBlob);
+        if(playbackEl) playbackEl.style.display='block';
+        if(audioEl){ audioEl.src=url; audioEl.load(); }
+        if(recBtn){ recBtn.textContent='🔄 重新录音'; recBtn.classList.remove('recording'); }
+        if(stopBtn) stopBtn.classList.remove('show');
+        if(statusEl) statusEl.style.display='none';
+        if(reviewBtn) reviewBtn.disabled=false;
+        if(_shadowTimer){ clearInterval(_shadowTimer); _shadowTimer=null; }
+        showToast('✅ 录音完成');
+      };
+      mr.start();
+      if(recBtn){ recBtn.textContent='⏹ 停止录音'; recBtn.classList.add('recording'); }
+      if(stopBtn) stopBtn.classList.add('show');
+      if(statusEl) statusEl.style.display='block';
+      if(timeEl) timeEl.textContent='00:00';
+      _shadowTimer = setInterval(()=>{
+        _shadowSeconds++;
+        if(timeEl) timeEl.textContent = String(Math.floor(_shadowSeconds/60)).padStart(2,'0')+':'+String(_shadowSeconds%60).padStart(2,'0');
+      },1000);
+    }catch(err){
+      showToast('⚠️ 无法访问麦克风，请检查权限');
+    }
+  });
+
+  stopBtn?.addEventListener('click',()=>{
+    if(_shadowRecorder && _shadowRecorder.state==='recording') _shadowRecorder.stop();
+  });
+
+  // AI 点评
+  reviewBtn?.addEventListener('click',()=>{
+    if(!_shadowBlob){ showToast('请先录音'); return; }
+    const data = englishGetDailyData();
+    const refText = data.recScene.en;
+    // 基于规则模拟点评
+    const wordCount = refText.split(/\s+/).length;
+    const sentenceCount = refText.split(/[.!?]/).filter(s=>s.trim()).length;
+    const hasLongWords = /\b\w{8,}\b/.test(refText);
+
+    let pronunciation = '良好';
+    let intonation = '良好';
+    let fluency = '良好';
+    let tips = [];
+
+    if(wordCount <= 5){
+      pronunciation = '优秀'; intonation = '优秀';
+      tips.push('✅ 句子简短，适合初学者练习发音和语调。');
+      tips.push('💡 注意每个单词的发音清晰度，特别是重音音节。');
+    } else if(wordCount <= 15){
+      pronunciation = '优秀'; intonation = '良好';
+      tips.push('✅ 中长句子，建议注意意群划分和连读。');
+      tips.push('💡 尝试模仿原音的语调和节奏，注意升调和降调的切换。');
+    } else {
+      pronunciation = '良好'; intonation = '需提升';
+      tips.push('💡 长句子需要特别注意换气和意群停顿。');
+      tips.push('💡 先分段练习，再整体跟读。注意从句之间的语调衔接。');
+    }
+    if(hasLongWords){
+      pronunciation = '需提升';
+      tips.push('⚠️ 包含较长词汇，建议逐个攻克难词发音后再整体跟读。');
+    }
+    if(sentenceCount > 1){
+      fluency = '需提升';
+      tips.push('💡 多句练习建议逐句跟读，确保每句的发音和语调都到位。');
+    }
+
+    const scoreMap = { '优秀':'🌟','良好':'👍','需提升':'💪' };
+    if(scoreEl) scoreEl.innerHTML = `发音: ${scoreMap[pronunciation]}${pronunciation} &nbsp; 语调: ${scoreMap[intonation]}${intonation} &nbsp; 流畅: ${scoreMap[fluency]}${fluency}`;
+    if(tipsEl) tipsEl.innerHTML = tips.map(t=>`<div class="sf-item">${t}</div>`).join('');
+    if(feedbackEl) feedbackEl.classList.add('show');
+  });
+}
+
+// ---------- 设置中心 ----------
+function renderSettings(){
+  // 模块管理
+  const modRows = modules.map(m=>`
+    <div class="set-mod-row">
+      <span>${m.icon} ${m.name}</span>
+      <div class="mod-toggle ${appSettings.disabledModules.includes(m.id)?'':'on'}" data-setmod="${m.id}"></div>
+    </div>
+  `).join('');
+
+  // 本地数据总量估算
+  let totalKeys = 0;
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith('cw_')) totalKeys++;
+  }
+
+  return `
+    <div class="set-page">
+      <!-- 模块管理 -->
+      <div class="set-section">
+        <div class="set-section-title">📦 模块管理</div>
+        <div class="set-mod-list">${modRows}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;">关闭的模块将在侧边栏和首页中隐藏</div>
+      </div>
+
+      <!-- 数据管理 -->
+      <div class="set-section">
+        <div class="set-section-title">💾 数据管理</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">当前本地存储数据：<strong style="color:var(--pink-dark);">${totalKeys}</strong> 条记录</div>
+        <div class="set-data-btns">
+          <button class="set-data-btn primary" id="setExportAll">📥 导出全部数据</button>
+        </div>
+        <div class="set-data-btns" style="margin-top:8px;">
+          <button class="set-data-btn danger" id="setClearAll">🗑 清除全部数据</button>
+        </div>
+      </div>
+
+      <!-- 偏好设置 -->
+      <div class="set-section">
+        <div class="set-section-title">⚙️ 偏好设置</div>
+        <div class="set-pref-row">
+          <span class="set-pref-label">显示秒针时钟</span>
+          <div class="mod-toggle ${appSettings.preferences.showSeconds!==false?'on':''}" data-setpref="showSeconds"></div>
+        </div>
+        <div class="set-pref-row">
+          <span class="set-pref-label">紧凑视图</span>
+          <div class="mod-toggle ${appSettings.preferences.compactView?'on':''}" data-setpref="compactView"></div>
+        </div>
+      </div>
+
+      <!-- 关于 -->
+      <div class="set-section">
+        <div class="set-section-title">ℹ️ 关于</div>
+        <div class="set-info">
+          <div>🐰 <strong>老莫工作台</strong> v2.5</div>
+          <div style="margin-top:4px;">本地优先 · 隐私保护 · 数据均在您的设备上</div>
+          <div style="margin-top:4px;">数据存储于浏览器 localStorage</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bindSettings(el){
+  // 模块开关
+  el.querySelectorAll('[data-setmod]').forEach(toggle=>{
+    toggle.addEventListener('click',()=>{
+      const mid = toggle.dataset.setmod;
+      const idx = appSettings.disabledModules.indexOf(mid);
+      if(idx > -1){
+        appSettings.disabledModules.splice(idx,1);
+      } else {
+        appSettings.disabledModules.push(mid);
+      }
+      save(LS_SETTINGS, appSettings);
+      renderModule('settings');
+      // 同步更新侧边栏
+      renderDrawer();
+    });
+  });
+
+  // 偏好设置开关
+  el.querySelectorAll('[data-setpref]').forEach(toggle=>{
+    toggle.addEventListener('click',()=>{
+      const key = toggle.dataset.setpref;
+      if(key==='showSeconds'){
+        appSettings.preferences.showSeconds = !(appSettings.preferences.showSeconds!==false);
+      } else if(key==='compactView'){
+        appSettings.preferences.compactView = !appSettings.preferences.compactView;
+      }
+      save(LS_SETTINGS, appSettings);
+      renderModule('settings');
+    });
+  });
+
+  // 导出全部
+  el.querySelector('#setExportAll')?.addEventListener('click',()=>{
+    const allData = {};
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith('cw_')){
+        try{ allData[k] = JSON.parse(localStorage.getItem(k)); }
+        catch(e){ allData[k] = localStorage.getItem(k); }
+      }
+    }
+    const blob = new Blob([JSON.stringify(allData,null,2)],{type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `laomo_backup_${todayStr()}.json`;
+    a.click();
+    showToast('📥 全部数据已导出');
+  });
+
+  // 清除全部
+  el.querySelector('#setClearAll')?.addEventListener('click',()=>{
+    if(!confirm('⚠️ 此操作将清除老莫工作台的所有本地数据，包括记账、计划、运动记录等，无法恢复！\n\n确定要清除吗？')) return;
+    // 清除所有 cw_ 开头的 key
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith('cw_')) keys.push(k);
+    }
+    keys.forEach(k=>localStorage.removeItem(k));
+    // 重置内存状态
+    modules = JSON.parse(JSON.stringify(DEFAULT_MODULES));
+    tasks = []; memos = []; exerciseRecords = []; exerciseIdCounter = 0;
+    expressionRecords = []; exprIdCounter = 0; exprStreak = {count:0,lastDate:''};
+    checkinItems = JSON.parse(JSON.stringify(DEFAULT_CHECKIN_ITEMS));
+    checkinStreak = {count:0,lastDate:''};
+    financeRecords = []; financeIdCounter = 0; financeBudget = 0;
+    financeCats.expense = JSON.parse(JSON.stringify(DEFAULT_EXPENSE_CATS));
+    financeCats.income = JSON.parse(JSON.stringify(DEFAULT_INCOME_CATS));
+    appSettings = {disabledModules:[],preferences:{showSeconds:true,compactView:false}};
+    englishData = null; englishProgress = {completed:0,streakDays:0,lastDate:'',difficulty:'beginner'};
+    dailyBits = {};
+    // 重新保存默认值
+    save(LS_MODULES, modules);
+    save(LS_SETTINGS, appSettings);
+    save(LS_CHECKIN, checkinItems);
+    save(LS_CHECKIN_STREAK, checkinStreak);
+    save(LS_FINANCE, financeRecords);
+    save(LS_FIN_BUDGET, 0);
+    save(LS_FIN_CATS, financeCats);
+    save(LS_ENGLISH_PROG, englishProgress);
+    activeModuleId = 'home';
+    renderAll();
+    showToast('🗑 已清除全部数据');
+  });
 }
 
 // ---------- 自定义模块（纯笔记型） ----------
@@ -4157,8 +4764,8 @@ function renderHome(){
   const circumference = 2 * Math.PI * 22; // r=22
   const dashOffset = circumference - (pct/100)*circumference;
 
-  // 功能入口（排除home自身）
-  const funcModules = modules.filter(m => m.id !== 'home');
+  // 功能入口（排除home自身和禁用模块）
+  const funcModules = modules.filter(m => m.id !== 'home' && !appSettings.disabledModules.includes(m.id));
   const funcHTML = funcModules.map(m => `
     <div class="func-item" data-goto="${m.id}">
       <div class="func-icon">${m.icon}</div>
@@ -4371,6 +4978,7 @@ function renderModule(mid) {
     case 'exercise':    html = renderExercise(); break;
     case 'expression':  html = renderExpression(); break;
     case 'english':     html = renderEnglish(); break;
+    case 'settings':    html = renderSettings(); break;
     default:            html = renderCustomModule(mod); break;
   }
 
@@ -4395,6 +5003,7 @@ function renderModule(mid) {
     case 'exercise':    bindExercise(card); break;
     case 'expression':  bindExpression(card); break;
     case 'english':     bindEnglish(card); break;
+    case 'settings':    bindSettings(card); break;
     default:            bindCustomModule(card, mod); break;
   }
 }
@@ -4404,7 +5013,11 @@ function renderAll() {
   renderDrawer();
   const main = $('#mainContent');
 
-  main.innerHTML = modules.map(mod => {
+  // 过滤禁用模块（设置中心永不禁用）
+  const visibleModules = modules.filter(m=>m.id==='settings'||!appSettings.disabledModules.includes(m.id));
+  if(!visibleModules.find(m=>m.id===activeModuleId)) activeModuleId=visibleModules[0]?.id||'home';
+
+  main.innerHTML = visibleModules.map(mod => {
     if(mod.id === 'home'){
       return `<div class="module${mod.id===activeModuleId?' active':''}" data-section="${mod.id}"></div>`;
     }
@@ -4416,10 +5029,10 @@ function renderAll() {
   }).join('');
 
   // 渲染第一个激活模块
-  if(activeModuleId && modules.find(m=>m.id===activeModuleId)) {
+  if(activeModuleId && visibleModules.find(m=>m.id===activeModuleId)) {
     renderModule(activeModuleId);
-  } else if(modules.length) {
-    activeModuleId = modules[0].id;
+  } else if(visibleModules.length) {
+    activeModuleId = visibleModules[0].id;
     renderModule(activeModuleId);
   }
 }
