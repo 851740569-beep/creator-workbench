@@ -1857,6 +1857,7 @@ const LS_SETTINGS='cw_settings_v2';   // 设置中心数据
 const LS_FABRIC='cw_fabric_v2';       // 缝纫-布料库
 const LS_SEW_TPL='cw_sew_tpl_v2';     // 缝纫-自定义模板
 const LS_SEW_DESIGN='cw_sew_design_v2'; // 缝纫-设计方案存档
+const LS_SEW_TRIM='cw_sew_trim_v2';   // 缝纫-我的辅料库
 
 // ---------- 设置中心 ----------
 let appSettings = load(LS_SETTINGS, null) || {
@@ -4873,17 +4874,22 @@ let fabricIdCounter = fabrics.length ? Math.max(...fabrics.map(f=>f.id)) : 0;
 let sewCustomTpls = load(LS_SEW_TPL, null) || [];
 let sewDesigns = load(LS_SEW_DESIGN, null) || [];
 let sewDesignIdCounter = sewDesigns.length ? Math.max(...sewDesigns.map(d=>d.id)) : 0;
+let sewTrims = load(LS_SEW_TRIM, null) || [];
+let sewTrimIdCounter = sewTrims.length ? Math.max(...sewTrims.map(t=>t.id)) : 0;
 
 window._sewTab = window._sewTab || 'fabric';
 window._sewFabricFilter = window._sewFabricFilter || 'all';
+window._sewTrimFilter = window._sewTrimFilter || 'all';
 window._sewTplCat = window._sewTplCat || 'hair';
 window._sewMode = window._sewMode || null;      // 'auto' | 'diy'
 window._sewSelTpl = window._sewSelTpl || null;  // 当前选中模板id
 window._sewSelFabrics = window._sewSelFabrics || []; // 勾选的布料id
+window._sewSelTrims = window._sewSelTrims || [];     // 勾选的辅料id
 window._sewPlans = window._sewPlans || [];      // 自动搭配生成的方案
 window._sewDiyParts = window._sewDiyParts || []; // DIY部件
 window._sewDiyDecos = window._sewDiyDecos || []; // DIY装饰
 window._sewDiyActive = null;                    // 当前选中图层
+window._sewAccTab = window._sewAccTab || 'pre'; // DIY装饰来源 pre|mine
 
 // 布料属性选项
 const SEW_COLORS = ['粉色','白色','米色','黑色','灰色','红色','橙色','黄色','绿色','蓝色','紫色','棕色','卡其','杏色'];
@@ -4900,77 +4906,139 @@ const SEW_COLOR_FAMILY = {
 // 撞色配对
 const SEW_CONTRAST = { 'warm':'cool', 'cool':'warm', 'neutral':'warm' };
 
-// 装饰素材库
-const SEW_DECOS = [
-  {id:'ribbon', emoji:'🎀', name:'丝带'},
-  {id:'pearl',  emoji:'⚪', name:'珍珠'},
-  {id:'lace',   emoji:'🌸', name:'蕾丝'},
-  {id:'button', emoji:'🔘', name:'纽扣'},
-  {id:'bow',    emoji:'🎗️', name:'蝴蝶结'},
-  {id:'heart',  emoji:'💗', name:'爱心'},
-  {id:'star',   emoji:'⭐', name:'星星'},
-  {id:'flower', emoji:'🌼', name:'小花'}
+// 装饰配件库（两层结构：基础轮廓 + 可叠加配件）
+const SEW_ACCESSORIES = [
+  {id:'lace',   name:'蕾丝花边', emoji:'🌸'},
+  {id:'band',   name:'嵌条',     emoji:'📏'},
+  {id:'label',  name:'布质标签', emoji:'🏷️'},
+  {id:'bow',    name:'小蝴蝶结', emoji:'🎀'},
+  {id:'pearl',  name:'珍珠链条', emoji:'📿'},
+  {id:'binding',name:'包边条',   emoji:'🧵'},
+  {id:'zipper', name:'拉链',     emoji:'⛓️'},
+  {id:'strap',  name:'肩带',     emoji:'🎗️'},
+  {id:'button', name:'包扣',     emoji:'🔘'}
 ];
+// 配件位置预设（按模板品类）
+const SEW_ACC_POSITIONS = {
+  hair:['外圈环绕','侧边点缀','中心贴标'],
+  bag:['包口嵌条','包边装饰','肩带拼接','包盖贴标','侧边蝴蝶结','前袋装饰'],
+  cloth:['领口嵌条','袖口蕾丝','下摆花边','腰部标签']
+};
+// 位置默认用量（len=厘米 / cnt=个数）
+const SEW_POS_USAGE = {
+  '外圈环绕':{len:60},'侧边点缀':{len:15},'中心贴标':{cnt:1},
+  '包口嵌条':{len:60},'包边装饰':{len:120},'肩带拼接':{len:120},'包盖贴标':{cnt:1},'侧边蝴蝶结':{cnt:1},'前袋装饰':{len:20},
+  '领口嵌条':{len:50},'袖口蕾丝':{len:60},'下摆花边':{len:150},'腰部标签':{cnt:1}
+};
+// 兼容旧引用
+const SEW_DECOS = SEW_ACCESSORIES;
 
-// 内置模板库（SVG轮廓，viewBox 0 0 200 200）
+// 我的辅料类型 & 单位
+const SEW_TRIM_TYPES = ['蕾丝花边','嵌条织带','布标标签','蝴蝶结','珍珠链条','拉链','肩带','包扣','磁扣','其他'];
+const SEW_TRIM_LEN_TYPE = ['蕾丝花边','嵌条织带','珍珠链条']; // 按长度计价(cm/米)
+
+// ---------- 蓬松褶皱环形轮廓生成（花瓣状外缘+内圆，模拟真实大肠发圈） ----------
+function sewPleatRingD(petals, startFrac, endFrac, rOut, rIn, depth){
+  const cx=100, cy=100;
+  depth = depth||0.85;
+  const N=petals*2, TAU=Math.PI*2;
+  const P=(i,r)=>[cx+Math.cos(i/N*TAU)*r, cy+Math.sin(i/N*TAU)*r];
+  const f=n=>+n.toFixed(1);
+  const i0=Math.round(startFrac*N), iN=Math.round(endFrac*N);
+  const v0=P(i0,rOut*depth);
+  let d=`M ${f(v0[0])} ${f(v0[1])} `;
+  for(let j=i0;j<iN;j+=2){
+    const pk=P(j+1,rOut), vl=P(j+2,rOut*depth);
+    d+=`Q ${f(pk[0])} ${f(pk[1])} ${f(vl[0])} ${f(vl[1])} `;
+  }
+  const arcBig=((iN-i0)/N)>0.5?1:0;
+  if(endFrac-startFrac>=0.999){
+    d+='Z ';
+    d+=`M ${f(cx+rIn)} ${f(cy)} A ${rIn} ${rIn} 0 1 0 ${f(cx-rIn)} ${f(cy)} A ${rIn} ${rIn} 0 1 0 ${f(cx+rIn)} ${f(cy)} Z`;
+  } else {
+    const vE=P(iN,rIn), vS=P(i0,rIn);
+    d+=`L ${f(vE[0])} ${f(vE[1])} A ${rIn} ${rIn} 0 ${arcBig} 0 ${f(vS[0])} ${f(vS[1])} Z`;
+  }
+  return d;
+}
+
+// 内置模板库（SVG轮廓，viewBox 0 0 200 200；stroke=描边部件 dash=缝线虚线）
 const SEW_TEMPLATES = [
-  // ===== ①头饰 =====
-  { id:'scrunchie', name:'普通大肠发圈', cat:'hair', usage:0.25,
+  // ===== ①头饰-大肠发圈（真实蓬松褶皱轮廓） =====
+  { id:'scrunchie', name:'普通褶皱大肠发圈', cat:'hair', usage:0.25,
     parts:[
-      {id:'main', name:'主布', d:'M100,30 A70,70 0 1,0 100,170 A70,70 0 1,0 100,30 Z M100,70 A30,30 0 1,1 100,130 A30,30 0 1,1 100,70 Z'}
+      {id:'main', name:'主布', d:sewPleatRingD(7, 0, 1, 72, 30, 0.85)}
     ]},
-  { id:'scrunchie-xl', name:'加大发圈', cat:'hair', usage:0.35,
+  { id:'scrunchie-xl', name:'加大蓬松大肠发圈', cat:'hair', usage:0.35,
     parts:[
-      {id:'main', name:'主布', d:'M100,15 A85,85 0 1,0 100,185 A85,85 0 1,0 100,15 Z M100,65 A35,35 0 1,1 100,135 A35,35 0 1,1 100,65 Z'}
+      {id:'main', name:'主布', d:sewPleatRingD(9, 0, 1, 86, 32, 0.85)}
     ]},
-  { id:'scrunchie-pleat', name:'褶皱款发圈', cat:'hair', usage:0.4,
+  { id:'scrunchie-texture', name:'肌理褶皱款发圈', cat:'hair', usage:0.40,
     parts:[
-      {id:'main', name:'主布', d:'M100,25 A75,75 0 1,0 100,175 A75,75 0 1,0 100,25 Z M100,68 A32,32 0 1,1 100,132 A32,32 0 1,1 100,68 Z'},
-      {id:'trim', name:'包边布', d:'M100,25 A75,75 0 0,1 175,100 L168,100 A68,68 0 0,0 100,32 Z', stroke:true},
-      {id:'trim2', name:'装饰褶', d:'M100,132 A32,32 0 0,1 68,100 L75,100 A25,25 0 0,0 100,125 Z', stroke:true}
+      {id:'main',    name:'主布①', d:sewPleatRingD(6, 0, 1/3, 76, 30, 0.82)},
+      {id:'texture', name:'拼接布②', d:sewPleatRingD(6, 1/3, 2/3, 76, 30, 0.87)},
+      {id:'texture2',name:'拼接布③', d:sewPleatRingD(6, 2/3, 1, 76, 30, 0.84)}
     ]},
-  { id:'scrunchie-duo', name:'双拼撞色发圈', cat:'hair', usage:0.3,
+  { id:'scrunchie-duo', name:'双拼撞色发圈', cat:'hair', usage:0.30,
     parts:[
-      {id:'main',   name:'主布',   d:'M30,100 A70,70 0 0,1 170,100 L130,100 A30,30 0 0,0 70,100 Z'},
-      {id:'contrast',name:'撞色布', d:'M170,100 A70,70 0 0,1 30,100 L70,100 A30,30 0 0,0 130,100 Z'}
+      {id:'main',    name:'主布',   d:sewPleatRingD(8, 0, 0.5, 74, 30, 0.85)},
+      {id:'contrast',name:'撞色布', d:sewPleatRingD(8, 0.5, 1, 74, 30, 0.85)}
     ]},
-  // ===== ②布艺包包 =====
-  { id:'tote', name:'托特包', cat:'bag', usage:0.7,
+  // ===== ②布艺包包（真实手工布艺成品轮廓） =====
+  { id:'tote', name:'软布托特包', cat:'bag', usage:0.6,
     parts:[
-      {id:'main', name:'主布', d:'M40,80 L160,80 L172,172 L28,172 Z'},
-      {id:'trim', name:'提手/包边', d:'M70,82 C70,42 130,42 130,82', stroke:true},
-      {id:'lining',name:'口袋布', d:'M62,120 L138,120 L142,158 L58,158 Z'}
+      {id:'main', name:'包身', d:'M44,82 C46,77 76,73 100,73 C124,73 154,77 156,82 C158,112 156,146 150,166 C146,178 54,178 50,166 C44,146 42,112 44,82 Z'},
+      {id:'strap', name:'手挽带', d:'M64,80 C60,40 96,40 92,80 M108,80 C104,40 140,40 136,80', stroke:true},
+      {id:'seam', name:'底缝线', d:'M56,158 C70,168 130,168 144,158', stroke:true, dash:true, w:2}
     ]},
-  { id:'crossbag', name:'斜挎小包', cat:'bag', usage:0.5,
+  { id:'crossbag', name:'简约斜挎小包', cat:'bag', usage:0.5,
     parts:[
-      {id:'main',   name:'主布',   d:'M45,78 L155,78 L155,162 L45,162 Z'},
-      {id:'contrast',name:'翻盖撞色', d:'M45,78 L155,78 L155,118 L45,118 Z'},
-      {id:'trim',   name:'肩带',   d:'M45,78 L28,48', stroke:true},
-      {id:'trim2',  name:'肩带2',  d:'M155,78 L172,48', stroke:true}
+      {id:'main', name:'包身', d:'M52,88 L148,88 C153,88 156,91 156,96 L156,152 C156,160 150,166 142,166 L58,166 C50,166 44,160 44,152 L44,96 C44,91 47,88 52,88 Z'},
+      {id:'flap', name:'包盖', d:'M44,96 C44,89 48,85 54,85 L146,85 C152,85 156,89 156,96 L156,120 C128,134 72,134 44,120 Z'},
+      {id:'strap', name:'可拆肩带', d:'M48,90 C22,64 26,26 66,20 M152,90 C178,64 174,26 134,20', stroke:true},
+      {id:'seam', name:'缝线', d:'M50,94 L150,94 M50,158 C70,166 130,166 150,158', stroke:true, dash:true, w:2}
     ]},
-  { id:'coinpurse', name:'零钱包', cat:'bag', usage:0.2,
+  { id:'coinpurse', name:'弧形零钱包', cat:'bag', usage:0.25,
     parts:[
-      {id:'main', name:'主布', d:'M55,88 L145,88 L145,155 Q145,166 134,166 L66,166 Q55,166 55,155 Z'},
-      {id:'trim', name:'拉链包边', d:'M55,88 Q100,72 145,88', stroke:true}
+      {id:'main', name:'软布包身', d:'M42,112 C42,82 68,68 100,68 C132,68 158,82 158,112 C158,144 132,162 100,162 C68,162 42,144 42,112 Z'},
+      {id:'binding', name:'包边', d:'M42,112 C42,144 68,162 100,162 C132,162 158,144 158,112 C158,138 130,151 100,151 C70,151 42,138 42,112 Z'},
+      {id:'zipper', name:'拉链', d:'M52,104 C70,90 130,90 148,104 M120,94 L128,86 L134,94', stroke:true},
+      {id:'seam', name:'缝线', d:'M56,120 C60,146 78,156 100,156 C122,156 140,146 144,120', stroke:true, dash:true, w:2}
+    ]},
+  { id:'drawstring', name:'抽绳小布袋', cat:'bag', usage:0.3,
+    parts:[
+      {id:'main', name:'袋身', d:'M62,74 C62,62 138,62 138,74 C154,100 156,142 146,160 C136,174 64,174 54,160 C44,142 46,100 62,74 Z'},
+      {id:'mouth', name:'抽绳口', d:'M58,72 C58,58 142,58 142,72 L142,84 C142,90 58,90 58,84 Z'},
+      {id:'string', name:'束带', d:'M66,84 C58,98 60,110 70,118 M134,84 C142,98 140,110 130,118', stroke:true},
+      {id:'seam', name:'褶线', d:'M76,90 L72,150 M100,92 L100,152 M124,90 L128,150', stroke:true, dash:true, w:2}
+    ]},
+  { id:'phonebag', name:'手机斜挎包', cat:'bag', usage:0.4,
+    parts:[
+      {id:'main', name:'窄长包身', d:'M66,56 L134,56 C139,56 142,59 142,64 L142,166 C142,172 138,176 132,176 L68,176 C62,176 58,172 58,166 L58,64 C58,59 61,56 66,56 Z'},
+      {id:'pocket', name:'前袋', d:'M62,116 L138,116 L138,158 C138,164 134,168 128,168 L72,168 C66,168 62,164 62,158 Z'},
+      {id:'strap', name:'肩带', d:'M64,60 C36,40 34,18 60,14 M136,60 C164,40 166,18 140,14', stroke:true},
+      {id:'seam', name:'缝线', d:'M64,112 L136,112 M66,170 C80,174 120,174 134,170', stroke:true, dash:true, w:2}
     ]},
   // ===== ③服饰小物 =====
-  { id:'skirt', name:'半身裙', cat:'cloth', usage:1.2,
+  { id:'skirt', name:'半身裙', cat:'cloth', usage:0.8,
     parts:[
-      {id:'main', name:'主布', d:'M62,68 L138,68 L162,176 L38,176 Z'},
-      {id:'trim', name:'腰头', d:'M62,68 L138,68 L138,86 L62,86 Z'}
+      {id:'main', name:'基础裙片', d:'M64,66 L136,66 C140,66 141,70 141,74 L158,168 C159,174 154,178 148,178 L52,178 C46,178 41,174 42,168 L59,74 C59,70 60,66 64,66 Z'},
+      {id:'trim', name:'腰头', d:'M60,64 L140,64 C142,64 143,66 143,68 L143,80 C143,82 142,84 140,84 L60,84 C58,84 57,82 57,80 L57,68 C57,66 58,64 60,64 Z'},
+      {id:'seam', name:'裙摆缝线', d:'M48,166 C70,174 130,174 152,166', stroke:true, dash:true, w:2}
     ]},
-  { id:'camisole', name:'吊带', cat:'cloth', usage:0.8,
+  { id:'camisole', name:'吊带', cat:'cloth', usage:0.4,
     parts:[
-      {id:'main', name:'主布', d:'M60,62 L140,62 L146,168 L54,168 Z'},
-      {id:'trim', name:'肩带左', d:'M72,62 L78,28', stroke:true},
-      {id:'trim2',name:'肩带右', d:'M128,62 L122,28', stroke:true}
+      {id:'back', name:'后片', d:'M62,70 L138,70 L142,164 C142,170 138,174 132,174 L68,174 C62,174 58,170 58,164 Z'},
+      {id:'main', name:'前片', d:'M70,70 L130,70 L134,158 C134,164 130,168 124,168 L76,168 C70,168 66,164 66,158 Z'},
+      {id:'strap', name:'肩带', d:'M74,70 L80,32 M126,70 L120,32', stroke:true},
+      {id:'seam', name:'缝线', d:'M68,160 C80,166 120,166 132,160', stroke:true, dash:true, w:2}
     ]},
-  { id:'cardigan', name:'小开衫', cat:'cloth', usage:1.5,
+  { id:'cardigan', name:'小开衫', cat:'cloth', usage:0.7,
     parts:[
-      {id:'main',    name:'主布',   d:'M74,52 L126,52 L132,178 L68,178 Z'},
-      {id:'contrast',name:'袖子撞色', d:'M74,52 L38,68 L52,112 L70,96 Z'},
-      {id:'contrast2',name:'右袖撞色', d:'M126,52 L162,68 L148,112 L130,96 Z'},
-      {id:'trim',    name:'门襟',   d:'M100,52 L100,178', stroke:true}
+      {id:'back', name:'后片', d:'M66,56 L134,56 C138,56 140,60 140,66 L140,166 C140,172 136,176 130,176 L70,176 C64,176 60,172 60,166 L60,66 C60,60 62,56 66,56 Z'},
+      {id:'main', name:'前片左', d:'M72,58 L98,58 L98,174 L72,174 C70,140 70,92 72,58 Z'},
+      {id:'contrast', name:'前片右', d:'M102,58 L128,58 C130,92 130,140 128,174 L102,174 Z'},
+      {id:'trim', name:'衣襟', d:'M100,58 L100,174 M70,58 L70,174 M130,58 L130,174', stroke:true, w:4}
     ]}
 ];
 const SEW_CATS = { hair:'①头饰', bag:'②布艺包包', cloth:'③服饰小物' };
@@ -4982,7 +5050,8 @@ function sewBuildSVG(tpl, fabricMap){
   (tpl.parts||[]).forEach((p,i)=>{
     const fab = fabricMap && fabricMap[p.id];
     if(p.stroke){
-      body.push(`<path d="${p.d}" fill="none" stroke="#D46888" stroke-width="7" stroke-linecap="round"/>`);
+      const dashAttr = p.dash ? ` stroke-dasharray="4 3"` : '';
+      body.push(`<path d="${p.d}" fill="none" stroke="#D46888" stroke-width="${p.w||7}" stroke-linecap="round"${dashAttr}/>`);
     } else if(fab && fab.img){
       defs.push(`<pattern id="sp${i}_${Math.random().toString(36).slice(2,7)}" patternUnits="userSpaceOnUse" width="200" height="200"><image href="${fab.img}" x="0" y="0" width="200" height="200" preserveAspectRatio="xMidYMid slice"/></pattern>`);
       const pid = defs.length-1;
@@ -5006,12 +5075,13 @@ function sewRenderGuide(){
   <div class="sew-guide">
     <div class="sew-guide-title">🎀 欢迎来到缝纫布料搭配设计 ✨</div>
     <div class="sew-guide-text">
-      <div>底部导航：<b>布料库｜模板库｜我的设计｜灵感参考</b></div>
-      <div style="margin-top:6px;">① <b>布料库</b>：上传、打标签、管理你的全部布料库存</div>
-      <div>② <b>模板库</b>：选择内置模板，也可以上传图片保存自定义模板</div>
-      <div style="margin-top:6px;">👉 <b>模式A 自动搭配</b>：选模板+选多块布料，设置库存约束&amp;配色偏好生成多套方案</div>
-      <div>👉 <b>模式B 手动DIY</b>：自由更换部件布料、摆放装饰素材做个性化设计</div>
-      <div style="margin-top:6px;">完成设计可以 <b>保存、算成本、导出图片、写制作笔记</b></div>
+      <div>底部导航：<b>布料库｜我的辅料｜模板库｜我的设计｜灵感参考</b></div>
+      <div style="margin-top:6px;">① <b>布料库</b>：上传管理你的面料库存</div>
+      <div>② <b>我的辅料</b>：拍照上传蕾丝、织带、标签、拉链、肩带等实物辅料</div>
+      <div>③ <b>模板库</b>：选择真实布艺基础款式轮廓，叠加装饰配件</div>
+      <div style="margin-top:6px;">👉 <b>模式A 自动搭配</b>：选模板+勾选布料/辅料，设置库存约束、配色偏好生成多套完整方案</div>
+      <div>👉 <b>模式B 手动DIY</b>：自由更换布料、叠加自己上传辅料，自由排布装饰</div>
+      <div style="margin-top:6px;">完成设计自动输出：<b>主布用量、辅料长度、预估成本</b>，支持保存方案、写制作笔记</div>
     </div>
   </div>`;
 }
@@ -5022,12 +5092,14 @@ function renderSewing(){
   let content = '';
   if(window._sewMode==='diy')      content = sewRenderDiy();
   else if(tab==='fabric')          content = sewRenderFabric();
+  else if(tab==='trims')           content = sewRenderTrims();
   else if(tab==='template')        content = window._sewMode==='auto' ? sewRenderAuto() : sewRenderTemplate();
   else if(tab==='design')          content = sewRenderDesign();
   else                             content = sewRenderInspire();
 
   const navItems = [
     {k:'fabric',   icon:'📦', label:'布料库'},
+    {k:'trims',    icon:'🎀', label:'我的辅料'},
     {k:'template', icon:'📋', label:'模板库'},
     {k:'design',   icon:'💼', label:'我的设计'},
     {k:'inspire',  icon:'✨', label:'灵感参考'}
@@ -5120,6 +5192,76 @@ function sewRenderFabric(){
 }
 
 // ============================================================
+// 分页: 🎀 我的辅料库
+// ============================================================
+function sewTrimUnit(type){ return SEW_TRIM_LEN_TYPE.includes(type)?'cm':'个'; }
+function sewGetTrim(id){ return sewTrims.find(t=>t.id===id); }
+
+function sewRenderTrims(){
+  if(sewTrims.length===0){
+    return `
+    <div class="sew-card">
+      <div class="sew-empty">
+        <span class="sew-empty-icon">🎀</span>
+        辅料库还是空的哦～<br/>拍照上传蕾丝、织带、标签、拉链、肩带等实物辅料吧！
+      </div>
+      <div class="sew-btn-row">
+        <button class="sew-btn primary" id="sewTrimTakePhoto">📷 拍照上传</button>
+        <button class="sew-btn" id="sewTrimPickPhoto">🖼 相册选择</button>
+      </div>
+      <input type="file" id="sewTrimCamera" accept="image/*" capture="environment" style="display:none"/>
+      <input type="file" id="sewTrimAlbum" accept="image/*" style="display:none"/>
+    </div>`;
+  }
+
+  const filter = window._sewTrimFilter;
+  let list = sewTrims;
+  if(filter!=='all') list = sewTrims.filter(t=>t.type===filter);
+
+  const filterChips = ['all', ...new Set(sewTrims.map(t=>t.type).filter(Boolean))]
+    .map(v=>`<button class="sew-filter-chip ${filter===v?'active':''}" data-sewtrimfilter="${escAttr(v)}">${v==='all'?'🌟 全部':escHtml(v)}</button>`).join('');
+
+  const grid = list.map(t=>{
+    const unit = sewTrimUnit(t.type);
+    return `
+    <div class="sew-fabric-card ${window._sewSelTrims.includes(t.id)?'selected':''}" data-sewtrim="${t.id}">
+      <button class="sew-fabric-del" data-sewtrimdel="${t.id}">×</button>
+      <span class="sew-fabric-check">✓</span>
+      <img class="sew-fabric-img" src="${t.img}" alt="${escAttr(t.name)}"/>
+      <div class="sew-fabric-name">${escHtml(t.name)}</div>
+      <div class="sew-fabric-tags">
+        <span class="sew-chip">${escHtml(t.type||'')}</span>
+        <span class="sew-chip">余 ${escHtml(t.stock||0)}${unit}</span>
+        ${t.width?`<span class="sew-chip">宽${escHtml(t.width)}mm</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="sew-card">
+      <div class="sew-sec-title">🎀 我的辅料库 <span style="margin-left:auto;font-size:11px;color:var(--text3);">共 ${sewTrims.length} 件</span></div>
+      <div class="sew-btn-row">
+        <button class="sew-btn primary" id="sewTrimTakePhoto">📷 拍照上传</button>
+        <button class="sew-btn" id="sewTrimPickPhoto">🖼 相册选择</button>
+      </div>
+      <input type="file" id="sewTrimCamera" accept="image/*" capture="environment" style="display:none"/>
+      <input type="file" id="sewTrimAlbum" accept="image/*" style="display:none"/>
+      <div class="sew-hint">💡 上传蕾丝花边、嵌条织带、布标、蝴蝶结、珍珠链、拉链、肩带、包扣、磁扣等实物辅料；点击卡片勾选，可在模式A/B中与布料自由组合</div>
+    </div>
+
+    <div class="sew-card">
+      <div class="sew-sec-title">🏷 类型筛选</div>
+      <div class="sew-filter-bar">${filterChips}</div>
+    </div>
+
+    <div class="sew-card">
+      <div class="sew-sec-title">🧷 辅料库存 (${list.length})</div>
+      <div class="sew-fabric-grid">${grid || '<div class="sew-empty">无匹配辅料</div>'}</div>
+    </div>
+  `;
+}
+
+// ============================================================
 // 分页2: 📋 模板库
 // ============================================================
 function sewRenderTemplate(){
@@ -5183,6 +5325,7 @@ function sewRenderAuto(){
     <button class="sew-btn block" data-sewback>← 返回模板库</button></div>`;
   }
   const pool = fabrics.filter(f=>window._sewSelFabrics.includes(f.id));
+  const trimPool = sewTrims.filter(t=>window._sewSelTrims.includes(t.id));
   const needParts = (tpl.parts||[]).filter(p=>!p.stroke);
   const warnHTML = pool.length>0 && pool.length < 2
     ? `<div class="sew-warn">⚠️ 当前只选了 ${pool.length} 块布料，可能不足以生成多套搭配方案。建议到布料库再补充 2-3 块不同颜色/材质的布料，方案会更丰富哦～</div>` : '';
@@ -5194,6 +5337,23 @@ function sewRenderAuto(){
       <div class="sew-fabric-name">${escHtml(f.name)}</div>
     </div>`).join('');
 
+  const trimGridHTML = sewTrims.length>0 ? `
+    <div class="sew-card">
+      <div class="sew-sec-title">🎗️ 勾选参与搭配的辅料（可选）</div>
+      <div class="sew-hint">已选 <b style="color:var(--pink-dark);">${trimPool.length}</b> 件辅料 · 来自【我的辅料库】</div>
+      <div class="sew-fabric-grid">${sewTrims.map(t=>`
+        <div class="sew-fabric-card ${window._sewSelTrims.includes(t.id)?'selected':''}" data-sewtrim="${t.id}">
+          <span class="sew-fabric-check">✓</span>
+          <img class="sew-fabric-img" src="${t.img}" alt="${escAttr(t.name)}"/>
+          <div class="sew-fabric-name">${escHtml(t.name)}</div>
+        </div>`).join('')}</div>
+      ${sewTrims.length===0?'<div class="sew-hint">辅料库为空，可到【我的辅料】页上传实物辅料</div>':''}
+    </div>` : `
+    <div class="sew-card">
+      <div class="sew-sec-title">🎗️ 选用辅料</div>
+      <div class="sew-hint">辅料库还是空的～可先跳过，或到 <b>我的辅料</b> 页拍照上传蕾丝、织带、标签等实物辅料，搭配会更完整。</div>
+    </div>`;
+
   return `
     <div class="sew-card">
       <div class="sew-sec-title">🤖 模式A · 自动搭配</div>
@@ -5201,7 +5361,7 @@ function sewRenderAuto(){
         <div style="width:92px;flex-shrink:0;">${sewBuildSVG(tpl,{})}</div>
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--text);">${escHtml(tpl.name)}</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:3px;">需 ${needParts.length} 块面料</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px;">需 ${needParts.length} 块面料 · 耗布 ${(tpl.usage||0.3)}米</div>
           <button class="sew-btn" style="margin-top:7px;padding:6px 12px;font-size:12px;" data-sewback>← 换模板</button>
         </div>
       </div>
@@ -5214,14 +5374,16 @@ function sewRenderAuto(){
       ${warnHTML}
     </div>
 
+    ${trimGridHTML}
+
     <div class="sew-card">
       <div class="sew-sec-title">⚙️ 搭配设置</div>
       <div class="sew-field">
         <label class="sew-label">库存约束</label>
         <div class="sew-btn-row" style="margin-bottom:0;">
-          <button class="sew-btn ${window._sewOnlyStock!==false?'primary':''}" id="sewToggleStock">${window._sewOnlyStock!==false?'☑ 仅使用库存布料':'☐ 允许建议外部面料'}</button>
+          <button class="sew-btn ${window._sewOnlyStock!==false?'primary':''}" id="sewToggleStock">${window._sewOnlyStock!==false?'☑ 仅使用库存布料&辅料':'☐ 允许建议外部素材'}</button>
         </div>
-        <div class="sew-hint" style="margin-top:6px;">${window._sewOnlyStock!==false?'只从我布料库现有布料生成，不虚构面料':'可额外建议需要采购的外部面料'}</div>
+        <div class="sew-hint" style="margin-top:6px;">${window._sewOnlyStock!==false?'全部搭配只从我已上传的库存布料&辅料生成，禁止虚构面料辅料':'可额外建议需要采购的外部布料辅料'}</div>
       </div>
       <div class="sew-field">
         <label class="sew-label">配色偏好</label>
@@ -5256,19 +5418,23 @@ function sewRenderPlans(){
     <div class="sew-plan-card">
       <div class="sew-plan-head">【缝纫布料设计｜方案名称：${escHtml(pl.name)}】</div>
       ${pl.preview?`<img class="sew-plan-preview" src="${pl.preview}"/>`:''}
-      <div class="sew-plan-line">🎨 选用版型模板：<b>${escHtml(pl.tplName)}</b></div>
-      <div class="sew-plan-line">⚙️ 筛选约束：${pl.onlyStock?'☑':'☐'} 仅使用库存布料｜配色偏好：<b>${escHtml(pl.prefLabel)}</b></div>
+      <div class="sew-plan-line">🎨 选用基础版型模板：<b>${escHtml(pl.tplName)}</b></div>
+      <div class="sew-plan-line">⚙️ 筛选约束：${pl.onlyStock?'☑':'☐'} 仅使用库存布料&辅料｜配色偏好：<b>${escHtml(pl.prefLabel)}</b></div>
       <div class="sew-plan-line">📷 面料池：${pl.poolNames.map(n=>escHtml(n)).join('、')}</div>
+      <div class="sew-plan-line">🎗️ 选用辅料：${pl.trimNames.length?pl.trimNames.map(n=>escHtml(n)).join('、'):'（未勾选辅料）'}</div>
       <div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(240,128,160,.3);">
         <div class="sew-plan-sub">🎨 面料分配</div>
         ${pl.assign.map(a=>`<div class="sew-plan-line">· ${escHtml(a.part)}：<b>${escHtml(a.fabric)}</b></div>`).join('')}
+        <div class="sew-plan-sub">🎗️ 辅料配置</div>
+        ${pl.trimCfg.length ? pl.trimCfg.map(t=>`<div class="sew-plan-line">· ${escHtml(t.name)}（${escHtml(t.src)}）— 摆放：<b>${escHtml(t.pos)}</b> × ${t.qty}</div>`).join('') : '<div class="sew-plan-line">· 无（纯布艺款）</div>'}
         <div class="sew-plan-sub">✨ 成品模拟预览描述</div>
         <div class="sew-plan-line">${escHtml(pl.desc)}</div>
-        <div class="sew-plan-sub">🧷 辅料清单（标注规格）</div>
-        ${pl.supplies.map(s=>`<div class="sew-plan-line">· ${escHtml(s)}</div>`).join('')}
+        <div class="sew-plan-sub">🧷 辅料清单 &amp; 用料</div>
+        <div class="sew-plan-line">主布用量：<b>${pl.usage}米</b></div>
+        ${pl.trimUsage.map(u=>`<div class="sew-plan-line">${escHtml(u.label)}：<b>${escHtml(u.amount)}</b></div>`).join('')}
         <div class="sew-plan-sub">✂️ 缝纫工艺 &amp; 制作笔记</div>
         <div class="sew-plan-line">${escHtml(pl.craft)}</div>
-        <div class="sew-plan-sub">💰 物料成本参考</div>
+        <div class="sew-plan-sub">💰 物料预估成本</div>
         <div class="sew-plan-line">${escHtml(pl.cost)}</div>
         <div class="sew-plan-sub">🎁 衍生配套（成套售卖建议）</div>
         <div class="sew-plan-line">${escHtml(pl.bundle)}</div>
@@ -5313,6 +5479,12 @@ function sewRenderDiy(){
       return `<div class="sew-part ${window._sewDiyActive===item.id?'active':''}" data-sewpart="${item.id}"
         style="left:${item.x}%;top:${item.y}%;width:${item.w}%;height:${item.h}%;">${sewPartSVG(item, fab)}<span class="sew-resize-handle">⇲</span></div>`;
     }
+    if(item.img){
+      return `<div class="sew-deco ${window._sewDiyActive===item.id?'active':''}" data-sewdeco="${item.id}"
+        style="left:${item.x}%;top:${item.y}%;width:${item.size||60}px;height:${item.size||60}px;">
+        <img src="${item.img}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.12);"/>
+        <span class="sew-resize-handle">⇲</span></div>`;
+    }
     return `<div class="sew-deco ${window._sewDiyActive===item.id?'active':''}" data-sewdeco="${item.id}"
       style="left:${item.x}%;top:${item.y}%;font-size:${item.size}px;">${item.emoji}<span class="sew-resize-handle">⇲</span></div>`;
   }).join('');
@@ -5329,7 +5501,7 @@ function sewRenderDiy(){
 
   // 图层（部件+装饰，按 z 排序，从上到下 = 从底层到顶层倒序显示）
   const allLayers = [...window._sewDiyParts.map(p=>({id:p.id,name:'🧩 '+p.name,z:p.z||0,type:'part'})),
-                     ...window._sewDiyDecos.map(d=>({id:d.id,name:d.emoji+' 装饰',z:d.z||0,type:'deco'}))]
+                     ...window._sewDiyDecos.map(d=>({id:d.id,name:(d.img?'🖼️ ':(d.emoji+' '))+(d.name||'装饰'),z:d.z||0,type:'deco'}))]
                     .sort((a,b)=>b.z-a.z);
   const layerHTML = allLayers.map((l,idx)=>`
     <div class="sew-layer-item ${window._sewDiyActive===l.id?'active':''}" data-sewselpart="${l.id}">
@@ -5357,11 +5529,26 @@ function sewRenderDiy(){
     </div>
 
     <div class="sew-card">
-      <div class="sew-sec-title">✨ 装饰素材库</div>
-      <div class="sew-deco-grid">
-        ${SEW_DECOS.map(d=>`<div class="sew-deco-item" data-sewaddeco="${d.id}"><span class="sew-deco-emoji">${d.emoji}</span><div class="sew-deco-name">${d.name}</div></div>`).join('')}
+      <div class="sew-sec-title">✨ 装饰配件库</div>
+      <div class="sew-filter-bar">
+        <button class="sew-filter-chip ${(window._sewAccTab||'pre')==='pre'?'active':''}" data-sewacctab="pre">🧵 预制配件</button>
+        <button class="sew-filter-chip ${(window._sewAccTab||'pre')==='mine'?'active':''}" data-sewacctab="mine">🎀 我的辅料 (${sewTrims.length})</button>
       </div>
-      <div class="sew-hint" style="margin-top:8px;">点击添加装饰到画布，可拖动摆放</div>
+      ${(window._sewAccTab||'pre')==='pre' ? `
+        <div class="sew-deco-grid">
+          ${SEW_ACCESSORIES.map(d=>`<div class="sew-deco-item" data-sewaddeco="${d.id}"><span class="sew-deco-emoji">${d.emoji}</span><div class="sew-deco-name">${d.name}</div></div>`).join('')}
+        </div>
+        <div class="sew-hint" style="margin-top:8px;">点击配件添加到画布（自动按${tpl.cat==='hair'?'外圈环绕/侧边点缀/中心贴标':tpl.cat==='bag'?'包口/包边/包盖等':'领口/袖口/下摆等'}位置预设摆放），可拖动微调</div>
+      ` : (sewTrims.length ? `
+        <div class="sew-fabric-grid">
+          ${sewTrims.map(t=>`<div class="sew-fabric-card" data-sewaddtrim="${t.id}">
+            <img class="sew-fabric-img" src="${t.img}" alt="${escAttr(t.name)}"/>
+            <div class="sew-fabric-name">${escHtml(t.name)}</div></div>`).join('')}
+        </div>
+        <div class="sew-hint" style="margin-top:8px;">点击把你的实拍辅料叠加到画布，可拖拽缩放</div>
+      ` : `
+        <div class="sew-hint">辅料库还是空的～先到 <b>我的辅料</b> 页上传实物辅料（蕾丝、织带、标签等），就能叠加到设计里啦。</div>
+      `)}
     </div>
 
     <div class="sew-card">
@@ -5373,8 +5560,9 @@ function sewRenderDiy(){
 
 function sewPartSVG(part, fab){
   if(part.stroke){
+    const dashAttr = part.dash ? ` stroke-dasharray="4 3"` : '';
     return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;overflow:visible;">
-      <path d="${part.d}" fill="none" stroke="#D46888" stroke-width="7" stroke-linecap="round"/></svg>`;
+      <path d="${part.d}" fill="none" stroke="#D46888" stroke-width="${part.w||7}" stroke-linecap="round"${dashAttr}/></svg>`;
   }
   if(fab && fab.img){
     const pid = 'pt'+part.id+Math.random().toString(36).slice(2,6);
@@ -5405,6 +5593,7 @@ function sewRenderDesign(){
       <div class="sew-plan-line">📅 ${escHtml(d.createdAt||'')}</div>
       <div class="sew-plan-sub">🧵 用布清单</div>
       ${(d.fabrics||[]).map(f=>`<div class="sew-plan-line">· ${escHtml(f.name)} × ${f.usage}米</div>`).join('') || '<div class="sew-plan-line">无</div>'}
+      ${(d.trims||[]).length?`<div class="sew-plan-sub">🎗️ 辅料清单</div>${d.trims.map(t=>`<div class="sew-plan-line">· ${escHtml(t.name)}（${escHtml(t.pos||'')}）× ${t.qty||1}</div>`).join('')}`:''}
       <div class="sew-plan-sub">💰 成本：<b style="color:var(--pink-dark);">¥${(d.totalCost||0).toFixed(1)}</b></div>
       ${d.note?`<div class="sew-plan-sub">📝 笔记</div><div class="sew-plan-line">${escHtml(d.note)}</div>`:''}
       <div class="sew-btn-row" style="margin-top:10px;margin-bottom:0;">
@@ -5530,6 +5719,7 @@ function sewGeneratePlans(){
   if(!tpl){ showToast('请先选择模板'); return; }
   const pool = fabrics.filter(f=>window._sewSelFabrics.includes(f.id));
   if(pool.length===0){ showToast('请先选择参与搭配的布料'); return; }
+  const selTrimPool = sewTrims.filter(t=>window._sewSelTrims.includes(t.id));
 
   const pref = window._sewPref || 'free';
   const prefLabel = pref==='same'?'同色系':pref==='contrast'?'撞色':'混搭自由';
@@ -5537,6 +5727,19 @@ function sewGeneratePlans(){
   const needParts = (tpl.parts||[]).filter(p=>!p.stroke);
   const ordered = sewOrderPool(pool, pref);
   const poolNames = pool.map(f=>f.name);
+  const positions = SEW_ACC_POSITIONS[tpl.cat] || [];
+
+  // 每套方案差异化辅料配置：方案k从第k个位置开始轮转
+  const trimCfgs = [0,1,2].map(k=>{
+    if(selTrimPool.length===0) return [];
+    return selTrimPool.map((t,i)=>{
+      const pos = positions[(i+k) % positions.length] || '自由点缀';
+      const usage = SEW_POS_USAGE[pos] || {};
+      const qty = usage.cnt ? 1 : 1;
+      return { trimId:t.id, name:t.name, src:'我的辅料库', pos, qty,
+               len:usage.len||0, cnt:usage.cnt||0, type:t.type, price:t.price||0 };
+    });
+  });
 
   const plans = [];
   const pLabels = ['温柔日常款','撞色吸睛款','清新治愈款'];
@@ -5546,10 +5749,29 @@ function sewGeneratePlans(){
       fabric: ordered[(k+i) % ordered.length]
     }));
     const cost = sewCalcCost(tpl, assign);
+    // 辅料用量&成本
+    const trimCfg = trimCfgs[k];
+    let trimCost = 0;
+    const trimUsage = [];
+    trimCfg.forEach(t=>{
+      const unit = sewTrimUnit(t.type);
+      if(SEW_TRIM_LEN_TYPE.includes(t.type)){
+        const cm = (t.len||30) * t.qty;
+        trimCost += cm/100 * t.price;
+        trimUsage.push({label:`${t.name}（${t.pos}）`, amount:`${cm} cm`});
+      } else {
+        trimCost += t.price * t.qty;
+        trimUsage.push({label:`${t.name}（${t.pos}）`, amount:`${t.qty} ${unit}`});
+      }
+    });
+    trimUsage.push({label:'缝纫线/杂项辅料', amount:'按需'});
+
     const mainF = assign[0].fabric;
     const otherF = assign[1] ? assign[1].fabric : null;
-    const desc = `以${mainF.color||''}${mainF.material||''}为主布，${tpl.name}轮廓${otherF?`，搭配${otherF.color||''}${otherF.pattern||otherF.material||''}做${assign[1].part}`:''}，整体呈现${pref==='contrast'?'撞色活力':pref==='same'?'柔和统一':'自由混搭'}的视觉效果。`;
-    const costTxt = cost.detail.map(d=>`${d.name} ${d.usage}米×¥${d.price}＝¥${d.cost.toFixed(1)}`).join('；') + `；辅料约¥${cost.supplies}；💰合计约 ¥${cost.total.toFixed(1)}`;
+    const desc = `以${mainF.color||''}${mainF.material||''}为主布，${tpl.name}轮廓${otherF?`，搭配${otherF.color||''}${otherF.pattern||otherF.material||''}做${assign[1].part}`:''}${trimCfg.length?`，叠加${trimCfg[0].name}于${trimCfg[0].pos}`:''}，整体呈现${pref==='contrast'?'撞色活力':pref==='same'?'柔和统一':'自由混搭'}的视觉效果。`;
+    const costTxt = cost.detail.map(d=>`${d.name} ${d.usage}米×¥${d.price}＝¥${d.cost.toFixed(1)}`).join('；')
+      + (trimCost>0?`；辅料约¥${(trimCost).toFixed(1)}`:'')
+      + `；杂项辅料约¥${cost.supplies}；💰合计约 ¥${(cost.total+trimCost).toFixed(1)}元（基于录入单价自动核算）`;
     // 生成预览图
     const fmap = {};
     needParts.forEach((p,i)=>{ fmap[p.id] = assign[i].fabric; });
@@ -5558,12 +5780,17 @@ function sewGeneratePlans(){
       name: pLabels[k]||('方案'+(k+1)),
       tplId: tpl.id, tplName: tpl.name,
       onlyStock, prefLabel, poolNames,
+      trimNames: selTrimPool.map(t=>t.name),
+      trimCfg,
+      trimUsage,
       assign: assign.map(a=>({part:a.part, fabric:a.fabric.name, fabricId:a.fabric.id})),
-      desc, supplies: sewSuppliesFor(tpl), craft: sewCraftFor(tpl),
-      cost: costTxt, totalCost: cost.total,
+      desc, craft: sewCraftFor(tpl),
+      cost: costTxt, totalCost: +(cost.total+trimCost).toFixed(1),
+      usage: tpl.usage||0.3,
       bundle: sewBundleFor(tpl),
       names: sewGenNames(tpl, assign),
       fabrics: cost.detail.map(d=>({name:d.name, usage:d.usage, price:d.price})),
+      trims: trimCfg.map(t=>({name:t.name, pos:t.pos, qty:t.qty, type:t.type, price:t.price})),
       _svg: svgStr, preview:'', note:''
     });
   }
@@ -5662,6 +5889,48 @@ function bindSewing(el){
       window._sewSelFabrics = window._sewSelFabrics.filter(i=>i!==fid);
       renderModule('sewing');
       showToast('已删除布料');
+    });
+  });
+
+  // ---- 辅料上传 ----
+  const tCamInput = el.querySelector('#sewTrimCamera');
+  const tAlbInput = el.querySelector('#sewTrimAlbum');
+  el.querySelector('#sewTrimTakePhoto')?.addEventListener('click',()=>tCamInput&&tCamInput.click());
+  el.querySelector('#sewTrimPickPhoto')?.addEventListener('click',()=>tAlbInput&&tAlbInput.click());
+  const onTrimPick = e=>{ const f=e.target.files&&e.target.files[0]; if(f) sewReadTrimImage(f); e.target.value=''; };
+  if(tCamInput) tCamInput.addEventListener('change', onTrimPick);
+  if(tAlbInput) tAlbInput.addEventListener('change', onTrimPick);
+
+  // ---- 辅料筛选 ----
+  el.querySelectorAll('[data-sewtrimfilter]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      window._sewTrimFilter = btn.dataset.sewtrimfilter;
+      renderModule('sewing');
+    });
+  });
+
+  // ---- 辅料勾选 ----
+  el.querySelectorAll('[data-sewtrim]').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const tid = +card.dataset.sewtrim;
+      const idx = window._sewSelTrims.indexOf(tid);
+      if(idx>-1) window._sewSelTrims.splice(idx,1);
+      else window._sewSelTrims.push(tid);
+      renderModule('sewing');
+    });
+  });
+
+  // ---- 辅料删除 ----
+  el.querySelectorAll('[data-sewtrimdel]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const tid = +btn.dataset.sewtrimdel;
+      if(!confirm('确定删除这件辅料吗？')) return;
+      sewTrims = sewTrims.filter(t=>t.id!==tid);
+      save(LS_SEW_TRIM, sewTrims);
+      window._sewSelTrims = window._sewSelTrims.filter(i=>i!==tid);
+      renderModule('sewing');
+      showToast('已删除辅料');
     });
   });
 
@@ -5779,7 +6048,8 @@ function bindSewing(el){
       sewDesignIdCounter++;
       sewDesigns.push({
         id: sewDesignIdCounter, name: pl.name, tplId: pl.tplId, tplName: pl.tplName,
-        preview: pl.preview||'', fabrics: pl.fabrics||[], totalCost: pl.totalCost||0,
+        preview: pl.preview||'', fabrics: pl.fabrics||[], trims: pl.trims||[], trimUsage: pl.trimUsage||[],
+        totalCost: pl.totalCost||0, usage: pl.usage||0.3,
         note: pl.craft||'', createdAt: todayStr()
       });
       save(LS_SEW_DESIGN, sewDesigns);
@@ -5878,14 +6148,28 @@ function bindSewDiy(el){
     btn.addEventListener('click',e=>{ e.stopPropagation(); sewShowFabricPicker(btn.dataset.sewpartfab); });
   });
 
-  // 添加装饰
+  // 装饰来源切换
+  el.querySelectorAll('[data-sewacctab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{ window._sewAccTab = btn.dataset.sewacctab; renderModule('sewing'); });
+  });
+
+  // 添加预制配件（按位置预设摆放，支持数量）
   el.querySelectorAll('[data-sewaddeco]').forEach(item=>{
     item.addEventListener('click',()=>{
-      const d = SEW_DECOS.find(x=>x.id===item.dataset.sewaddeco);
+      const d = SEW_ACCESSORIES.find(x=>x.id===item.dataset.sewaddeco);
       if(!d) return;
-      window._sewDiyDecos.push({ id:'d'+Date.now(), decoId:d.id, emoji:d.emoji, x:38, y:38, size:34, z:100+window._sewDiyDecos.length });
+      sewOpenAccPositionPicker(d);
+    });
+  });
+
+  // 添加我的辅料（图片叠加）
+  el.querySelectorAll('[data-sewaddtrim]').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const t = sewGetTrim(+item.dataset.sewaddtrim);
+      if(!t) return;
+      window._sewDiyDecos.push({ id:'d'+Date.now(), trimId:t.id, name:t.name, img:t.img, x:36, y:36, size:64, z:100+window._sewDiyDecos.length });
       renderModule('sewing');
-      showToast('已添加 '+d.name);
+      showToast('已叠加辅料 '+t.name);
     });
   });
 
@@ -5933,6 +6217,9 @@ function bindSewDiy(el){
     const dx=(e.clientX-sx)/rect.width*100, dy=(e.clientY-sy)/rect.height*100;
     if(dragMode==='move'){
       dragEl.style.left=(sl+dx)+'%'; dragEl.style.top=(st+dy)+'%';
+    } else if(dragEl.classList.contains('sew-deco') && dragEl.querySelector('img')){
+      const nw = Math.max(24, sw + (e.clientX-sx));
+      dragEl.style.width = nw+'px'; dragEl.style.height = nw+'px';
     } else if(dragEl.classList.contains('sew-deco')){
       dragEl.style.fontSize = Math.max(14, ss+(dx+dy)/2)+'px';
     } else {
@@ -5950,8 +6237,11 @@ function bindSewDiy(el){
              p.w=parseFloat(dragEl.style.width)||100; p.h=parseFloat(dragEl.style.height)||100; }
     } else {
       const d = window._sewDiyDecos.find(x=>x.id===id);
-      if(d){ d.x=parseFloat(dragEl.style.left)||0; d.y=parseFloat(dragEl.style.top)||0;
-             d.size=parseFloat(dragEl.style.fontSize)||34; }
+      if(d){
+        d.x=parseFloat(dragEl.style.left)||0; d.y=parseFloat(dragEl.style.top)||0;
+        if(d.img) d.size=parseFloat(dragEl.style.width)||60;
+        else d.size=parseFloat(dragEl.style.fontSize)||34;
+      }
     }
     dragEl=null;
   };
@@ -5974,12 +6264,22 @@ function bindSewDiy(el){
         return f ? {name:f.name, usage:(tpl.usage||0.3)/Math.max(1,window._sewDiyParts.filter(x=>x.fabricId).length), price:f.price||0} : null;
       }).filter(Boolean);
       let total = used.reduce((s,u)=>s+u.usage*u.price,0);
+      // DIY 中叠加的我的辅料 → 记入辅料清单并计成本
+      const usedTrims = [];
+      window._sewDiyDecos.forEach(d=>{
+        const t = d.trimId ? sewGetTrim(d.trimId) : null;
+        if(t){
+          usedTrims.push({name:t.name, pos:d.pos||'自由点缀', qty:1, type:t.type, price:t.price||0});
+          if(SEW_TRIM_LEN_TYPE.includes(t.type)) total += (t.price||0); // 简化按1米内估算
+          else total += (t.price||0);
+        }
+      });
       total += tpl.cat==='bag'?6:tpl.cat==='cloth'?8:2;
       sewDesignIdCounter++;
       sewDesigns.push({
         id: sewDesignIdCounter, name: tpl.name+' · DIY ' + todayStr(),
         tplId: tpl.id, tplName: tpl.name, preview: dataURL,
-        fabrics: used, totalCost: total, note:'', createdAt: todayStr(),
+        fabrics: used, trims: usedTrims, totalCost: total, note:'', createdAt: todayStr(),
         diyParts: JSON.parse(JSON.stringify(window._sewDiyParts)),
         diyDecos: JSON.parse(JSON.stringify(window._sewDiyDecos))
       });
@@ -6020,7 +6320,7 @@ function sewCanvasToPNG(cb){
   ].sort((a,b)=>(a.data.z||0)-(b.data.z||0));
 
   const drawDecos = ()=>{
-    items.filter(i=>i.type==='deco').forEach(i=>{
+    items.filter(i=>i.type==='deco' && !i.data.img).forEach(i=>{
       const d=i.data;
       ctx.font = `${(d.size||34)*size/350}px serif`;
       ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -6029,7 +6329,37 @@ function sewCanvasToPNG(cb){
   };
 
   const parts = items.filter(i=>i.type==='part');
-  if(parts.length===0){ drawDecos(); try{ cb(canvas.toDataURL('image/png')); }catch(e){ cb(''); } return; }
+  const imgDecos = items.filter(i=>i.type==='deco' && i.data.img);
+  let imgLoaded = 0;
+  const finalize = ()=>{
+    // 绘制图片类辅料（叠加在部件之上）
+    imgDecos.forEach(i=>{
+      const d=i.data;
+      // 图片已在上一步绘制
+    });
+    drawDecos();
+    try{ cb(canvas.toDataURL('image/png')); }catch(e){ cb(''); }
+  };
+  const drawImgDecos = (done)=>{
+    if(imgDecos.length===0){ done(); return; }
+    imgDecos.forEach(i=>{
+      const d=i.data;
+      const s=(d.size||60)*size/350;
+      const img=new Image();
+      const fin=()=>{
+        imgLoaded++;
+        if(imgLoaded>=imgDecos.length) done();
+      };
+      img.onload=()=>{
+        ctx.drawImage(img, (d.x||0)/100*size - s/2, (d.y||0)/100*size - s/2, s, s);
+        fin();
+      };
+      img.onerror=fin;
+      img.src=d.img;
+    });
+  };
+
+  if(parts.length===0){ drawImgDecos(finalize); return; }
 
   let loaded=0;
   parts.forEach(i=>{
@@ -6040,7 +6370,7 @@ function sewCanvasToPNG(cb){
     const img = new Image();
     const finish = ()=>{
       URL.revokeObjectURL(url); loaded++;
-      if(loaded>=parts.length){ drawDecos(); try{ cb(canvas.toDataURL('image/png')); }catch(e){ cb(''); } }
+      if(loaded>=parts.length){ drawImgDecos(finalize); }
     };
     img.onload = ()=>{
       const p=i.data;
@@ -6049,6 +6379,63 @@ function sewCanvasToPNG(cb){
     };
     img.onerror = finish;
     img.src = url;
+  });
+}
+
+// 预制配件位置+数量选择弹窗
+const SEW_ACC_COORDS = {
+  '外圈环绕':[50,14],'侧边点缀':[16,50],'中心贴标':[50,50],
+  '包口嵌条':[50,36],'包边装饰':[50,80],'肩带拼接':[24,28],'包盖贴标':[50,52],'侧边蝴蝶结':[14,68],'前袋装饰':[50,74],
+  '领口嵌条':[50,64],'袖口蕾丝':[18,54],'下摆花边':[50,84],'腰部标签':[50,44],
+  '自由点缀':[40,40]
+};
+function sewOpenAccPositionPicker(acc){
+  const tpl = sewGetTpl(window._sewSelTpl);
+  const cat = tpl ? tpl.cat : 'hair';
+  const positions = SEW_ACC_POSITIONS[cat] || ['自由点缀'];
+  const old=document.getElementById('sewAccOverlay'); if(old) old.remove();
+  const ov=document.createElement('div');
+  ov.className='sew-edit-overlay show'; ov.id='sewAccOverlay';
+  ov.innerHTML=`
+    <div class="sew-edit-box">
+      <div class="sew-edit-title">${acc.emoji} ${escHtml(acc.name)} · 摆放设置</div>
+      <div class="sew-field"><label class="sew-label">摆放位置</label>
+        <div class="sew-filter-bar" style="flex-wrap:wrap;" id="sewAccPosBar">
+          ${positions.map((p,i)=>`<button class="sew-filter-chip ${i===0?'active':''}" data-accpos="${escAttr(p)}">${escHtml(p)}</button>`).join('')}
+        </div>
+      </div>
+      <div class="sew-field"><label class="sew-label">使用数量</label>
+        <div class="sew-filter-bar" id="sewAccQtyBar">
+          ${[1,2,3].map(q=>`<button class="sew-filter-chip ${q===1?'active':''}" data-accqty="${q}">×${q}</button>`).join('')}
+        </div>
+      </div>
+      <button class="sew-btn primary block" id="sewAccConfirm">✅ 添加到画布</button>
+      <button class="sew-btn block" id="sewAccCancel" style="margin-top:6px;">取消</button>
+    </div>`;
+  document.body.appendChild(ov);
+  let selPos = positions[0], selQty = 1;
+  ov.querySelectorAll('[data-accpos]').forEach(b=>b.addEventListener('click',()=>{
+    selPos = b.dataset.accpos;
+    ov.querySelectorAll('[data-accpos]').forEach(x=>x.classList.toggle('active',x===b));
+  }));
+  ov.querySelectorAll('[data-accqty]').forEach(b=>b.addEventListener('click',()=>{
+    selQty = +b.dataset.accqty;
+    ov.querySelectorAll('[data-accqty]').forEach(x=>x.classList.toggle('active',x===b));
+  }));
+  ov.querySelector('#sewAccCancel').addEventListener('click',()=>ov.remove());
+  ov.querySelector('#sewAccConfirm').addEventListener('click',()=>{
+    const coord = SEW_ACC_COORDS[selPos] || [40,40];
+    for(let q=0;q<selQty;q++){
+      // 数量>1时横向错开摆放
+      const off = selQty>1 ? (q-(selQty-1)/2)*12 : 0;
+      window._sewDiyDecos.push({
+        id:'d'+Date.now()+q, decoId:acc.id, name:acc.name, emoji:acc.emoji,
+        x: Math.max(2,Math.min(88, coord[0]+off)), y: coord[1],
+        size:34, z:100+window._sewDiyDecos.length, pos:selPos
+      });
+    }
+    ov.remove(); renderModule('sewing');
+    showToast(`已添加 ${acc.name} ×${selQty}（${selPos}）`);
   });
 }
 
@@ -6186,6 +6573,108 @@ function sewOpenFabricEditor(src){
     window._sewTab='fabric';
     renderModule('sewing');
     showToast('✅ 布料已保存到库存');
+  });
+}
+
+// ============================================================
+// 辅料读取 & 编辑弹窗
+// ============================================================
+function sewReadTrimImage(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const maxSize=600; let w=img.width,h=img.height;
+      if(Math.max(w,h)>maxSize){ const r=maxSize/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
+      const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      let d=''; try{ d=cv.toDataURL('image/jpeg',0.8); }catch(e){ d=ev.target.result; }
+      sewOpenTrimEditor(d);
+    };
+    img.onerror=()=>sewOpenTrimEditor(ev.target.result);
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function sewOpenTrimEditor(src){
+  const old=document.getElementById('sewTrimEditOverlay'); if(old) old.remove();
+  const ov=document.createElement('div');
+  ov.className='sew-edit-overlay show'; ov.id='sewTrimEditOverlay';
+  ov.innerHTML=`
+    <div class="sew-edit-box">
+      <div class="sew-edit-title">✂️ 编辑辅料 &amp; 打标签</div>
+      <canvas class="sew-edit-canvas" id="sewTrimCanvas"></canvas>
+      <div class="sew-btn-row">
+        <button class="sew-btn" id="sewTrimRotL">↺ 左转90°</button>
+        <button class="sew-btn" id="sewTrimRotR">↻ 右转90°</button>
+      </div>
+      <div class="sew-slider-row">
+        <label>裁剪缩放</label>
+        <input type="range" id="sewTrimScale" min="60" max="240" value="120"/>
+      </div>
+      <div class="sew-field"><label class="sew-label">辅料名称</label>
+        <input class="sew-input" id="sewtName" placeholder="如：白色蕾丝花边"/></div>
+      <div style="display:flex;gap:8px;">
+        <div class="sew-field" style="flex:1;"><label class="sew-label">辅料类型</label>
+          <select class="sew-select" id="sewtType">${SEW_TRIM_TYPES.map(c=>`<option>${c}</option>`).join('')}</select></div>
+        <div class="sew-field" style="flex:1;"><label class="sew-label">宽度(mm)</label>
+          <input class="sew-input" id="sewtWidth" type="number" inputmode="numeric" placeholder="如20"/></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div class="sew-field" style="flex:1;"><label class="sew-label">库存余量</label>
+          <input class="sew-input" id="sewtStock" type="number" inputmode="numeric" value="100"/></div>
+        <div class="sew-field" style="flex:1;"><label class="sew-label">总长/总量</label>
+          <input class="sew-input" id="sewtLength" type="number" inputmode="numeric" placeholder="cm或个"/></div>
+      </div>
+      <div class="sew-field"><label class="sew-label">单价（长度类:元/米，件类:元/个）</label>
+        <input class="sew-input" id="sewtPrice" type="number" inputmode="decimal" value="2"/></div>
+      <button class="sew-btn primary block" id="sewSaveTrim">💾 保存到辅料库</button>
+      <button class="sew-btn block" id="sewCancelTrim" style="margin-top:6px;">取消</button>
+    </div>`;
+  document.body.appendChild(ov);
+
+  const img=new Image(); let rot=0, scale=1.2;
+  img.onload=()=>draw(); img.src=src;
+  function draw(){
+    try{
+      const c=ov.querySelector('#sewTrimCanvas');
+      if(!c||!img.width) return;
+      const S=280; c.width=S; c.height=S;
+      const ctx=c.getContext('2d');
+      if(!ctx) return;
+      ctx.fillStyle='#F0F0F0'; ctx.fillRect(0,0,S,S);
+      ctx.save(); ctx.translate(S/2,S/2); ctx.rotate(rot*Math.PI/180);
+      const base=Math.min(S/img.width,S/img.height)*scale;
+      const w=img.width*base, h=img.height*base;
+      ctx.drawImage(img,-w/2,-h/2,w,h); ctx.restore();
+    }catch(e){ console.warn('trim draw error',e); }
+  }
+  ov.querySelector('#sewTrimRotL').addEventListener('click',()=>{ rot=(rot+270)%360; draw(); });
+  ov.querySelector('#sewTrimRotR').addEventListener('click',()=>{ rot=(rot+90)%360; draw(); });
+  ov.querySelector('#sewTrimScale').addEventListener('input',e=>{ scale=e.target.value/100; draw(); });
+  ov.querySelector('#sewCancelTrim').addEventListener('click',()=>ov.remove());
+  ov.querySelector('#sewSaveTrim').addEventListener('click',()=>{
+    const c=ov.querySelector('#sewTrimCanvas');
+    let finalImg=src;
+    try{ if(c && c.width) finalImg=c.toDataURL('image/jpeg',0.78); }catch(e){}
+    sewTrimIdCounter++;
+    sewTrims.push({
+      id: sewTrimIdCounter,
+      name: (ov.querySelector('#sewtName').value||('辅料'+sewTrimIdCounter)).trim(),
+      img: finalImg,
+      type: ov.querySelector('#sewtType').value,
+      width: parseFloat(ov.querySelector('#sewtWidth').value)||0,
+      length: parseFloat(ov.querySelector('#sewtLength').value)||0,
+      stock: parseFloat(ov.querySelector('#sewtStock').value)||0,
+      price: parseFloat(ov.querySelector('#sewtPrice').value)||0,
+      createdAt: todayStr()
+    });
+    save(LS_SEW_TRIM, sewTrims);
+    ov.remove();
+    window._sewTab='trims';
+    renderModule('sewing');
+    showToast('✅ 辅料已保存到辅料库');
   });
 }
 
